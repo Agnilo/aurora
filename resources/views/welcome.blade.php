@@ -4,7 +4,7 @@
 <div class="container py-5 text-center">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <h1 class="display-4 mb-3">Sveiki atvykę į <span class="text-warning">Aurora</span></h1>
+            <h1 class="display-4 mb-3">Sveiki atvykę į <span class="text-warning">aurora</span></h1>
             <p class="lead mb-4">
                 Tvarkyk savo tikslus, įpročius ir pasiek savo aukščiausią potencialą 💡
             </p>

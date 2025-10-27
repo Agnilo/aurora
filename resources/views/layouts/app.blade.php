@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Aurora</title>
+    <title>aurora</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- Bootstrap CDN --}}
@@ -16,10 +16,10 @@
 </head>
 <body>
 
-    {{-- ✅ Navigacija viršuje --}}
+    
     <nav class="navbar navbar-light bg-white border-bottom mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold text-warning" href="{{ url('/') }}">Aurora</a>
+            <a class="navbar-brand fw-bold text-warning" href="{{ url('/') }}">aurora</a>
 
             <div>
                 @auth
@@ -32,7 +32,7 @@
         </div>
     </nav>
 
-    {{-- 🔽 Turinio vieta (Welcome, Dashboard ir t.t.) --}}
+    
     <main>
         @yield('content')
     </main>
