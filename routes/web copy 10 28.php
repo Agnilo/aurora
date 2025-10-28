@@ -24,9 +24,9 @@ Route::get('/{locale?}', function ($locale = null) {
     if (isset($locale) && in_array($locale, config('app.available_locales'))) {
         app()->setLocale($locale);
     }
-
+    
     return view('welcome');
-})->name('lang.switch');
+});
 
 
 require __DIR__.'/auth.php';
