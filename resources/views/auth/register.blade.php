@@ -7,7 +7,7 @@
             <div class="card-body p-4">
                 <h2 class="text-center mb-4">Registracija</h2>
 
-                <form method="POST" action="{{ route('register') }}">
+                <form method="POST" action="{{ route('register', ['locale' => App::getLocale()]) }}">
                     @csrf
 
                     {{-- Name --}}
@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ route('login') }}" class="text-decoration-none small">
+                        <a href="{{ route('login', ['locale' => App::getLocale()]) }}" class="text-decoration-none small">
                             Jau turi paskyrą?
                         </a>
                         <button type="submit" class="btn btn-warning">Registruotis</button>

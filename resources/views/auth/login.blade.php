@@ -14,7 +14,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login', ['locale' => App::getLocale()]) }}">
                     @csrf
 
                     {{-- Email --}}
@@ -47,7 +47,7 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         @if (Route::has('password.request'))
-                            <a class="text-decoration-none small" href="{{ route('password.request') }}">
+                            <a class="text-decoration-none small" href="{{ route('password.request', ['locale' => App::getLocale()]) }}">
                                 Pamiršai slaptažodį?
                             </a>
                         @endif

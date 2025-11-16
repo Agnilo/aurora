@@ -1,0 +1,330 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
+use App\Models\Category;
+
+use App\Models\Goal;
+use App\Models\GoalType;
+use App\Models\GoalStatus;
+use App\Models\GoalPriority;
+
+use App\Models\Milestone;
+
+use App\Models\Task;
+use App\Models\TaskType;
+use App\Models\TaskStatus;
+use App\Models\TaskPriority;
+
+
+
+class GoalController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index($locale, Request $request)
+    {
+
+        $categories = \App\Models\Category::all();
+        $activeCategory = null;
+        
+        $goalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
+            ->where('user_id', Auth::id() ?? 1);
+
+        if ($request->has('category') && $request->category !== null) {
+            $activeCategory = Category::find($request->category);
+
+            if ($activeCategory) {
+                $goalsQuery->where('category_id', $activeCategory->id);
+            }
+        }
+
+        $allGoals = $goalsQuery->get();
+
+        $favoriteGoals = $allGoals->where('is_favorite', true);
+        $importantGoals = $allGoals->where('is_important', true);
+
+        $otherGoals = $allGoals->filter(function ($goal) {
+            return !$goal->is_favorite && !$goal->is_important;
+        });
+
+        return view('goals.index', [
+            'categories' => $categories,
+            'activeCategory' => $activeCategory,
+
+            'goals' => $allGoals,
+            'favoriteGoals' => $favoriteGoals,
+            'importantGoals' => $importantGoals,
+            'otherGoals' => $otherGoals            
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create($locale)
+    {
+        $statuses = GoalStatus::all();
+        $priorities = GoalPriority::all();
+        $types = GoalType::all();
+        $categories = Category::all();
+
+        $taskStatuses   = TaskStatus::all();
+        $taskTypes      = TaskType::all();
+        $taskPriorities = TaskPriority::all();
+        $taskCategories = Category::all();
+
+        return view('goals.create', compact(
+            'statuses', 'priorities', 'types', 'categories',
+            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories'
+        ));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request, $locale)
+    {
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'color' => 'nullable|string|max:20',
+
+            'deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+
+            'progress' => 'nullable|integer|min:0|max:100',
+            'is_completed' => 'nullable|boolean',
+            'is_favorite' => 'nullable|boolean',
+            'is_important' => 'nullable|boolean',
+
+            'visibility' => 'nullable|string|in:private,shared,public',
+            'reminder_date' => 'nullable|date',
+            'tags' => 'nullable|string',
+
+            'priority_id' => 'nullable|exists:goal_priorities,id',
+            'status_id' => 'nullable|exists:goal_statuses,id',
+            'type_id' => 'nullable|exists:goal_types,id',
+
+            'milestones' => 'array',
+            'milestones.*.title'  => 'nullable|string|max:255',
+            'milestones.*.deadline' => 'nullable|date',
+
+            'milestones.*.tasks' => 'array',
+            'milestones.*.tasks.*.title' => 'nullable|string|max:255',
+            'milestones.*.tasks.*.points' => 'nullable|numeric',
+
+            'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
+            'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
+            'milestones.*.tasks.*.priority_id' => 'nullable|exists:task_priorities,id',
+        ]);
+
+        if (!empty($validated['tags'])) {
+            $validated['tags'] = array_map('trim', explode(',', $validated['tags']));
+        }
+
+        if (($validated['progress'] ?? 0) == 100) {
+            $validated['is_completed'] = true;
+            $validated['end_date'] = $validated['end_date'] ?? Carbon::today();
+        }
+
+        $validated['user_id'] = auth()->id() ?? 1;
+
+        $goal = Goal::create($validated);
+
+        // Milestones + Tasks
+        if ($request->has('milestones')) {
+            foreach ($request->milestones as $milestoneData) {
+
+                $milestone = $goal->milestones()->create([
+                    'title' => $milestoneData['title'] ?? 'Be pavadinimo',
+                    'deadline' => $milestoneData['deadline'] ?? null,
+                ]);
+
+                if (isset($milestoneData['tasks'])) {
+                    foreach ($milestoneData['tasks'] as $taskData) {
+
+                        $milestone->tasks()->create([
+                            'title' => $taskData['title'] ?? '',
+                            'points' => $taskData['points'] ?? 0,
+                            'category_id' => $goal->category_id,
+                            'status_id'   => $taskData['status_id'] ?? null,
+                            'type_id'     => $taskData['type_id'] ?? null,
+                            'priority_id' => $taskData['priority_id'] ?? null,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return redirect()->route('goals.index', ['locale' => $locale])
+            ->with('success', 'Tikslas sėkmingai sukurtas su milestone ir užduotimis!');
+    }
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($locale, $id)
+    {
+        $goal = Goal::findOrFail($id);
+        $priorities = GoalPriority::all();
+        $statuses = GoalStatus::all();
+        $types = GoalType::all();
+        $categories = Category::all();
+
+        $taskStatuses   = TaskStatus::all();
+        $taskTypes      = TaskType::all();
+        $taskPriorities = TaskPriority::all();
+        $taskCategories = Category::all();
+
+        return view('goals.edit', compact(
+            'goal', 'priorities', 'statuses', 'types', 'categories',
+            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories'
+        ));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $locale, $id)
+    {
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'color' => 'nullable|string|max:20',
+
+            'deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+
+            'progress' => 'nullable|integer|min:0|max:100',
+            'is_completed' => 'nullable|boolean',
+            'is_favorite' => 'nullable|boolean',
+            'is_important' => 'nullable|boolean',
+
+            'visibility' => 'nullable|string|in:private,shared,public',
+            'reminder_date' => 'nullable|date',
+            'tags' => 'nullable|string',
+
+            'priority_id' => 'nullable|exists:goal_priorities,id',
+            'status_id' => 'nullable|exists:goal_statuses,id',
+            'type_id' => 'nullable|exists:goal_types,id',
+
+            'milestones' => 'array',
+            'milestones.*.id' => 'nullable|exists:milestones,id',
+            'milestones.*.title' => 'nullable|string|max:255',
+            'milestones.*.deadline' => 'nullable|date',
+            
+            'milestones.*.tasks' => 'array',
+            'milestones.*.tasks.*.id' => 'nullable|exists:tasks,id',
+            'milestones.*.tasks.*.title' => 'nullable|string|max:255',
+            'milestones.*.tasks.*.points' => 'nullable|numeric',
+
+            'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
+            'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
+            'milestones.*.tasks.*.priority_id' => 'nullable|exists:task_priorities,id',
+        ]);
+
+        if (!empty($validated['tags'])) {
+            $validated['tags'] = array_map('trim', explode(',', $validated['tags']));
+        }
+
+
+
+        if (($validated['progress'] ?? 0) == 100) {
+            $validated['is_completed'] = true;
+            $validated['end_date'] = $validated['end_date'] ?? Carbon::today();
+        }
+
+        $goal = Goal::findOrFail($id);
+        $goal->update($validated);
+
+        $existingMilestoneIds = $goal->milestones()->pluck('id')->toArray();
+        $submittedMilestoneIds = [];
+
+        // iterate milestones
+        foreach ($request->input('milestones', []) as $mData) {
+            
+            // jei yra ID – update, jei nėra – create
+            $milestone = $goal->milestones()->updateOrCreate(
+                ['id' => $mData['id'] ?? null],
+                [
+                    'title' => $mData['title'] ?? '',
+                    'deadline' => $mData['deadline'] ?? null,
+                ]
+            );
+
+            $submittedMilestoneIds[] = $milestone->id;
+
+            // TASKS
+            $existingTaskIds = $milestone->tasks()->pluck('id')->toArray();
+            $submittedTaskIds = [];
+
+            foreach ($mData['tasks'] ?? [] as $tData) {
+                
+                $task = $milestone->tasks()->updateOrCreate(
+                    ['id' => $tData['id'] ?? null],
+                    [
+                        'title' => $tData['title'] ?? '',
+                        'points' => $tData['points'] ?? 0,
+                        'category_id' =>$goal->category_id,
+                        'status_id'   => $tData['status_id'] ?? null,
+                        'type_id'     => $tData['type_id'] ?? null,
+                        'priority_id' => $tData['priority_id'] ?? null,
+                    ]
+                );
+
+                $submittedTaskIds[] = $task->id;
+            }
+
+            // Ištrinam taskus, kurių formoje nebėra
+            $tasksToDelete = array_diff($existingTaskIds, $submittedTaskIds);
+            if (!empty($tasksToDelete)) {
+                $milestone->tasks()->whereIn('id', $tasksToDelete)->delete();
+            }
+        }
+
+        // Ištrinam milestone’us, kurių formoje nebėra
+        $milestonesToDelete = array_diff($existingMilestoneIds, $submittedMilestoneIds);
+        if (!empty($milestonesToDelete)) {
+            $goal->milestones()->whereIn('id', $milestonesToDelete)->delete();
+        }
+
+        return redirect()
+            ->route('goals.index', ['locale' => $locale])
+            ->with('success', 'Tikslas atnaujintas!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($locale, $id)
+    {
+        $goal = Goal::findOrFail($id);
+        $goal->delete();
+
+        return redirect()
+            ->route('goals.index', ['locale' => $locale])
+            ->with('success', 'Tikslas sėkmingai ištrintas!');
+    }
+}

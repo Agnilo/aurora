@@ -1,0 +1,245 @@
+/* ============================================================
+   DEFAULT MODE (GRID LAYOUT)
+============================================================ */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    transition: all 0.28s ease;
+}
+
+/* ============================================================
+   ACTIVE MODE (HORIZONTAL FLEX)
+============================================================ */
+.category-grid.has-active {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    transition: all 0.28s ease;
+}
+
+/* ============================================================
+   TILES BASE
+============================================================ */
+.category-tile {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition:
+        flex 0.30s ease,
+        width 0.30s ease,
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+.category-tile-inner {
+    background: #dfd6c6;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    transition:
+        background 0.30s ease,
+        outline 0.30s ease,
+        padding 0.30s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.category-tile-inner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* ============================================================
+   INNER ELEMENTS
+============================================================ */
+.category-icon,
+.category-name,
+.category-gradient,
+.category-score {
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease,
+        font-size 0.22s ease;
+}
+
+.category-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.category-gradient {
+    width: 100%;
+    height: 38px;
+    border-radius: 10px;
+    margin: 0 auto 10px auto;
+}
+
+.category-score {
+    font-size: 0.85rem;
+    color: #6d6d6d;
+    margin-top: auto;
+}
+
+/* ============================================================
+   ACTIVE TILE EXPANDED
+============================================================ */
+.category-grid.has-active .category-tile.active {
+    flex: 1;
+    min-width: 260px;
+}
+
+.category-grid.has-active .category-tile.active .category-tile-inner {
+    outline: 3px solid #ffba22;
+    background: #fff7e0;
+    transform: scale(1.02);
+}
+
+/* ============================================================
+   NON-ACTIVE SHRUNK
+============================================================ */
+.category-grid.has-active .category-tile:not(.active) {
+    width: 70px;
+    flex-shrink: 0;
+    transform: scale(0.92);
+    opacity: 0.75;
+}
+
+.category-grid.has-active .category-tile:not(.active) .category-name,
+.category-grid.has-active .category-tile:not(.active) .category-gradient,
+.category-grid.has-active .category-tile:not(.active) .category-score {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* Icon shrink */
+.category-grid.has-active .category-tile:not(.active) .category-icon {
+    font-size: 28px;
+    margin: 0;
+}
+
+
+/* ============================================================
+   CLOSING MODE — Active tile shrinks smooth BEFORE grid returns
+============================================================ */
+
+/* During collapse animation */
+.category-grid.closing {
+    gap: 12px;
+    align-items: stretch;
+}
+
+.category-grid.closing .category-tile {
+    transform: scale(0.95);
+    opacity: 0.6;
+    transition: transform 0.28s ease, opacity 0.28s ease, width 0.28s ease;
+}
+
+.category-grid.closing .category-name,
+.category-grid.closing .category-gradient,
+.category-grid.closing .category-score,
+.category-grid.closing .category-icon {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.category-grid:not(.has-active):not(.closing) .category-tile {
+    transition: width 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
+}
+
+/* ============================================================
+   SMOOTH RESET (ACTIVE → GRID)
+============================================================ */
+.category-grid.resetting .category-tile.active {
+    flex: 0;
+    min-width: 0;
+    transform: scale(0.95);
+    opacity: 0.9;
+    transition:
+        flex 0.28s ease,
+        min-width 0.28s ease,
+        transform 0.28s ease,
+        opacity 0.28s ease;
+}
+
+.category-grid.resetting .category-tile.active .category-tile-inner {
+    outline: none;
+    background: #dfd6c6;
+    transform: scale(1);
+}
+
+/* After reset — normal mode fade-in */
+.category-grid:not(.has-active) .category-tile {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* Inner fade-in */
+.category-grid:not(.has-active) .category-icon,
+.category-grid:not(.has-active) .category-name,
+.category-grid:not(.has-active) .category-gradient,
+.category-grid:not(.has-active) .category-score {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   SKELETON LOADER
+============================================================ */
+#goalsContentLoader {
+    min-height: 240px;
+    position: relative;
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #dddddd 0%,
+        #f2f2f2 40%,
+        #dddddd 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.skeleton-card {
+    height: 80px;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ============================================================
+   STAGGER ANIMATION
+============================================================ */
+.goal-card {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.goal-card.stagger-in {
+    animation: staggerFade 0.5s ease forwards;
+}
+
+@keyframes staggerFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

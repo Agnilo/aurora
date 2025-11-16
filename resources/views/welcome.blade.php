@@ -14,14 +14,18 @@
                 <div class="alert alert-success">
                     Prisijungęs kaip <strong>{{ Auth::user()->name }}</strong>
                 </div>
-                <a href="{{ route('dashboard') }}" class="btn btn-success btn-lg me-2">Eiti į valdymo skydą</a>
-                <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                <a href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}" class="btn btn-success btn-lg me-2">Eiti į valdymo skydą</a>
+                <form method="POST" action="{{ route('logout', ['locale' => app()->getLocale()]) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger btn-lg">Atsijungti</button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="btn btn-primary btn-lg me-2">{{ __('Login') }}</a>
-                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg">Registruotis</a>
+                <a href="{{ route('login', ['locale' => App::getLocale()]) }}" class="btn btn-primary btn-lg me-2">
+                    {{ __('Login') }}
+                </a>
+                <a href="{{ route('register', ['locale' => App::getLocale()]) }}" class="btn btn-outline-primary btn-lg">
+                    {{ __('Register') }}
+                </a>
             @endauth
         </div>
     </div>

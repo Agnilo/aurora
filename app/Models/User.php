@@ -45,4 +45,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function goals()
+    {
+        return $this->hasMany(Goal::class);
+    }
+
+    public function gameDetails()
+    {
+        return $this->hasOne(UserGameDetail::class);
+    }
+
+    public function categoryLevels()
+    {
+        return $this->hasMany(CategoryLevel::class);
+    }
+
+    public function pointsLog()
+    {
+        return $this->hasMany(PointsLog::class);
+    }
+
 }
