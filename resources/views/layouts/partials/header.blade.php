@@ -43,6 +43,18 @@
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-end">
+                        
+                        {{-- ADMIN ONLY --}}
+                        @role('admin')
+                        <li>
+                            <a class="dropdown-item"
+                            href="{{ route('admin.dashboard', app()->getLocale()) }}">
+                                🛠 Admin
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        @endrole
+
                         <li>
                             <a class="dropdown-item" 
                                href="{{ route('profile.edit', app()->getLocale()) }}">

@@ -21,9 +21,10 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            //LookupSeeder::class,
+            LookupSeeder::class,
             LanguageSeeder::class,
             TranslationSeeder::class,
+            RolePermissionSeeder::class,
         ]);
 
     }

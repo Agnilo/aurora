@@ -26,6 +26,12 @@
         </div>
     </div>
 
+    @hasrole('admin')
+        <p>You are an administrator.</p>
+    @else
+        <p>You are not an administrator.</p>
+    @endhasrole
+
 
     {{-- ============================
          GYVENIMO ASPEKTAI
