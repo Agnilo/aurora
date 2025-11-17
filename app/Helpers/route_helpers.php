@@ -1,43 +1,29 @@
 <?php
 
 if (!function_exists('ar')) {
-    /**
-     * Generate a localized route URL.
-     * Works with:
-     *   - no params
-     *   - one param (id or key string)
-     *   - array of params
-     */
-    function ar(string $name, $params = [])
+    function ar($name, $param = null)
     {
         $locale = app()->getLocale();
 
-        $route = app('router')->getRoutes()->getByName($name);
-        if (!$route) {
-            throw new Exception("Route [$name] not found.");
-        }
-
-        // Route parameters (e.g. ["translationKey"])
-        $paramNames = $route->parameterNames();
-
+        // 1) visada siunčiam locale
         $data = ['locale' => $locale];
 
-        // jei $params yra NOT array → vienas parametras
-        if (!is_array($params)) {
-            $data[$paramNames[0]] = $params;
-            return route($name, $data);
+        // 2) patikrinam route parametrus
+        $route = app('router')->getRoutes()->getByName($name);
+
+        if ($route) {
+            $paramNames = $route->parameterNames(); // ['locale','translationKey']
+        } else {
+            $paramNames = [];
         }
 
-        // jei masyvas → matchinam vardus
-        foreach ($paramNames as $i => $param) {
-            if ($i == 0) continue; // skip locale
-            if (isset($params[$param])) {
-                $data[$param] = $params[$param];
-            }
+        // 3) Jeigu route turi antrą parametrą — naudok jį
+        if ($param !== null && isset($paramNames[1])) {
+            $data[$paramNames[1]] = $param;   // ← ČIA ESENSIJA
         }
 
         return route($name, $data);
     }
-
 }
+
 

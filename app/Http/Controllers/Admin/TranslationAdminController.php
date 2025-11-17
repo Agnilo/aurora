@@ -36,30 +36,48 @@ class TranslationAdminController extends Controller
         return view('admin.translations.create', compact('languages'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $locale)
     {
-        $data = $request->validate([
-            'group'         => 'required|string',
-            'key'           => 'required|string',
-            'language_code' => 'required|string|exists:languages,code',
-            'value'         => 'required|string',
+        $request->validate([
+            'group' => 'required|string',
+            'key' => 'required|string',
+            'value' => 'required|array'
         ]);
 
-        Translation::create($data);
+        foreach ($request->value as $langCode => $val) {
+            if ($val === null || $val === '') {
+                continue; // praleidžiam tuščias
+            }
 
-        return redirect(ar('admin.translations.index'))
+            Translation::create([
+                'group'         => $request->group,
+                'key'           => $request->key,
+                'language_code' => $langCode,
+                'value'         => $val,
+            ]);
+        }
+
+        return redirect()->route('admin.translations.index', $locale)
             ->with('success', 'Translation created successfully.');
     }
 
+
     public function edit($translationKey)
     {
-        
-        $languages = Language::where('is_active', true)->get();
+        // Force override from URL segment
+        $translationKey = request()->route('translationKey')
+            ?? request()->segment(4)
+            ?? request()->segment(count(request()->segments()) - 1);
 
-        // Gaunam VISAS eilutes pagal key
+
         $items = Translation::where('key', $translationKey)->get();
 
-        // Perdedam į array pagal kalbos kodą
+        if ($items->isEmpty()) {
+            abort(404, "Translation key not found: $translationKey");
+        }
+
+        $languages = Language::where('is_active', true)->get();
+
         $translations = [];
         foreach ($items as $t) {
             $translations[$t->language_code] = $t;
@@ -75,27 +93,62 @@ class TranslationAdminController extends Controller
         ));
     }
 
+
     public function update(Request $request, $translationKey)
     {
+        $translationKey = request()->route('translationKey')
+            ?? request()->segment(4)
+            ?? request()->segment(count(request()->segments()) - 1);
+
+        $request->validate([
+            'group' => 'required|string',
+            'new_key' => 'required|string',
+            'value' => 'required|array'
+        ]);
+
+        $oldKey = $translationKey;
+        $newKey = $request->new_key;
+        $newGroup = $request->group;
+
+        // Jeigu key pakeistas – pervadinam VISAS eilutes
+        if ($oldKey !== $newKey) {
+            Translation::where('key', $oldKey)->update([
+                'key' => $newKey,
+                'group' => $newGroup,
+            ]);
+        } else {
+            // tik group update
+            Translation::where('key', $oldKey)->update([
+                'group' => $newGroup,
+            ]);
+        }
+
+        // VALUE update
         foreach ($request->value as $langCode => $val) {
             Translation::updateOrCreate(
                 [
-                    'key' => $key,
+                    'key' => $newKey,
                     'language_code' => $langCode,
                 ],
-                ['value' => $val]
+                [
+                    'group' => $newGroup,
+                    'value' => $val,
+                ]
             );
         }
 
-        return redirect(ar('admin.translations.index'))
-            ->with('success', 'Translations updated.');
+        return redirect()
+            ->route('admin.translations.index', app()->getLocale())
+            ->with('success', 'Translation updated.');
     }
 
-    public function destroy(Translation $translation)
-    {
-        $translation->delete();
 
-        return back()->with('success', 'Translation deleted.');
+    public function destroy($locale, $translationKey)
+    {
+        Translation::where('key', $translationKey)->delete();
+
+        return redirect()->route('admin.translations.index', [$locale])
+            ->with('success', 'Translation deleted.');
     }
 
     public function export()

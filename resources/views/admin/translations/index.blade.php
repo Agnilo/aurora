@@ -40,8 +40,30 @@
                 @endforeach
 
                 <td class="text-end">
-                    <a href="{{ ar('admin.translations.edit', 'your_goals') }}">Edit</a>
+
+                    {{-- EDIT --}}
+                    <a href="{{ route('admin.translations.edit', ['locale' => app()->getLocale(), 'translationKey' => $key]) }}"
+                    class="text-primary text-decoration-none me-3 hover-underline">
+                        Edit
+                    </a>
+
+                    {{-- DELETE --}}
+                    <a href="#"
+                    class="text-danger text-decoration-none hover-underline"
+                    onclick="event.preventDefault(); if(confirm('Delete this translation?')) document.getElementById('del-{{ $key }}').submit();">
+                        Delete
+                    </a>
+
+                    <form id="del-{{ $key }}"
+                        action="{{ route('admin.translations.destroy', ['locale' => app()->getLocale(), 'translationKey' => $key]) }}"
+                        method="POST"
+                        class="d-none">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+
                 </td>
+
             </tr>
         @endforeach
     </tbody>

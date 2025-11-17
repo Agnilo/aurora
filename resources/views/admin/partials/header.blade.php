@@ -1,5 +1,5 @@
 <div class="admin-navbar">
-    <div class="admin-container d-flex justify-content-between align-items-center">
+    <div class="admin-navbar-container d-flex justify-content-between align-items-center">
 
         {{-- LEFT: LOGO --}}
         <a href="{{ route('admin.dashboard', app()->getLocale()) }}" class="admin-logo">

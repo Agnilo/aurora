@@ -15,6 +15,15 @@
     align-items: center;
 }
 
+.admin-navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .admin-content {
     max-width: none !important;
     width: 100%;
@@ -198,7 +207,6 @@
     font-weight: 500;
 }
 
-
 .dropdown-menu {
     border-radius: 12px;
     padding: 8px 0;
@@ -216,5 +224,18 @@
 
 .dropdown-item:hover {
     background: #fff1c7;
+}
+
+.hover-underline:hover {
+    text-decoration: underline;
+}
+
+.table a {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.table td.text-end a {
+    margin-left: 6px;
 }
 

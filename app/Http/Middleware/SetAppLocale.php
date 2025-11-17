@@ -12,32 +12,19 @@ class SetAppLocale
 {
     public function handle($request, Closure $next): Response
     {
-        $locale = $request->segment(1);
         $available = config('app.available_locales', ['en', 'lt']);
+        $first = $request->segment(1);
 
-        if (in_array($locale, $available)) {
-            App::setLocale($locale);
-            Session::put('locale', $locale);
+        // Jei URL prasideda locale → nustatom locale ir tęsiam
+        if (in_array($first, $available)) {
+            App::setLocale($first);
+            Session::put('locale', $first);
+            return $next($request);
         }
 
-        elseif (Session::has('locale')) {
-            $locale = Session::get('locale');
-            App::setLocale($locale);
+        // Jei URL neturi locale → pridėti jį prie viešo URL
+        $locale = Session::get('locale', config('app.locale'));
 
-            $segments = $request->segments();
-            array_unshift($segments, $locale);
-            return redirect()->to(implode('/', $segments));
-        }
-
-        else {
-            $locale = config('app.locale');
-            App::setLocale($locale);
-
-            $segments = $request->segments();
-            array_unshift($segments, $locale);
-            return redirect()->to(implode('/', $segments));
-        }
-
-        return $next($request);
+        return redirect('/' . $locale . $request->getRequestUri());
     }
 }
