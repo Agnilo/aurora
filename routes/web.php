@@ -57,41 +57,6 @@ use App\Http\Controllers\DashboardController;
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
 
-            
-        // =========================
-        // ADMIN PANEL (only admin)
-        // =========================
-        Route::middleware(['auth', 'role:admin'])
-            ->prefix('admin')
-            ->group(function () {
-
-                // Admin dashboard
-                Route::get('/', function () {
-                    return view('admin.dashboard');
-                })->name('admin.dashboard');
-
-                // Translations
-                Route::get('/translations', [\App\Http\Controllers\Admin\TranslationAdminController::class, 'index'])
-                    ->name('admin.translations.index');
-
-                Route::get('/translations/create', [\App\Http\Controllers\Admin\TranslationAdminController::class, 'create'])
-                    ->name('admin.translations.create');
-
-                Route::post('/translations', [\App\Http\Controllers\Admin\TranslationAdminController::class, 'store'])
-                    ->name('admin.translations.store');
-
-                Route::get('/translations/edit/{group}/{key}', [\App\Http\Controllers\Admin\TranslationAdminController::class, 'edit'])
-                    ->name('admin.translations.edit');
-
-                Route::post('/translations/update/{group}/{key}', [\App\Http\Controllers\Admin\TranslationAdminController::class, 'update'])
-                    ->name('admin.translations.update');
-
-                // Upcoming modules (placeholders)
-                // Route::get('/languages', ...)->name('admin.languages.index');
-                // Route::get('/lookups', ...)->name('admin.lookups.index');
-                // Route::get('/users', ...)->name('admin.users.index');
-        });
-
         //CategoryController
         Route::get('/goals/category/{category}', 
             [CategoryController::class, 'show']
@@ -110,5 +75,6 @@ use App\Http\Controllers\DashboardController;
 
         // Laravel Breeze / auth route'ai (login, register, password, etc.)
         require __DIR__.'/auth.php';
+        require __DIR__.'/admin.php';
     });
 

@@ -1,0 +1,52 @@
+@extends('admin.translations.layout')
+
+@section('translations-content')
+
+@if($translations->isEmpty())
+    <p class="text-muted">No translations found.</p>
+@else
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th style="width:200px">Key</th>
+
+            @foreach($languages as $lang)
+                <th>{{ strtoupper($lang) }}</th>
+            @endforeach
+
+            <th style="width:120px"></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach($translations as $key => $rows)
+            <tr>
+                <td class="fw-semibold">{{ $key }}</td>
+
+                @foreach($languages as $lang)
+                    @php
+                        // $lang = "lt" arba "en"
+                        $t = $rows->firstWhere('language_code', $lang);
+                    @endphp
+
+                    <td class="{{ $t ? '' : 'text-danger' }}">
+                        @if($t)
+                            {{ Str::limit($t->value, 60) }}
+                        @else
+                            <em>missing</em>
+                        @endif
+                    </td>
+                @endforeach
+
+                <td class="text-end">
+                    <a href="{{ ar('admin.translations.edit', 'your_goals') }}">Edit</a>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+@endif
+
+@endsection

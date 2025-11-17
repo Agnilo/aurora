@@ -49,7 +49,7 @@
                         <li>
                             <a class="dropdown-item"
                             href="{{ route('admin.dashboard', app()->getLocale()) }}">
-                                🛠 Admin
+                                Admin
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
