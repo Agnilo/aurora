@@ -19,13 +19,13 @@
             {{-- ADD NEW --}}
             <a href="{{ route('admin.translations.create', app()->getLocale()) }}"
             class="btn btn-primary">
-                + Add New
+                + {{ t('button.add_new_button') }}
             </a>
 
             {{-- EXPORT --}}
             <a href="{{ ar('admin.translations.export') }}"
             class="btn btn-outline-secondary">
-                Export CSV
+                {{ t('button.export_csv') }}
             </a>
 
             {{-- IMPORT --}}
@@ -34,7 +34,7 @@
                 enctype="multipart/form-data">
                 @csrf
                 <label class="btn btn-outline-primary mb-0">
-                    Import CSV
+                    {{ t('button.import_csv') }}
                     <input type="file" name="file" class="d-none" onchange="this.form.submit()">
                 </label>
             </form>
@@ -54,9 +54,12 @@
         </a>
 
         @foreach($groups as $grp)
-            <a href="{{ route('admin.translations.index', ['locale' => app()->getLocale(), 'group' => $grp]) }}"
-            class="{{ $group === $grp ? 'fw-bold text-primary' : 'text-muted' }}">
-                {{ $grp }}
+            <a href="{{ route('admin.translations.index', [
+                'locale' => app()->getLocale(),
+                'group' => $grp->key
+            ]) }}"
+            class="{{ $group === $grp->key ? 'fw-bold text-primary' : 'text-muted' }}">
+                {{ $grp->label() }}
             </a>
         @endforeach
 

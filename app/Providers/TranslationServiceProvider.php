@@ -14,6 +14,11 @@ class TranslationServiceProvider extends ServiceProvider
         });
     }
 
+    public function flushCache()
+    {
+        Cache::forget('translations.cache');
+    }
+
     public function boot()
     {
         //

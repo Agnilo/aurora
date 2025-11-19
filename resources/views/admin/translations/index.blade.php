@@ -3,8 +3,22 @@
 @section('translations-content')
 
 @if($translations->isEmpty())
-    <p class="text-muted">No translations found.</p>
+    <p class="text-muted">{{ t('errors.no_translation') }}</p>
 @else
+
+<form method="GET" action="{{ route('admin.translations.index', app()->getLocale()) }}" class="mb-4">
+    <div class="input-group" style="max-width: 380px;">
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               class="form-control"
+               placeholder="{{ t('header.search') }}">
+
+        <button class="btn btn-outline-secondary">
+            {{ t('button.search') }}
+        </button>
+    </div>
+</form>
 
 <table class="table align-middle">
     <thead>
@@ -39,19 +53,19 @@
                     </td>
                 @endforeach
 
-                <td class="text-end">
+                <td class="d-flex align-items-center gap-3">
 
                     {{-- EDIT --}}
                     <a href="{{ route('admin.translations.edit', ['locale' => app()->getLocale(), 'translationKey' => $key]) }}"
                     class="text-primary text-decoration-none me-3 hover-underline">
-                        Edit
+                        {{ t('button.edit') }}
                     </a>
 
                     {{-- DELETE --}}
                     <a href="#"
                     class="text-danger text-decoration-none hover-underline"
                     onclick="event.preventDefault(); if(confirm('Delete this translation?')) document.getElementById('del-{{ $key }}').submit();">
-                        Delete
+                        {{ t('button.delete') }}
                     </a>
 
                     <form id="del-{{ $key }}"

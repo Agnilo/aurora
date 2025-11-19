@@ -19,19 +19,23 @@
     {{-- GROUP --}}
     <div class="mb-3">
         <label class="form-label fw-semibold">Group</label>
-        <input type="text" 
-               name="group" 
-               value="{{ $group }}" 
-               class="form-control" 
-               required>
+
+        <select name="group" class="form-select" required>
+            @foreach($groups as $grp)
+                <option value="{{ $grp->key }}"
+                    {{ old('group', $group) == $grp->key ? 'selected' : '' }}>
+                    {{ $grp->label() }}
+                </option>
+            @endforeach
+        </select>
     </div>
 
     {{-- KEY --}}
     <div class="mb-3">
         <label class="form-label fw-semibold">Key</label>
         <input type="text" 
-               name="new_key" 
-               value="{{ $translationKey }}" 
+               name="key" 
+               value="{{ old('key', $translationKey) }}" 
                class="form-control" 
                required>
     </div>
@@ -49,7 +53,7 @@
 
             <textarea class="form-control"
                       name="value[{{ $lang->code }}]"
-                      rows="2">{{ $t->value ?? '' }}</textarea>
+                      rows="2">{{ old("value.$lang->code", $t->value ?? '') }}</textarea>
         </div>
     @endforeach
 

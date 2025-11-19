@@ -12,17 +12,17 @@
         {{-- Translations --}}
         <a href="{{ route('admin.translations.index', app()->getLocale()) }}"
            class="admin-card">
-            🌐 <span>Translations</span>
+            <span>{{ t('dashboard.translations') }}</span>
         </a>
 
         {{-- Languages --}}
         <div class="admin-card disabled">
-            🔤 <span>Languages (coming soon)</span>
+            <span>{{ t('dashboard.languages') }}</span>
         </div>
 
         {{-- Lookup tables --}}
         <div class="admin-card disabled">
-            📁 <span>Lookup Tables (coming soon)</span>
+            <span>{{ t('dashboard.lookup_tables') }}</span>
         </div>
 
     </div>

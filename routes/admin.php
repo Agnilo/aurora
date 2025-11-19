@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\TranslationAdminController;
+use App\Http\Controllers\Admin\TranslationGroupController;
 use App\Http\Middleware\SetAppLocale;
 
 // ADMIN ROUTES
@@ -38,4 +39,7 @@ Route::group([
 
     Route::post('/translations/import', [TranslationAdminController::class, 'import'])
         ->name('translations.import');
+
+    Route::resource('translation-groups', \App\Http\Controllers\Admin\TranslationGroupController::class);
+
 });
