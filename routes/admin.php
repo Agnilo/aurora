@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\TranslationAdminController;
 use App\Http\Controllers\Admin\TranslationGroupController;
+use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Middleware\SetAppLocale;
 
 // ADMIN ROUTES
@@ -41,5 +42,14 @@ Route::group([
         ->name('translations.import');
 
     Route::resource('translation-groups', \App\Http\Controllers\Admin\TranslationGroupController::class);
+
+    Route::get('/users', [\App\Http\Controllers\Admin\UserAdminController::class, 'index'])
+        ->name('users.index');
+
+    Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\UserAdminController::class, 'edit'])
+        ->name('users.edit');
+
+    Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserAdminController::class, 'update'])
+        ->name('users.update');
 
 });

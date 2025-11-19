@@ -4,7 +4,7 @@
 
 <div class="admin-dashboard-wrapper">
 
-    <h1 class="admin-title">Admin Dashboard</h1>
+    <h1 class="admin-title">Admin {{ t('dashboard.dashboard') }}</h1>
     <p class="admin-subtitle">Sistemos valdymo panelė</p>
 
     <div class="admin-cards-row">

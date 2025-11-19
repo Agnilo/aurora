@@ -12,7 +12,7 @@
     {{-- PAGE HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h1 class="admin-title">Translations</h1>
+        <h1 class="admin-title">{{ t('header.translations') }}</h1>
 
         <div class="d-flex align-items-center gap-2">
 
@@ -45,7 +45,7 @@
 
 
     {{-- GROUP SWITCHER --}}
-    <div class="d-flex align-items-center gap-3 mb-4 pt-1" 
+    <div class="d-flex align-items-center gap-3 mb-4 pt-1 flex-wrap"
         style="border-bottom: 1px solid #e6d9b8; padding-bottom: 12px;">
 
         <a href="{{ route('admin.translations.index', app()->getLocale()) }}"

@@ -18,9 +18,9 @@
                value="{{ $group->name }}" required>
     </div>
 
-    <button class="btn btn-primary">Save</button>
+    <button class="btn btn-primary">{{ t('button.save') }}</button>
     <a href="{{ route('admin.translation-groups.index', app()->getLocale()) }}"
-       class="btn btn-outline-secondary ms-2">Cancel</a>
+       class="btn btn-outline-secondary ms-2">{{ t('button.cancel') }}</a>
 </form>
 
 @endsection

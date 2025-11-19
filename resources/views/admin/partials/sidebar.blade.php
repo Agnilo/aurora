@@ -14,6 +14,11 @@
             <span>{{ t('dashboard.dashboard') }}</span>
         </a>
 
+        <a href="{{ route('admin.users.index', app()->getLocale()) }}"
+            class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            <span>{{ t('dashboard.users') }}</span>
+        </a>
+
         {{-- Translations --}}
         <a href="{{ route('admin.translations.index', app()->getLocale()) }}"
            class="sidebar-link {{ request()->routeIs('admin.translations.*') ? 'active' : '' }}">

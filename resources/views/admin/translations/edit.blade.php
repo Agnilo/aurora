@@ -57,11 +57,11 @@
         </div>
     @endforeach
 
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary">{{ t('button.save') }}</button>
 
     <a href="{{ route('admin.translations.index', app()->getLocale()) }}" 
        class="btn btn-outline-secondary ms-2">
-       Cancel
+       {{ t('button.cancel') }}
     </a>
 
 </form>

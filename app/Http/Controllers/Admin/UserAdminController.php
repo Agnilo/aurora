@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 
 class UserAdminController extends Controller
@@ -10,13 +12,18 @@ class UserAdminController extends Controller
     public function index()
     {
         $users = User::with('roles')->paginate(20);
+
         return view('admin.users.index', compact('users'));
     }
 
     public function edit($locale, User $user)
     {
-        $roles = Role::all();
-        return view('admin.users.edit', compact('user', 'roles'));
+        $roles = Role::orderBy('name')->get();
+
+        return view('admin.users.edit', [
+            'user'  => $user,
+            'roles' => $roles,
+        ]);
     }
 
     public function update(Request $request, $locale, User $user)
@@ -27,11 +34,16 @@ class UserAdminController extends Controller
             'roles' => 'array'
         ]);
 
-        $user->update($request->only('name', 'email'));
+        $user->update([
+            'name'  => $request->name,
+            'email' => $request->email,
+        ]);
 
-        $user->syncRoles($request->roles); // Spatie magic ✨
+        // Assign roles
+        $user->syncRoles($request->roles ?? []);
 
-        return redirect()->route('admin.users.index', $locale)
-            ->with('success', 'User updated.');
+        return redirect()
+            ->route('admin.users.index', $locale)
+            ->with('success', t('dashboard.user_updated'));
     }
 }
