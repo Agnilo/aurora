@@ -13,7 +13,7 @@
 
             <a href="{{ route('admin.translation-groups.create', app()->getLocale()) }}"
             class="btn btn-primary mb-3">
-                + {{ t('button.add_new_button') }}
+                + {{ t('button.add_new') }}
             </a>
 
         </div>

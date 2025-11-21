@@ -31,16 +31,17 @@
             <span>{{ t('dashboard.translation_groups') }}</span>
         </a>
 
-
         {{-- Languages (disabled) --}}
-        <div class="sidebar-link disabled">
+        <a href="{{ route('admin.languages.index', ['locale' => app()->getLocale()]) }}"
+        class="sidebar-link {{ request()->routeIs('admin.languages.*') ? 'active' : '' }}">
             <span>{{ t('dashboard.languages') }}</span>
-        </div>
+        </a>
 
         {{-- Lookup tables --}}
-        <div class="sidebar-link disabled">
+        <a href="{{ route('admin.lookups.index', app()->getLocale()) }}"
+        class="sidebar-link {{ request()->routeIs('admin.lookups.*') ? 'active' : '' }}">
             <span>{{ t('dashboard.lookup_tables') }}</span>
-        </div>
+        </a>
 
     </nav>
 

@@ -19,7 +19,7 @@
             {{-- ADD NEW --}}
             <a href="{{ route('admin.translations.create', app()->getLocale()) }}"
             class="btn btn-primary">
-                + {{ t('button.add_new_button') }}
+                + {{ t('button.add_new') }}
             </a>
 
             {{-- EXPORT --}}
@@ -64,6 +64,20 @@
         @endforeach
 
     </div>
+
+    <form method="GET" action="{{ route('admin.translations.index', app()->getLocale()) }}" class="mb-4">
+        <div class="input-group" style="max-width: 380px;">
+            <input type="text"
+                name="search"
+                value="{{ request('search') }}"
+                class="form-control"
+                placeholder="{{ t('header.search') }}">
+
+            <button class="btn btn-outline-secondary">
+                {{ t('button.search') }}
+            </button>
+        </div>
+    </form>
 
 
     {{-- INNER CONTENT --}}

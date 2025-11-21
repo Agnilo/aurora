@@ -132,24 +132,37 @@ class TranslationAdminController extends Controller
         $newKey = $request->key;
         $newGroup = $request->group;
 
+        $oldKey = $translationKey;
+
+        $rows = Translation::where('key', $oldKey)->get();
+
+        foreach ($rows as $row) {
+            $langCode = $row->language_code;
+
+            $exists = Translation::where('group', $newGroup)
+                ->where('key', $newKey)
+                ->where('language_code', $langCode)
+                ->exists();
+
+            if ($exists) {
+                return back()->withErrors([
+                    'key' => "Vertimas su key '{$newKey}' ir group '{$newGroup}' jau egzistuoja kalbai {$langCode}."
+                ]);
+            }
+        }
+
         // Update group/key for all entries
-        Translation::where('key', $translationKey)->update([
+        Translation::where('key', $oldKey)->update([
             'key'   => $newKey,
             'group' => $newGroup,
         ]);
 
         // Update values
         foreach ($request->value as $langCode => $val) {
-            Translation::updateOrCreate(
-                [
-                    'key'           => $newKey,
-                    'language_code' => $langCode,
-                ],
-                [
-                    'group' => $newGroup,
-                    'value' => $val,
-                ]
-            );
+            Translation::where('group', $newGroup)
+            ->where('key', $newKey)
+            ->where('language_code', $langCode)
+            ->update(['value' => $val]);
         }
 
         app('translation')->flushCache();

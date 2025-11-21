@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <form method="POST" action="{{ route('password.store') }}">
+    <form method="POST" action="{{ route('password.store', ['locale' => App::getLocale()]) }}">
         @csrf
 
         <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+        <input type="hidden" name="token" value="{{ $request->route('token', ['locale' => App::getLocale()]) }}">
 
         <!-- Email Address -->
         <div>

@@ -6,20 +6,6 @@
     <p class="text-muted">{{ t('errors.no_translation') }}</p>
 @else
 
-<form method="GET" action="{{ route('admin.translations.index', app()->getLocale()) }}" class="mb-4">
-    <div class="input-group" style="max-width: 380px;">
-        <input type="text"
-               name="search"
-               value="{{ request('search') }}"
-               class="form-control"
-               placeholder="{{ t('header.search') }}">
-
-        <button class="btn btn-outline-secondary">
-            {{ t('button.search') }}
-        </button>
-    </div>
-</form>
-
 <table class="table align-middle">
     <thead>
         <tr>

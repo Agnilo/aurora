@@ -239,3 +239,51 @@
     margin-left: 6px;
 }
 
+.lookup-card {
+    border: 1px solid #e9e2cc;
+}
+
+.lookup-card table thead th {
+    background: #f9f4e7;
+    font-weight: 600;
+    border-bottom: 1px solid #e3d8c2 !important;
+}
+
+.lookup-card table tbody tr td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background: #f4f4f4;
+    color: #5a5a5a;
+    font-weight: 600;
+    vertical-align: middle !important;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+.table tbody td {
+    vertical-align: middle !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 15px;
+}
+
+.table tbody td.text-end a,
+.table tbody td.text-end form {
+    margin-left: 10px;
+}
+
+.table tbody td.text-end {
+    padding-right: 25px;
+}
+
+.table .check-icon {
+    color: #6a4fbf;
+    font-size: 18px;
+}
+
+.table tbody tr:hover {
+    background: #fafafa;
+}
+

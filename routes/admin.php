@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\TranslationAdminController;
 use App\Http\Controllers\Admin\TranslationGroupController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Admin\LookupAdminController;
+use App\Http\Controllers\Admin\LanguageController;
+
 use App\Http\Middleware\SetAppLocale;
 
 // ADMIN ROUTES
@@ -17,39 +20,63 @@ Route::group([
     Route::get('/', [AdminDashboardController::class, 'index'])
         ->name('dashboard');
 
-    Route::get('/translations/{translationKey}/edit', [TranslationAdminController::class, 'edit'])
-        ->name('translations.edit');
+    Route::prefix('translations')->as('translations.')->group(function () {
 
-    Route::put('/translations/{translationKey}', [TranslationAdminController::class, 'update'])
-        ->name('translations.update');
+        Route::get('/{translationKey}/edit', [TranslationAdminController::class, 'edit'])
+            ->name('edit');
+        Route::put('/{translationKey}', [TranslationAdminController::class, 'update'])
+            ->name('update');
 
-    Route::get('/translations', [TranslationAdminController::class, 'index'])
-        ->name('translations.index');
+        Route::get('/', [TranslationAdminController::class, 'index'])
+            ->name('index');
+        Route::get('/create', [TranslationAdminController::class, 'create'])
+            ->name('create');
+        Route::post('/', [TranslationAdminController::class, 'store'])
+            ->name('store');
+        Route::delete('/{translationKey}', [TranslationAdminController::class, 'destroy'])
+            ->name('destroy');
 
-    Route::get('/translations/create', [TranslationAdminController::class, 'create'])
-        ->name('translations.create');
+        Route::get('/export', [TranslationAdminController::class, 'export'])
+            ->name('export');
+        Route::post('/import', [TranslationAdminController::class, 'import'])
+            ->name('import');
 
-    Route::post('/translations', [TranslationAdminController::class, 'store'])
-        ->name('translations.store');
+    });
 
-    Route::delete('/translations/{translationKey}', [TranslationAdminController::class, 'destroy'])
-        ->name('translations.destroy');
+    Route::resource('translation-groups', TranslationGroupController::class);
 
-    Route::get('/translations/export', [TranslationAdminController::class, 'export'])
-        ->name('translations.export');
+    Route::prefix('users')->as('users.')->group(function () {
 
-    Route::post('/translations/import', [TranslationAdminController::class, 'import'])
-        ->name('translations.import');
+        Route::get('/', [UserAdminController::class, 'index'])
+            ->name('index');
 
-    Route::resource('translation-groups', \App\Http\Controllers\Admin\TranslationGroupController::class);
+        Route::get('/{user}/edit', [UserAdminController::class, 'edit'])
+            ->name('edit');
 
-    Route::get('/users', [\App\Http\Controllers\Admin\UserAdminController::class, 'index'])
-        ->name('users.index');
+        Route::put('/{user}', [UserAdminController::class, 'update'])
+            ->name('update');
 
-    Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\UserAdminController::class, 'edit'])
-        ->name('users.edit');
+    });
 
-    Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserAdminController::class, 'update'])
-        ->name('users.update');
+    Route::prefix('lookups')->as('lookups.')->group(function () {
+        
+        Route::get('/', [LookupAdminController::class, 'index'])->name('index');
+
+        Route::get('/{section}', [LookupAdminController::class, 'section'])->name('section');
+
+        Route::get('/{section}/create/{type}', [LookupAdminController::class, 'create'])->name('create');
+        Route::post('/{section}/create/{type}', [LookupAdminController::class, 'store'])->name('store');
+
+        Route::get('/{section}/{type}/{id}/edit', [LookupAdminController::class, 'edit'])->name('edit');
+        Route::put('/{section}/{type}/{id}', [LookupAdminController::class, 'update'])->name('update');
+
+        Route::delete('/{section}/{type}/{id}', [LookupAdminController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{section}/{type}/reorder', [LookupAdminController::class, 'reorder'])
+            ->name('lookups.reorder');
+
+    });
+
+    Route::resource('languages', LanguageController::class);
 
 });
