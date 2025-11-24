@@ -18,18 +18,15 @@
     letter-spacing: -0.5px;
 }
 
-/* Center nav */
 .aurora-nav a {
     text-decoration: none;
     color: #555;
     font-weight: 500;
     transition: color 0.25s ease;
 }
-
 .aurora-nav a:hover {
     color: #e89b00;
 }
-
 .aurora-nav a.active {
     color: #ffb300;
     font-weight: 700;
@@ -37,19 +34,16 @@
     padding-bottom: 2px;
 }
 
-/* Language switch */
 .aurora-lang-switch a {
     color: #777;
     text-decoration: none;
     font-size: 0.9rem;
 }
-
 .aurora-lang-switch a.active {
     font-weight: 700;
     color: #ffb300;
 }
 
-/* User button */
 .aurora-user-btn {
     background: #fff;
     border: 1px solid #f0e4cc;
@@ -57,7 +51,6 @@
     padding: 6px 14px;
     font-size: 0.9rem;
 }
-
 .aurora-user-btn:hover {
     background: #fff7e0;
     border-color: #ffcc8a;
@@ -65,7 +58,7 @@
 
 
 /* ============================================================
-   DASHBOARD
+   DASHBOARD / GOALS LIST
 ============================================================ */
 
 .aurora-hero {
@@ -89,87 +82,130 @@
     height: 60px;
     background: #fff6e2;
     border: 1px solid #f0e4cc;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Featured goal (Svarbiausi tikslai) */
 .featured-goal-card {
-    background: #fffbea;
-    border: 2px solid #ffd166;
+    background: #fffef8;
+    border-radius: 14px;
+    border: 1px solid #f0e4cc;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
 }
 
+/* Basic goal list item */
 .goal-item {
     background: white;
+    border-radius: 14px;
     border: 1px solid #f0e4cc;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
 }
 .goal-item:hover {
     background: #fff7e0;
 }
 
+/* Stagger animation target (Tavo tikslų kortelės) */
+.goal-card {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .3s ease, transform .3s ease;
+}
+.goal-card.stagger-in {
+    animation: staggerFade 0.5s ease forwards;
+}
+
+@keyframes staggerFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 
 /* ============================================================
-   DEFAULT MODE (FLEX LAYOUT – replaces grid)
+   GOALS – CATEGORY GRID 
 ============================================================ */
+
 .category-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* centering like grid */
-    gap: 20px;
-    transition: gap 0.28s ease;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+    margin: 40px 0;
 }
 
-/* Makes tiles behave like grid columns */
-.category-tile {
-    flex: 1 1 230px;    /* MIN WIDTH + grow */
-    max-width: 1fr;     /* visual match to grid */
-}
-
-/* ============================================================
-   ACTIVE MODE (HORIZONTAL EXPAND)
-============================================================ */
-.category-grid.has-active {
-    gap: 12px;
-    align-items: stretch;
-    transition: gap 0.28s ease;
-}
-
-/* ============================================================
-   TILES BASE
-============================================================ */
-.category-tile {
+.category-title {
     text-decoration: none;
     color: inherit;
     display: block;
     transition:
-        flex 0.30s ease,
-        width 0.30s ease,
-        opacity 0.25s ease,
-        transform 0.25s ease;
+        transform .25s ease,
+        box-shadow .25s ease,
+        opacity .25s ease;
 }
 
 .category-tile-inner {
-    background: #dfd6c6;
-    border-radius: 16px;
-    padding: 18px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px 22px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-    transition:
-        background 0.30s ease,
-        box-shadow 0.25s ease,
-        transform 0.25s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    border: 1px solid #f1e8d2;
+    height: 200px;
     display: flex;
     flex-direction: column;
-    height: 200px;      /* fixed height → no vertical FLIP */
-    overflow: hidden;
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
 }
 
 .category-tile-inner:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 12px 34px rgba(0,0,0,0.06);
 }
 
-/* ============================================================
-   INNER ELEMENTS
-============================================================ */
+.category-bar {
+    width: 100%;
+    height: 16px;
+    border-radius: 999px;
+    margin: 0 auto 16px auto;
+    background-size: cover;
+}
+
+.category-points {
+    font-size: 0.9rem;
+    color: #7a6c4b;
+}
+
+.category-tile-inner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+}
+
+.category-tile:hover .category-name {
+    color: inherit !important;
+}
+
+.category-tile,
+.category-tile:visited,
+.category-tile:hover {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+ 
 .category-icon,
 .category-name,
 .category-gradient,
@@ -181,109 +217,80 @@
 }
 
 .category-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 36px;
+    margin-bottom: 12px;
 }
 
 .category-name {
     font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: 12px;
-}
-
-.category-gradient {
-    width: 100%;
-    height: 38px;
-    border-radius: 10px;
-    margin: 0 auto 10px auto;
+    font-size: 1.15rem;
+    margin-bottom: 14px;
 }
 
 .category-score {
-    font-size: 0.85rem;
-    color: #6d6d6d;
+    font-size: 0.9rem;
+    color: #6b5c41;
     margin-top: auto;
 }
 
-/* ============================================================
-   ACTIVE TILE EXPANDED
-============================================================ */
-.category-grid.has-active .category-tile.active {
-    flex: 1 !important;         /* grow fully */
-    min-width: 260px;
-}
-
+/* Aktyvi kategorija */
 .category-grid.has-active .category-tile.active .category-tile-inner {
-    box-shadow: 0 0 0 3px #ffba22;
-    background: #fff7e0;
-    transform: scaleX(1.02);    /* no vertical impact */
-}
-
-/* ============================================================
-   NON-ACTIVE SHRUNK (HORIZONTAL ONLY)
-============================================================ */
-.category-grid.has-active .category-tile:not(.active) {
-    flex: 0 0 70px;             /* stays 70px wide */
-    transform: scaleX(0.92);    /* horizontal only */
-    opacity: 0.75;
+    background: #fffdf5;
+    box-shadow: 0 0 0 3px #ffd36d;
+    transform: scale(1.03);
 }
 
 .category-grid.has-active .category-tile:not(.active) .category-name,
 .category-grid.has-active .category-tile:not(.active) .category-gradient,
 .category-grid.has-active .category-tile:not(.active) .category-score {
-    opacity: 0;
-    transform: translateY(-6px); /* inner fade only */
-}
-
-.category-grid.has-active .category-tile:not(.active) .category-icon {
-    font-size: 28px;
-    margin: 0;
-}
-
-/* ============================================================
-   REMOVE VERTICAL ANIMATION IN CLOSING/RESETTING
-============================================================ */
-.category-grid.closing .category-tile {
-    transform: scaleX(0.95); /* horizontal only */
     opacity: 0.6;
 }
 
-.category-grid.closing .category-icon,
-.category-grid.closing .category-name,
-.category-grid.closing .category-gradient,
-.category-grid.closing .category-score {
-    opacity: 0;
-    transform: none; /* no vertical movement */
-}
-
-.category-grid.resetting .category-tile.active {
-    flex: 0;
-    min-width: 0;
-    transform: scaleX(0.95);
-    opacity: 0.9;
-}
-
-.category-grid.resetting .category-tile.active .category-tile-inner {
-    background: #dfd6c6;
-    transform: scaleX(1);
-}
-
-/* After reset — normal mode fade-in */
 .category-grid:not(.has-active) .category-tile {
     opacity: 1;
-    transform: scaleX(1);
+    transform: scale(1);
 }
 
-.category-grid:not(.has-active) .category-icon,
-.category-grid:not(.has-active) .category-name,
-.category-grid:not(.has-active) .category-gradient,
-.category-grid:not(.has-active) .category-score {
-    opacity: 1;
-    transform: none;
+.category-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.05);
+    border: 1px solid #f2e6c7;
+    transition: transform .25s ease, box-shadow .25s ease;
+    text-align: center;
 }
 
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+}
+
+.category-progress {
+    all: unset;
+    display: block;
+    width: 100%;
+    height: 14px;
+    background: #f3e7c5;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.category-progress-fill {
+    height: 100%;
+    background: var(--bar-bg);
+    border-radius: 999px;
+    transition: width 0.45s ease;
+}
+
+.category-progress,
+.category-progress *,
+.category-progress-fill {
+    box-sizing: content-box !important;
+}
 
 /* ============================================================
-   SKELETON LOADER (Title + fake goals)
+   SKELETON LOADER (Tikslų sąrašas)
 ============================================================ */
 
 #goalsContentLoader {
@@ -309,7 +316,7 @@
     animation: shimmer 1.2s ease-in-out infinite;
 }
 
-/* Title */
+/* Title placeholder */
 .skeleton-title {
     width: 160px;
     height: 20px;
@@ -363,20 +370,218 @@
 
 
 /* ============================================================
-   STAGGER ANIMATION
+   PROFILE PAGE (Untitled UI style)
 ============================================================ */
-.goal-card {
-    opacity: 0;
-    transform: translateY(10px);
+.profile-page {
+    background: #fff7eb;
 }
 
-.goal-card.stagger-in {
-    animation: staggerFade 0.5s ease forwards;
+/* HERO COVER */
+.profile-hero {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid #eee;
 }
 
-@keyframes staggerFade {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+/* Content (avatar + text) */
+.profile-hero-content {
+    position: absolute;
+    bottom: -80px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+/* Big avatar */
+.profile-hero-avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 6px solid white;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Hero text */
+.profile-hero-text h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.profile-hero-text .handle {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Tabs */
+.profile-tabs {
+    padding-top: 80px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.profile-tab {
+    padding: 12px 0;
+    font-weight: 600;
+    color: #666;
+    text-decoration: none;
+}
+.profile-tab.active {
+    color: #000;
+    border-bottom: 2px solid #4A44FF;
+}
+
+/* 2-column layout (profile content + sidebar) */
+.profile-container {
+    max-width: 1000px;
+    margin: 20px auto 40px;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+    gap: 32px;
+}
+
+.profile-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+/* Sidebar (Tavo progresas) */
+.stats-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: 1px solid #f0e4cc;
+    font-size: 14px;
+}
+
+.stats-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee2c4;
+}
+.stats-row:last-of-type {
+    border-bottom: none;
+}
+
+.stats-label {
+    color: #7a6c4b;
+}
+.stats-value {
+    font-weight: 600;
+    color: #3c2f1c;
+}
+
+/* XP bar */
+.xp-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #f3e7c5;
+    overflow: hidden;
+}
+.xp-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+}
+.xp-bar-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #7a6c4b;
+}
+
+.stats-footer {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f1e4c7;
+    font-size: 12px;
+    color: #86775a;
+}
+
+
+/* ============================================================
+   AVATAR (profile + header)
+============================================================ */
+.avatar-preview {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.avatar-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
+.header-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 4px rgba(0,0,0,0.15);
+}
+
+.placeholder-avatar {
+    background: #f4d98c;
+    color: #444;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+.task-done-toggle:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 1100px) {
+    .profile-container {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 800px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .category-grid {
+        grid-template-columns: 1fr;
     }
 }

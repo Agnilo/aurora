@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container py-4">
 
     {{-- CATEGORY HEADER --}}
@@ -13,7 +14,7 @@
     <div class="text-end mt-4">
         <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}"
            class="btn btn-lg btn-warning text-white fw-semibold px-4">
-            + Naujas tikslas
+            + {{ t('button.add_new') }}
         </a>
     </div>
 
@@ -34,7 +35,7 @@
         ])
 
         {{-- PAGE TITLE --}}
-        <h3 class="fw-bold text-warning mb-4">Tavo tikslai</h3>
+        <h3 class="fw-bold text-warning mb-4">{{ t('goals.yourGoals') }}</h3>
 
         {{-- GOALS LIST --}}
         @include('goals.partials.list.other.full', [

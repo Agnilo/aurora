@@ -46,6 +46,32 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            $user->gameDetails()->create([
+                'level' => 1,
+                'xp' => 0,
+                'xp_next' => 100,
+                'coins' => 0,
+                'streak_current' => 0,
+                'streak_best' => 0,
+                'last_activity_date' => now(),
+            ]);
+
+            foreach (\App\Models\Category::all() as $category) {
+                $user->categoryLevels()->create([
+                    'category_id' => $category->id,
+                    'level' => 1,
+                    'xp' => 0,
+                    'xp_next' => 100,
+                ]);
+            }
+        });
+
+
+    }
+
     public function goals()
     {
         return $this->hasMany(Goal::class);
@@ -64,6 +90,27 @@ class User extends Authenticatable
     public function pointsLog()
     {
         return $this->hasMany(PointsLog::class);
+    }
+
+    public function getDetailsAttribute()
+    {
+        return $this->detailsRelation ?? new \App\Models\UserDetails([
+            'user_id' => $this->id,
+            'birthdate' => null,
+            'gender' => null,
+            'description' => null,
+            'handle' => null,
+        ]);
+    }
+
+    public function detailsRelation()
+    {
+        return $this->hasOne(UserDetails::class);
+    }
+
+    public function moodEntries()
+    {
+        return $this->hasMany(MoodEntry::class)->latest();
     }
 
 }

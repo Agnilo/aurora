@@ -9,11 +9,15 @@ class PointsLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'points_log';
+
     protected $fillable = [
         'user_id',
         'task_id',
         'category_id',
         'points',
+        'amount',
+        'type',
     ];
 
     public function user()

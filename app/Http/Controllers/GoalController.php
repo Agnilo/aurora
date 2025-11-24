@@ -80,15 +80,15 @@ class GoalController extends Controller
      */
     public function create($locale)
     {
-        $statuses = GoalStatus::all();
-        $priorities = GoalPriority::all();
-        $types = GoalType::all();
-        $categories = Category::all();
+        $statuses = GoalStatus::orderBy('order')->get();
+        $priorities = GoalPriority::orderBy('order')->get();
+        $types = GoalType::orderBy('order')->get();
+        $categories = Category::orderBy('order')->get();
 
-        $taskStatuses   = TaskStatus::all();
-        $taskTypes      = TaskType::all();
-        $taskPriorities = TaskPriority::all();
-        $taskCategories = Category::all();
+        $taskStatuses   = TaskStatus::orderBy('order')->get();
+        $taskTypes      = TaskType::orderBy('order')->get();
+        $taskPriorities = TaskPriority::orderBy('order')->get();
+        $taskCategories = Category::orderBy('order')->get();
 
         return view('goals.create', compact(
             'statuses', 'priorities', 'types', 'categories',
@@ -195,15 +195,15 @@ class GoalController extends Controller
     public function edit($locale, $id)
     {
         $goal = Goal::findOrFail($id);
-        $priorities = GoalPriority::all();
-        $statuses = GoalStatus::all();
-        $types = GoalType::all();
-        $categories = Category::all();
+        $statuses = GoalStatus::orderBy('order')->get();
+        $priorities = GoalPriority::orderBy('order')->get();
+        $types = GoalType::orderBy('order')->get();
+        $categories = Category::orderBy('order')->get();
 
-        $taskStatuses   = TaskStatus::all();
-        $taskTypes      = TaskType::all();
-        $taskPriorities = TaskPriority::all();
-        $taskCategories = Category::all();
+        $taskStatuses   = TaskStatus::orderBy('order')->get();
+        $taskTypes      = TaskType::orderBy('order')->get();
+        $taskPriorities = TaskPriority::orderBy('order')->get();
+        $taskCategories = Category::orderBy('order')->get();
 
         return view('goals.edit', compact(
             'goal', 'priorities', 'statuses', 'types', 'categories',
@@ -305,16 +305,39 @@ class GoalController extends Controller
                 );
 
                 $submittedTaskIds[] = $task->id;
+
+                if (!empty($tData['status_id'])) {
+
+                    $status = TaskStatus::find($tData['status_id']);
+
+                    if ($status) {
+                        if (strtolower($status->name) === 'completed') {
+                            $task->completed_at = now();
+                        }
+                        else {
+                            $task->completed_at = null;
+                        }
+                    }
+
+                    $task->save();
+                }
             }
 
-            // Ištrinam taskus, kurių formoje nebėra
             $tasksToDelete = array_diff($existingTaskIds, $submittedTaskIds);
             if (!empty($tasksToDelete)) {
                 $milestone->tasks()->whereIn('id', $tasksToDelete)->delete();
             }
         }
 
-        // Ištrinam milestone’us, kurių formoje nebėra
+        foreach ($goal->milestones as $m) {
+            app(\App\Http\Controllers\TaskController::class)
+                ->recalculateMilestoneProgress($m);
+        }
+
+        app(\App\Http\Controllers\TaskController::class)
+            ->recalculateGoalProgress($goal);
+
+
         $milestonesToDelete = array_diff($existingMilestoneIds, $submittedMilestoneIds);
         if (!empty($milestonesToDelete)) {
             $goal->milestones()->whereIn('id', $milestonesToDelete)->delete();

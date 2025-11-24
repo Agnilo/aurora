@@ -86,11 +86,8 @@ class TranslationAdminController extends Controller
             ->with('success', 'Translation created successfully.');
     }
 
-    public function edit($translationKey)
+    public function edit($locale, $translationKey)
     {
-        $translationKey = request()->route('translationKey')
-            ?? request()->segment(4);
-
         $items = Translation::where('key', $translationKey)->get();
 
         if ($items->isEmpty()) {
@@ -118,11 +115,8 @@ class TranslationAdminController extends Controller
         ));
     }
 
-    public function update(Request $request, $translationKey)
+    public function update(Request $request, $locale, $translationKey)
     {
-        $translationKey = request()->route('translationKey')
-            ?? request()->segment(4);
-
         $request->validate([
             'group' => 'required|string',
             'key'   => 'required|string',
@@ -132,45 +126,49 @@ class TranslationAdminController extends Controller
         $newKey = $request->key;
         $newGroup = $request->group;
 
-        $oldKey = $translationKey;
+        // Surenkam senus verčiamus įrašus
+        $rows = Translation::where('key', $translationKey)->get();
 
-        $rows = Translation::where('key', $oldKey)->get();
+        if ($rows->isEmpty()) {
+            abort(404, "Translation key not found: $translationKey");
+        }
 
+        // Patikrinam ar jau egzistuoja
         foreach ($rows as $row) {
-            $langCode = $row->language_code;
-
             $exists = Translation::where('group', $newGroup)
                 ->where('key', $newKey)
-                ->where('language_code', $langCode)
+                ->where('language_code', $row->language_code)
+                ->where('id', '!=', $row->id)
                 ->exists();
 
             if ($exists) {
                 return back()->withErrors([
-                    'key' => "Vertimas su key '{$newKey}' ir group '{$newGroup}' jau egzistuoja kalbai {$langCode}."
+                    'key' => "Vertimas su key '{$newKey}' ir group '{$newGroup}' jau egzistuoja kalbai {$row->language_code}."
                 ]);
             }
         }
 
-        // Update group/key for all entries
-        Translation::where('key', $oldKey)->update([
+        // Atnaujinam key + group visiems
+        Translation::where('key', $translationKey)->update([
             'key'   => $newKey,
             'group' => $newGroup,
         ]);
 
-        // Update values
-        foreach ($request->value as $langCode => $val) {
-            Translation::where('group', $newGroup)
-            ->where('key', $newKey)
-            ->where('language_code', $langCode)
-            ->update(['value' => $val]);
+        // Atnaujinam value
+        foreach ($request->value as $lang => $val) {
+            Translation::where('key', $newKey)
+                ->where('group', $newGroup)
+                ->where('language_code', $lang)
+                ->update(['value' => $val]);
         }
 
         app('translation')->flushCache();
 
         return redirect()
-            ->route('admin.translations.index', app()->getLocale())
+            ->route('admin.translations.index', $locale)
             ->with('success', 'Translation updated.');
     }
+
 
     public function destroy($locale, $translationKey)
     {

@@ -11,7 +11,14 @@
 
         {{-- Category --}}
         <div class="small text-muted">
-            {{ $goal->category->name ?? '—' }}
+            @if($goal->category)
+                @php
+                    $slug = \Illuminate\Support\Str::slug($goal->category->name, '_');
+                    $key = "lookup.categories.category.$slug";
+                @endphp
+
+                <strong>{{ t($key) }}</strong>
+            @endif
         </div>
 
         {{-- Progress bar --}}
@@ -21,7 +28,7 @@
 
     </div>
 @empty
-    <p class="text-muted">Dar nėra tikslų.</p>
+    <p class="text-muted">{{ t('goals.noGoalsYet') }}<</p>
 @endforelse
 
 </div>

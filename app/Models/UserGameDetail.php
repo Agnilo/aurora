@@ -9,6 +9,8 @@ class UserGameDetail extends Model
 {
     use HasFactory;
 
+    protected $table = 'user_game_details';
+
     protected $fillable = [
         'user_id',
         'level',
@@ -18,6 +20,10 @@ class UserGameDetail extends Model
         'streak_current',
         'streak_best',
         'last_activity_date',
+    ];
+
+    protected $casts = [
+        'last_activity_date' => 'date',
     ];
 
     public function user()

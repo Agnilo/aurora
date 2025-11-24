@@ -1,6 +1,11 @@
 {
+  "resources/css/admin.css": {
+    "file": "assets/admin-CDcqFlyD.css",
+    "src": "resources/css/admin.css",
+    "isEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-BBhsECGI.css",
+    "file": "assets/app-BbANEgJn.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },

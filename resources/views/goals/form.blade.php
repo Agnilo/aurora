@@ -14,9 +14,9 @@
     <div class="row mb-4">
         {{-- Sritis --}}
         <div class="col-md-3">
-            <label class="form-label fw-semibold">Sritis</label>
+            <label class="form-label fw-semibold">{{ t('goals.category') }}</label>
             <select name="category_id" class="form-select">
-                <option value="">— pasirinkti —</option>
+                <option value="">{{ t('goals.choose') }}</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" 
                         {{ old('category_id', $goal->category_id ?? '') == $category->id ? 'selected' : '' }}>
@@ -28,13 +28,18 @@
 
         {{-- Statusas --}}
         <div class="col-md-2">
-            <label class="form-label fw-semibold">Statusas</label>
+            <label class="form-label fw-semibold">{{ t('goals.status') }}</label>
             <select name="status_id" class="form-select">
-                <option value="">— pasirinkti —</option>
+                <option value="">{{ t('goals.choose') }}</option>
+
                 @foreach($statuses as $status)
+                    @php
+                        $slug = \Illuminate\Support\Str::slug($status->name, '_');
+                        $translationKey = "lookup.goals.status.$slug";
+                    @endphp
                     <option value="{{ $status->id }}" 
                         {{ old('status_id', $goal->status_id ?? '') == $status->id ? 'selected' : '' }}>
-                        {{ $status->name }}
+                        {{ t($translationKey) }}
                     </option>
                 @endforeach
             </select>
@@ -42,13 +47,18 @@
 
         {{-- Tipas --}}
         <div class="col-md-2">
-            <label class="form-label fw-semibold">Tipas</label>
+            <label class="form-label fw-semibold">{{ t('goals.type') }}</label>
             <select name="type_id" class="form-select">
-                <option value="">— pasirinkti —</option>
+                <option value="">{{ t('goals.choose') }}</option>
+
                 @foreach($types as $type)
+                    @php
+                        $slug = \Illuminate\Support\Str::slug($type->name, '_');
+                        $translationKey = "lookup.goals.type.$slug";
+                    @endphp
                     <option value="{{ $type->id }}" 
                         {{ old('type_id', $goal->type_id ?? '') == $type->id ? 'selected' : '' }}>
-                        {{ $type->name }}
+                        {{ t($translationKey) }}
                     </option>
                 @endforeach
             </select>
@@ -56,13 +66,20 @@
 
         {{-- Prioritetas --}}
         <div class="col-md-2">
-            <label class="form-label fw-semibold">Prioritetas</label>
+            <label class="form-label fw-semibold">{{ t('goals.priority') }}</label>
+
             <select name="priority_id" class="form-select">
-                <option value="">— pasirinkti —</option>
+                <option value="">{{ t('goals.choose') }}</option>
+
                 @foreach($priorities as $priority)
-                    <option value="{{ $priority->id }}" 
+                    @php
+                        $slug = \Illuminate\Support\Str::slug($priority->name, '_'); 
+                        $translationKey = "lookup.goals.priority.$slug";
+                    @endphp
+
+                    <option value="{{ $priority->id }}"
                         {{ old('priority_id', $goal->priority_id ?? '') == $priority->id ? 'selected' : '' }}>
-                        {{ $priority->name }}
+                        {{ t($translationKey) }}
                     </option>
                 @endforeach
             </select>
@@ -70,7 +87,7 @@
 
         {{-- Spalva --}}
         <div class="col-md-3">
-            <label class="form-label fw-semibold">Spalva</label>
+            <label class="form-label fw-semibold">{{ t('goals.color') }}</label>
             <input 
                 type="color" 
                 name="color" 
@@ -80,13 +97,13 @@
         </div>
     </div>
 
-        {{-- 🔸 PAPILDOMI NUSTATYMAI --}}
+        {{-- PAPILDOMI NUSTATYMAI --}}
     <div class="accordion mb-4" id="moreSettingsAccordion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingMore">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseMore" aria-expanded="false" aria-controls="collapseMore">
-                    ⚙️ Papildomi nustatymai
+                    {{ t('goals.additionalSettings') }}
                 </button>
             </h2>
 
@@ -108,7 +125,7 @@
                                     value="1"
                                     {{ old('is_favorite', $goal->is_favorite ?? false) ? 'checked' : '' }}>
                                 <label class="form-check-label fw-semibold">
-                                    ⭐ Mėgstamas
+                                    {{ t('goals.favorite') }}
                                 </label>
                             </div>
                         </div>
@@ -125,7 +142,7 @@
                                     value="1"
                                     {{ old('is_important', $goal->is_important ?? false) ? 'checked' : '' }}>
                                 <label class="form-check-label fw-semibold">
-                                    ❗ Svarbus
+                                    {{ t('goals.important') }}
                                 </label>
                             </div>
                         </div>
@@ -136,14 +153,14 @@
                                 <input class="form-check-input" type="checkbox" name="is_completed"
                                     {{ old('is_completed', $goal->is_completed ?? false) ? 'checked' : '' }}>
                                 <label class="form-check-label fw-semibold">
-                                    ✔️ Baigtas
+                                    {{ t('goals.finished') }}
                                 </label>
                             </div>
                         </div>
 
                         {{-- PROGRESS --}}
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Progresas (%)</label>
+                            <label class="form-label fw-semibold">{{ t('goals.progress') }}</label>
                             <input type="number" min="0" max="100" name="progress" class="form-control"
                                 value="{{ old('progress', $goal->progress ?? 0) }}">
                         </div>
@@ -154,21 +171,21 @@
 
                         {{-- START DATE --}}
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold">Pradžios data</label>
+                            <label class="form-label fw-semibold">{{ t('goals.startDate') }}</label>
                             <input type="date" name="start_date" class="form-control"
                                 value="{{ old('start_date', isset($goal->start_date) ? $goal->start_date->format('Y-m-d') : '') }}">
                         </div>
 
                         {{-- END DATE --}}
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold">Pabaigos data</label>
+                            <label class="form-label fw-semibold">{{ t('goals.endDate') }}</label>
                             <input type="date" name="end_date" class="form-control"
                                 value="{{ old('end_date', isset($goal->end_date) ? $goal->end_date->format('Y-m-d') : '') }}">
                         </div>
 
                         {{-- REMINDER --}}
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold">Priminimo data</label>
+                            <label class="form-label fw-semibold">{{ t('goals.reminderDate') }}</label>
                             <input type="datetime-local" name="reminder_date" class="form-control"
                                 value="{{ old('reminder_date', isset($goal->reminder_date) ? $goal->reminder_date->format('Y-m-d\TH:i') : '') }}">
                         </div>
@@ -179,10 +196,10 @@
 
                         {{-- TAGS --}}
                         <div class="col-md-12">
-                            <label class="form-label fw-semibold">Žymos (atskirk kableliais)</label>
+                            <label class="form-label fw-semibold">{{ t('goals.hashtag') }}</label>
                             <input type="text" name="tags" class="form-control"
                                 value="{{ old('tags', isset($goal->tags) ? implode(',', $goal->tags) : '') }}">
-                            <small class="text-muted">Pvz.: sportas, darbas, sveikata</small>
+                            <small class="text-muted">{{ t('goals.hashtagHelper') }}</small>
                         </div>
 
                     </div>
@@ -194,21 +211,21 @@
 
 
 
-    {{-- 🔸 PAGRINDINIAI LAUKAI --}}
+    {{-- PAGRINDINIAI LAUKAI --}}
     <div class="mb-3">
-        <label class="form-label fw-semibold">Tikslas</label>
+        <label class="form-label fw-semibold">{{ t('goals.goal') }}</label>
         <input type="text" name="title" class="form-control"
-               placeholder="Įvesk savo tikslą..."
+               placeholder="{{ t('goals.addYourGoalHelper') }}"
                value="{{ old('title', $goal->title ?? '') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label fw-semibold">Aprašymas</label>
+        <label class="form-label fw-semibold">{{ t('goals.description') }}</label>
         <textarea name="description" class="form-control" rows="2">{{ old('description', $goal->description ?? '') }}</textarea>
     </div>
 
     <div class="col-md-3">
-        <label class="form-label fw-semibold">Terminas</label>
+        <label class="form-label fw-semibold">{{ t('goals.deadline') }}</label>
         <input 
             type="date" 
             name="deadline" 
@@ -217,9 +234,9 @@
     </div>
 
 
-    {{-- 🔸 MILESTONES & TASKS --}}
+    {{-- MILESTONES & TASKS --}}
     <div class="mt-4">
-        <h5 class="fw-bold text-warning mb-3">Milestones</h5>
+        <h5 class="fw-bold text-warning mb-3">{{ t('goals.milestones') }}</h5>
 
         <div id="milestones-wrapper">
             {{-- Esami milestones, kai redaguojama --}}
@@ -229,7 +246,7 @@
                         <input type="hidden" name="milestones[{{ $loop->index }}][id]" value="{{ $milestone->id }}">
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-semibold">🏁 Milestone</h6>
+                            <h6 class="fw-semibold">{{ t('goals.milestone') }}</h6>
                             <button type="button" class="btn btn-sm btn-outline-danger remove-milestone">✖</button>
                         </div>
 
@@ -238,14 +255,14 @@
                             name="milestones[{{ $loop->index }}][title]" 
                             value="{{ $milestone->title }}" 
                             class="form-control mb-3" 
-                            placeholder="Milestone pavadinimas">
+                            placeholder="{{ t('goals.milestoneName') }}">
 
                         <input 
                             type="date" 
                             name="milestones[{{ $loop->index }}][deadline]" 
                             value="{{ $milestone->deadline?->format('Y-m-d') }}" 
                             class="form-control mb-3"
-                            placeholder="Deadline">
+                            placeholder="{{ t('goals.deadline') }}">
 
                         {{-- TASKS --}}
                         <div class="tasks-wrapper">
@@ -275,24 +292,32 @@
 
                                     <!-- Status -->
                                     <select name="milestones[{{ $loop->parent->index }}][tasks][{{ $loop->index }}][status_id]" 
-                                            class="form-select" style="width:140px;">
-                                        <option value="">— statusas —</option>
-                                        @foreach($taskStatuses as $st)
-                                            <option value="{{ $st->id }}" 
-                                                {{ $task->status_id == $st->id ? 'selected' : '' }}>
-                                                {{ $st->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                        class="form-select" style="width:140px;">
+                                    <option value="">{{ t('goals.task.status') }}</option>
+                                    @foreach($taskStatuses as $st)
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($st->name, '_');
+                                            $translationKey = "lookup.tasks.status.$slug";
+                                        @endphp
+                                        <option value="{{ $st->id }}" 
+                                            {{ $task->status_id == $st->id ? 'selected' : '' }}>
+                                            {{ t($translationKey) }}
+                                        </option>
+                                    @endforeach
+                                </select>
 
                                     <!-- Type -->
                                     <select name="milestones[{{ $loop->parent->index }}][tasks][{{ $loop->index }}][type_id]" 
                                             class="form-select" style="width:140px;">
-                                        <option value="">— tipas —</option>
+                                        <option value="">{{ t('goals.task.type') }}</option>
                                         @foreach($taskTypes as $tp)
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($tp->name, '_');
+                                            $translationKey = "lookup.tasks.type.$slug";
+                                        @endphp
                                             <option value="{{ $tp->id }}" 
                                                 {{ $task->type_id == $tp->id ? 'selected' : '' }}>
-                                                {{ $tp->name }}
+                                                {{ t($translationKey) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -300,11 +325,15 @@
                                     <!-- Priority -->
                                     <select name="milestones[{{ $loop->parent->index }}][tasks][{{ $loop->index }}][priority_id]" 
                                             class="form-select" style="width:140px;">
-                                        <option value="">— prioritetas —</option>
+                                        <option value="">{{ t('goals.task.priority') }}</option>
                                         @foreach($taskPriorities as $pr)
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($pr->name, '_');
+                                            $translationKey = "lookup.tasks.priority.$slug";
+                                        @endphp
                                             <option value="{{ $pr->id }}" 
                                                 {{ $task->priority_id == $pr->id ? 'selected' : '' }}>
-                                                {{ $pr->name }}
+                                                {{ t($translationKey) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -314,25 +343,25 @@
                             @endforeach
                         </div>
 
-                        <button type="button" class="btn btn-sm btn-outline-warning add-task mt-2">+ Pridėti užduotį</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning add-task mt-2">+ {{ t('button.task.add_new_task') }}</button>
                     </div>
                 @endforeach
             @endif
         </div>
 
         <button type="button" class="btn btn-outline-warning border-dashed px-4 py-2 mt-3" id="add-milestone">
-            + Pridėti naują milestone
+            + {{ t('button.milestone.add_new_milestone') }}
         </button>
     </div>
 
 
     {{-- 🔸 MYGTUKAI --}}
     <div class="mt-4 text-end">
-        <a href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}" 
-           class="btn btn-outline-secondary me-2">Atšaukti</a>
         <button type="submit" class="btn btn-warning text-white fw-semibold px-4">
-            {{ isset($goal) ? 'Atnaujinti' : 'Išsaugoti' }}
+            {{ isset($goal) ? t('button.update') : t('button.save') }}
         </button>
+        <a href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}" 
+           class="btn btn-outline-secondary me-2">{{ t('button.cancel') }}</a>
     </div>
 </form>
 
@@ -341,7 +370,7 @@
 <template id="milestone-template">
     <div class="milestone-block border rounded p-3 mt-3 bg-light" data-index="__MILESTONE_INDEX__">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-semibold">🏁 Naujas milestone</h6>
+            <h6 class="fw-semibold">{{ t('goals.newMilestone') }}</h6>
             <button type="button" class="btn btn-sm btn-outline-danger remove-milestone">✖</button>
         </div>
 
@@ -349,7 +378,7 @@
             type="text" 
             name="milestones[__MILESTONE_INDEX__][title]" 
             class="form-control mb-3" 
-            placeholder="Milestone pavadinimas">
+            placeholder="{{ t('goals.milestoneName') }}">
 
         <input 
             type="date"
@@ -360,7 +389,7 @@
         <div class="tasks-wrapper"></div>
 
         <button type="button" class="btn btn-sm btn-outline-warning add-task mt-2">
-            + Pridėti užduotį
+            + {{ t('button.task.add_new_task') }}
         </button>
     </div>
 </template>
@@ -371,7 +400,7 @@
             type="text" 
             name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][title]" 
             class="form-control" 
-            placeholder="Task pavadinimas">
+            placeholder="{{ t('goals.taskName') }}">
 
         <input 
             type="number" 
@@ -382,24 +411,37 @@
 
         <select name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][status_id]" 
                 class="form-select" style="width:140px;">
-            <option value="">— statusas —</option>
+            <option value="">{{ t('goals.task.status') }}</option>
             @foreach($taskStatuses as $st)
-                <option value="{{ $st->id }}">{{ $st->name }}</option>
+            @php
+                $slug = \Illuminate\Support\Str::slug($st->name, '_');
+                $translationKey = "lookup.tasks.status.$slug";
+            @endphp
+                <option value="{{ $st->id }}">{{ t($translationKey) }}</option>
             @endforeach
         </select>
 
         <select name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][type_id]" 
                 class="form-select" style="width:140px;">
+            <option value="">{{ t('goals.task.type') }}</option>
             @foreach($taskTypes as $tp)
-                <option value="{{ $tp->id }}">{{ $tp->name }}</option>
+            @php
+                $slug = \Illuminate\Support\Str::slug($tp->name, '_');
+                $translationKey = "lookup.tasks.type.$slug";
+            @endphp
+                <option value="{{ $tp->id }}">{{ t($translationKey) }}</option>
             @endforeach
         </select>
 
         <select name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][priority_id]" 
                 class="form-select" style="width:140px;">
-            <option value="">— prioritetas —</option>
+            <option value="">{{ t('goals.task.priority') }}</option>
             @foreach($taskPriorities as $pr)
-                <option value="{{ $pr->id }}">{{ $pr->name }}</option>
+            @php
+                $slug = \Illuminate\Support\Str::slug($pr->name, '_');
+                $translationKey = "lookup.tasks.priority.$slug";
+            @endphp
+                <option value="{{ $pr->id }}">{{ t($translationKey) }}</option>
             @endforeach
         </select>
 
@@ -417,7 +459,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let milestoneCount = document.querySelectorAll('.milestone-block').length;
 
-    // 🟢 Pridėti naują milestone
     document.getElementById('add-milestone').addEventListener('click', () => {
         const milestoneHtml = milestoneTemplate.replaceAll('__MILESTONE_INDEX__', milestoneCount);
         const milestoneEl = document.createElement('div');
@@ -428,9 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         milestoneCount++;
     });
 
-    // 🟡 Event delegation
     document.addEventListener('click', (e) => {
-        // ➕ Pridėti užduotį
         if (e.target.classList.contains('add-task')) {
             const milestoneBlock = e.target.closest('.milestone-block');
             const tasksWrapper = milestoneBlock.querySelector('.tasks-wrapper');
@@ -446,12 +485,10 @@ document.addEventListener('DOMContentLoaded', () => {
             tasksWrapper.appendChild(taskEl);
         }
 
-        // ❌ Pašalinti milestone
         if (e.target.classList.contains('remove-milestone')) {
             e.target.closest('.milestone-block').remove();
         }
 
-        // ❌ Pašalinti task
         if (e.target.classList.contains('remove-task')) {
             e.target.closest('.task-block').remove();
         }

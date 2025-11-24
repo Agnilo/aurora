@@ -70,4 +70,18 @@ class Goal extends Model
     {
         return $this->hasMany(Milestone::class);
     }
+
+    public function recalculateProgress()
+    {
+        $totalPoints = $this->milestones->flatMap->tasks->sum('points');
+        $donePoints = $this->milestones->flatMap->tasks->whereNotNull('completed_at')->sum('points');
+
+        $progress = $totalPoints ? round(($donePoints / $totalPoints) * 100) : 0;
+
+        $this->progress = $progress;
+        $this->is_completed = ($progress >= 100);
+        $this->save();
+
+        return $progress;
+    }
 }

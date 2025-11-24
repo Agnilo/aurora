@@ -29,4 +29,16 @@ class Milestone extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function recalculateProgress()
+    {
+        $total = $this->tasks()->count();
+        $done = $this->tasks()->whereNotNull('completed_at')->count();
+
+        $progress = $total ? round(($done / $total) * 100) : 0;
+
+        $this->progress = $progress;
+
+        return $progress;
+    }
 }

@@ -1,0 +1,256 @@
+/* ================================
+   AURORA NAVBAR
+================================ */
+.aurora-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #f3e9d4;
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.aurora-logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffb300;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.aurora-nav a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.25s ease;
+}
+.aurora-nav a:hover { color: #e89b00; }
+.aurora-nav a.active {
+    color: #ffb300;
+    font-weight: 700;
+    border-bottom: 2px solid #ffb300;
+    padding-bottom: 2px;
+}
+
+.aurora-lang-switch a {
+    color: #777;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.aurora-lang-switch a.active {
+    font-weight: 700;
+    color: #ffb300;
+}
+
+.aurora-user-btn {
+    background: #fff;
+    border: 1px solid #f0e4cc;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+}
+.aurora-user-btn:hover {
+    background: #fff7e0;
+    border-color: #ffcc8a;
+}
+
+/* ============================================================
+   PROFILE NEW (UntitledUI hero)
+============================================================ */
+.profile-page {
+    
+}
+
+/* HERO */
+.profile-hero {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.1) 60%,
+        rgba(255,255,255,0.2) 100%
+    );
+}
+
+/* HERO CONTENT */
+.profile-hero-content {
+    position: absolute;
+    bottom: -80px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+/* BIG AVATAR */
+.profile-hero-avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 6px solid white;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* HERO TEXT */
+.profile-hero-text h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.profile-hero-text .handle {
+    color: #666;
+    font-size: 14px;
+}
+
+/* TABS */
+.profile-tabs {
+    padding-top: 80px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.profile-tab {
+    padding: 12px 0;
+    font-weight: 600;
+    color: #666;
+    text-decoration: none;
+}
+
+.profile-tab.active {
+    color: #000;
+    border-bottom: 2px solid #4A44FF;
+}
+
+/* ============================================
+   MAIN LAYOUT – 2 columns
+============================================ */
+.profile-container {
+    max-width: 1000px;
+    margin: 20px auto 40px;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+    gap: 32px;
+}
+
+.profile-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+/* ============================================
+   SIDEBAR (Tavo progresas)
+============================================ */
+.stats-card {
+    font-size: 14px;
+}
+
+.stats-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee2c4;
+}
+.stats-row:last-of-type { border-bottom: none; }
+
+.stats-label { color: #7a6c4b; }
+.stats-value {
+    font-weight: 600;
+    color: #3c2f1c;
+}
+
+/* XP BAR */
+.xp-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #f3e7c5;
+    overflow: hidden;
+}
+.xp-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+}
+.xp-bar-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #7a6c4b;
+}
+
+.stats-footer {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f1e4c7;
+    font-size: 12px;
+    color: #86775a;
+}
+
+/* ============================================
+   AVATAR UPLOAD PREVIEW
+============================================ */
+.avatar-preview {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+}
+.avatar-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
+/* ============================================
+   HEADER SMALL AVATAR
+============================================ */
+.header-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 4px rgba(0,0,0,0.15);
+}
+
+.placeholder-avatar {
+    background: #f4d98c;
+    color: #444;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 900px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+}

@@ -10,12 +10,12 @@
         <div class="aurora-nav d-none d-md-flex gap-4">
             <a href="{{ route('dashboard', app()->getLocale()) }}"
                class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                Pagrindinis
+                {{ t('header.main') }}
             </a>
 
             <a href="{{ route('goals.index', app()->getLocale()) }}"
                class="{{ request()->routeIs('goals.*') ? 'active' : '' }}">
-                Tikslai
+                {{ t('header.goals') }}
             </a>
 
             <a href="#" class="">Planavimas</a>
@@ -37,10 +37,29 @@
             {{-- AUTH --}}
             @auth
                 <div class="dropdown">
-                    <button class="aurora-user-btn dropdown-toggle"
+                    <button class="aurora-user-btn dropdown-toggle d-flex align-items-center gap-2"
                         data-bs-toggle="dropdown">
-                        {{ Auth::user()->name }}
-                    </button>
+
+                    {{-- SMALL AVATAR --}}
+                    @php
+                        $details = Auth::user()->details;
+                        $avatar = $details?->avatar 
+                            ? asset('storage/' . $details->avatar) 
+                            : null;
+                    @endphp
+
+                    @if($avatar)
+                        <img src="{{ $avatar }}" class="header-avatar" alt="Avatar">
+                    @else
+                        <div class="header-avatar placeholder-avatar">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                    @endif
+
+                    {{-- NAME --}}
+                    <span>{{ Auth::user()->name }}</span>
+
+                </button>
 
                     <ul class="dropdown-menu dropdown-menu-end">
                         
@@ -58,7 +77,7 @@
                         <li>
                             <a class="dropdown-item" 
                                href="{{ route('profile.edit', app()->getLocale()) }}">
-                                Profilis
+                                {{ t('group.profile.group') }}
                             </a>
                         </li>
 
@@ -67,7 +86,7 @@
                         <li>
                             <form method="POST" action="{{ route('logout', app()->getLocale()) }}">
                                 @csrf
-                                <button class="dropdown-item text-danger">Atsijungti</button>
+                                <button class="dropdown-item text-danger">{{ t('button.disconnect') }}</button>
                             </form>
                         </li>
                     </ul>
@@ -77,7 +96,7 @@
             @guest
                 <a href="{{ route('login', app()->getLocale()) }}" 
                    class="btn btn-sm btn-outline-warning">
-                    Prisijungti
+                    {{ t('button.login') }}
                 </a>
             @endguest
 

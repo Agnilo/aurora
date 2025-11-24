@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskController;
 
 Route::get('{locale}/lang', function ($locale) {
     $available = ['en', 'lt'];
@@ -54,10 +55,28 @@ Route::group([
     Route::get('/goals/category/{category}', [CategoryController::class, 'show'])
         ->name('category.show');
 
+    Route::post('/tasks/{task}/toggle-complete', [TaskController::class, 'toggleComplete'])
+        ->name('tasks.toggle-complete');
+
     Route::middleware('auth')->group(function () {
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::prefix('profile')->as('profile.')->group(function () {
+
+            Route::get('/', [ProfileController::class, 'edit'])
+                ->name('edit');
+            Route::patch('/', [ProfileController::class, 'update'])
+                ->name('update');
+            Route::delete('/', [ProfileController::class, 'destroy'])
+                ->name('destroy');
+            Route::get('/password', [ProfileController::class, 'passwordForm'])
+                ->name('password.form');
+            Route::put('/password', [ProfileController::class, 'updatePassword'])
+                ->name('password.update');
+            Route::get('/avatar', [ProfileController::class, 'avatar'])
+                ->name('avatar');
+            Route::post('/avatar', [ProfileController::class, 'updateAvatar'])
+                ->name('avatar.update');
+
+        });
     });
 
     Route::resource('users', UserController::class);

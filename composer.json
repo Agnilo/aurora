@@ -28,7 +28,8 @@
         },
         "files": [
             "app/Helpers/route_helpers.php",
-            "app/Helpers/translation_helpers.php"
+            "app/Helpers/translation_helpers.php",
+            "app/Helpers/color.php"
         ]
     },
     "autoload-dev": {

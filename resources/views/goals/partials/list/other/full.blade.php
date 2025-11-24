@@ -1,8 +1,8 @@
 @if($otherGoals->isEmpty())
     <div class="alert alert-light border shadow-sm">
-        🎯 Dar neturi tikslų!
+        {{ t('goals.noGoalsYet') }}
         <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}" 
-           class="fw-semibold text-warning">Sukurk pirmąjį</a>.
+           class="fw-semibold text-warning">{{ t('goals.createFirst') }}</a>
     </div>
 @else
 
@@ -23,7 +23,14 @@
 
             {{-- STATUS --}}
             @if($goal->status)
-                <span class="badge bg-warning text-dark ms-2">{{ $goal->status->name }}</span>
+                @php
+                    $slug = \Illuminate\Support\Str::slug($goal->status->name, '_');
+                    $key = "lookup.goals.status.$slug";
+                @endphp
+
+                <span class="badge bg-warning text-dark ms-2">
+                    {{ t($key) }}
+                </span>
             @endif
 
             {{-- PROGRESS --}}
@@ -39,28 +46,49 @@
         <div class="accordion-body bg-white">
 
             {{-- GOAL DETAILS --}}
-            <p class="mb-0 text-muted">{{ $goal->description ?: 'Nėra aprašymo' }}</p>
+            <p class="mb-0 text-muted">{{ $goal->description ?: t('goals.noDescription') }}</p>
 
             <div class="small mt-2">
 
-                <span class="me-3">📅 Terminas:
+                <span class="me-3">{{ t('goals.deadline') }}:
                     <strong>{{ $goal->deadline?->format('Y-m-d') ?? 'Nenurodytas' }}</strong>
                 </span>
 
-                <span class="me-3">📂 Kategorija:
-                    <strong>{{ $goal->category->name ?? 'Nenurodyta' }}</strong>
+                <span class="me-3">{{ t('goals.category') }}:
+                    @if($goal->category)
+                        @php
+                            $slug = \Illuminate\Support\Str::slug($goal->category->name, '_');
+                            $key = "lookup.categories.category.$slug";
+                        @endphp
+
+                        <strong>{{ t($key) }}</strong>
+                    @endif
                 </span>
 
-                <span class="me-3">🏷️ Tipas:
-                    <strong>{{ $goal->type->name ?? '—' }}</strong>
+                <span class="me-3">{{ t('goals.type') }}:
+                    @if($goal->type)
+                        @php
+                            $slug = \Illuminate\Support\Str::slug($goal->type->name, '_');
+                            $key = "lookup.goals.type.$slug";
+                        @endphp
+
+                        <strong>{{ t($key) }}</strong>
+                    @endif
                 </span>
 
-                <span class="me-3">📌 Prioritetas:
-                    <strong>{{ $goal->priority->name ?? '—' }}</strong>
+                <span class="me-3">{{ t('goals.priority') }}:
+                    @if($goal->priority)
+                        @php
+                            $slug = \Illuminate\Support\Str::slug($goal->priority->name, '_');
+                            $key = "lookup.goals.priority.$slug";
+                        @endphp
+
+                        <strong>{{ t($key) }}</strong>
+                    @endif
                 </span>
 
                 @if($goal->reminder_date)
-                <span class="me-3">⏰ Priminimas:
+                <span class="me-3">{{ t('goals.reminder') }}:
                     {{ $goal->reminder_date->format('Y-m-d H:i') }}
                 </span>
                 @endif
@@ -88,10 +116,10 @@
                 <div class="border-start border-4 border-warning ps-3 mb-3">
 
                     <h5 class="fw-bold">
-                        🏁 {{ $milestone->title }}
+                        {{ $milestone->title }}
                         @if($milestone->deadline)
                             <span class="badge bg-light text-dark ms-2">
-                                📅 {{ $milestone->deadline->format('Y-m-d') }}
+                                {{ $milestone->deadline->format('Y-m-d') }}
                             </span>
                         @endif
                     </h5>
@@ -115,25 +143,57 @@
 
                                 <div class="text-end">
 
-                                    <span class="badge bg-light text-dark">
-                                        {{ $task->category->name ?? '—' }}
+                                    @php
+                                        $color = $task->category->color ?? '#ccc';
+                                    @endphp
+
+                                    <span class="badge"
+                                        style="
+                                            background: {{ $color }};
+                                            color: white;
+                                            padding:4px 10px;
+                                            border-radius: 12px;
+                                            font-weight: 600;
+                                        ">
+                                        {{ t("lookup.categories.category." . \Illuminate\Support\Str::slug($task->category->name, '_')) }}
                                     </span>
 
                                     @if($task->status)
-                                        <span class="badge bg-warning text-dark">
-                                            {{ $task->status->name }}
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($task->status->name, '_');
+                                            $key = "lookup.tasks.status.$slug";
+                                            $color = $task->status->color ?? '#ccc';
+                                        @endphp
+
+                                        <span class="badge text-dark"
+                                            style="background: {{ $color }}; color: #000;">
+                                            {{ t($key) }}
                                         </span>
                                     @endif
 
                                     @if($task->type)
-                                        <span class="badge bg-info text-dark">
-                                            {{ $task->type->name }}
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($task->type->name, '_');
+                                            $key = "lookup.tasks.type.$slug";
+                                            $color = $task->type->color ?? '#ccc';
+                                        @endphp
+
+                                        <span class="badge text-dark"
+                                            style="background: {{ $color }}; color: #000;">
+                                            {{ t($key) }}
                                         </span>
                                     @endif
 
                                     @if($task->priority)
-                                        <span class="badge bg-danger">
-                                            {{ $task->priority->name }}
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($task->priority->name, '_');
+                                            $key = "lookup.tasks.priority.$slug";
+                                            $color = $task->priority->color ?? '#ccc';
+                                        @endphp
+
+                                        <span class="badge text-dark"
+                                            style="background: {{ $color }}; color: #000;">
+                                            {{ t($key) }}
                                         </span>
                                     @endif
 
@@ -150,14 +210,14 @@
             {{-- CRUD BUTTONS --}}
             <div class="d-flex gap-2 mt-3">
                 <a href="{{ route('goals.edit', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
-                   class="btn btn-sm btn-outline-warning">✏️ Redaguoti</a>
+                   class="btn btn-sm btn-outline-warning">{{ t('button.edit') }}</a>
 
                 <form action="{{ route('goals.destroy', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
                       method="POST"
                       onsubmit="return confirm('Ar tikrai nori ištrinti šį tikslą?');">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-sm btn-danger">🗑️ Ištrinti</button>
+                    <button class="btn btn-sm btn-danger">{{ t('button.delete') }}</button>
                 </form>
             </div>
 
