@@ -6,7 +6,7 @@
 
     <title>Aurora Admin</title>
 
-    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
+    @vite(['resources/css/admin.css'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
 </head>
