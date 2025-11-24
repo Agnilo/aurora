@@ -15,7 +15,7 @@ class DashboardController extends Controller
 
         // Svarbiausias tikslas
         $featuredGoal = $user->goals()
-            ->where('is_featured', true)
+            ->where('is_favorite', true)
             ->first();
 
         // 3 paskutiniai tikslai
