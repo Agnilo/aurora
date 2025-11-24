@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('goals', function (Blueprint $table) {
-            /*$table->string('color')->nullable();*/
+            $table->string('color')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->unsignedTinyInteger('progress')->default(0)->nullable();
