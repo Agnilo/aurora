@@ -14,10 +14,13 @@ class Milestone extends Model
         'title',
         'deadline',
         'order_index',
+        'progress',
+        'is_completed',
     ];
 
     protected $casts = [
         'deadline' => 'date',
+        'is_completed' => 'boolean',
     ];
 
     public function goal()

@@ -337,6 +337,22 @@ document.addEventListener("change", function(e) {
             let percent = Math.round((data.xp / data.xp_next) * 100);
             xpBar.style.width = percent + "%";
         }
+
+        if (data.category_xp) {
+            Object.entries(data.category_xp).forEach(([catId, xpData]) => {
+                let tile = document.querySelector(`.category-tile[data-category-id="${catId}"]`);
+                if (!tile) return;
+
+                let bar = tile.querySelector(".category-progress-fill");
+                let score = tile.querySelector(".category-score");
+
+                let percent = Math.round((xpData.xp / xpData.xp_next) * 100);
+
+                if (bar) bar.style.width = percent + "%";
+                if (score) score.innerText = xpData.xp + " t. / " + xpData.xp_next + " t.";
+            });
+        }
+
     })
     .catch(() => {
         checkbox.disabled = false;

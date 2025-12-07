@@ -12,12 +12,19 @@
             $light = lightenColor($color, 35);
             $gradient = "linear-gradient(90deg, $light, $color)";
 
-            $points = 45;
-            $max = 100;
-            $percent = ($points / $max) * 100;
+            $lvl = $categoryLevels[$category->id] ?? null;
+
+            $points = $lvl->xp ?? 0;
+            $max = $lvl->xp_next ?? 100;
+
+            $percent = $max > 0 ? ($points / $max * 100) : 0;
+
         @endphp
 
-        <a href="{{ $targetUrl }}" class="category-tile {{ $isActive ? 'active' : '' }} category-link">
+        <a href="{{ $targetUrl }}" 
+            class="category-tile {{ $isActive ? 'active' : '' }} category-link"
+            data-category-id="{{ $category->id }}">
+            
             <div class="category-tile-inner">
 
                 <div class="category-icon">{!! $category->icon !!}</div>

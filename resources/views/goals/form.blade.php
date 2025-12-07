@@ -15,16 +15,28 @@
         {{-- Sritis --}}
         <div class="col-md-3">
             <label class="form-label fw-semibold">{{ t('goals.category') }}</label>
-            <select name="category_id" class="form-select">
-                <option value="">{{ t('goals.choose') }}</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" 
-                        {{ old('category_id', $goal->category_id ?? '') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
+
+<select name="category_id" class="form-select" required>
+    <option value="" disabled {{ !$goal->category_id ? 'selected' : '' }}>
+        {{ t('goals.choose') }}
+    </option>
+
+    @foreach($categories as $category)
+        <option value="{{ $category->id }}"
+            {{ old('category_id', $goal->category_id) == $category->id ? 'selected' : '' }}>
+            {{ $category->name }}
+        </option>
+    @endforeach
+</select>
+
+
+
+            @error('category_id')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+
         </div>
+
 
         {{-- Statusas --}}
         <div class="col-md-2">

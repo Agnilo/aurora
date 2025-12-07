@@ -114,7 +114,7 @@ class GoalController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'nullable|exists:categories,id',
             'color' => 'nullable|string|max:20',
 
             'deadline' => 'nullable|date',
@@ -225,7 +225,7 @@ class GoalController extends Controller
      */
     public function update(Request $request, $locale, $id)
     {
-        // 1️. VALIDACIJA
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -253,7 +253,7 @@ class GoalController extends Controller
             'milestones.*.id' => 'nullable|exists:milestones,id',
             'milestones.*.title' => 'nullable|string|max:255',
             'milestones.*.deadline' => 'nullable|date',
-
+            
             'milestones.*.tasks' => 'array',
             'milestones.*.tasks.*.id' => 'nullable|exists:tasks,id',
             'milestones.*.tasks.*.title' => 'nullable|string|max:255',
@@ -264,45 +264,33 @@ class GoalController extends Controller
             'milestones.*.tasks.*.priority_id' => 'nullable|exists:task_priorities,id',
         ]);
 
-        // 2️. TAGS FORMATAVIMAS
         if (!empty($validated['tags'])) {
             $validated['tags'] = array_map('trim', explode(',', $validated['tags']));
         }
 
-        // 3️. PAIMAM TIKSLĄ + SENOJI KATEGORIJA
-        $goal = Goal::findOrFail($id);
-        $oldCategory = $goal->category_id;
-
-        // 4️. COMPLETED LOGIKA — LEIDŽIAM EDITINT NET COMPLETED
         if (($validated['progress'] ?? 0) == 100) {
             $validated['is_completed'] = true;
             $validated['end_date'] = $validated['end_date'] ?? Carbon::today();
-        } else {
-            $validated['is_completed'] = false;
         }
 
-        // 5️. UPDATE GOALO
+        $goal = Goal::findOrFail($id);
         $goal->update($validated);
 
-        // 6️. PO UPDATE → TIKRINAM AR PASIKEITĖ KATEGORIJA
-        $newCategory = $goal->category_id;
-        $categoryChanged = ($oldCategory != $newCategory);
-
-        // JEI PASIKEITĖ → PERVEDAM VISIEMS TASKAMS
-        if ($categoryChanged) {
+        if ($goal->wasChanged('category_id')) {
             foreach ($goal->milestones as $milestone) {
                 foreach ($milestone->tasks as $task) {
-                    $task->update(['category_id' => $newCategory]);
+                    $task->update(['category_id' => $goal->category_id]);
                 }
             }
         }
 
-        // 7️. MILESTONE UPDATE
         $existingMilestoneIds = $goal->milestones()->pluck('id')->toArray();
         $submittedMilestoneIds = [];
 
+        // iterate milestones
         foreach ($request->input('milestones', []) as $mData) {
-
+            
+            // jei yra ID – update, jei nėra – create
             $milestone = $goal->milestones()->updateOrCreate(
                 ['id' => $mData['id'] ?? null],
                 [
@@ -313,38 +301,50 @@ class GoalController extends Controller
 
             $submittedMilestoneIds[] = $milestone->id;
 
-            // 8️. TASK UPDATE
+            // TASKS
             $existingTaskIds = $milestone->tasks()->pluck('id')->toArray();
             $submittedTaskIds = [];
 
             foreach ($mData['tasks'] ?? [] as $tData) {
 
-                // TASK DATA
-                $taskPayload = [
-                    'title' => $tData['title'] ?? '',
-                    'points' => $tData['points'] ?? 0,
-                    'status_id' => $tData['status_id'] ?? null,
-                    'type_id' => $tData['type_id'] ?? null,
-                    'priority_id' => $tData['priority_id'] ?? null,
-                    'category_id' => $goal->category_id, // 💛 VISADA NAUJAI
+                // paruošiam bendrus duomenis
+                $taskData = [
+                    'title'      => $tData['title'] ?? '',
+                    'points'     => $tData['points'] ?? 0,
+                    'status_id'  => $tData['status_id'] ?? null,
+                    'type_id'    => $tData['type_id'] ?? null,
+                    'priority_id'=> $tData['priority_id'] ?? null,
                 ];
 
+                // category_id logika
+                if (!empty($tData['id'])) {
+                    // redaguojamas taskas – paimam esamą category
+                    $existingTask = $milestone->tasks()->find($tData['id']);
+                    $taskData['category_id'] = $existingTask?->category_id ?? $goal->category_id;
+                } else {
+                    // naujas task – duodam goal kategoriją
+                    $taskData['category_id'] = $goal->category_id;
+                }
+
+                // dabar jau kuriam / atnaujinam
                 $task = $milestone->tasks()->updateOrCreate(
                     ['id' => $tData['id'] ?? null],
-                    $taskPayload
+                    $taskData
                 );
 
                 $submittedTaskIds[] = $task->id;
 
-                // COMPLETION LOGIKA
                 if (!empty($tData['status_id'])) {
+
                     $status = TaskStatus::find($tData['status_id']);
                     $wasCompletedBefore = (bool) $task->completed_at;
 
-                    if ($status && strtolower($status->name) === 'completed') {
-                        $task->completed_at = now();
-                    } else {
-                        $task->completed_at = null;
+                    if ($status) {
+                        if (strtolower($status->name) === 'completed') {
+                            $task->completed_at = now();
+                        } else {
+                            $task->completed_at = null;
+                        }
                     }
 
                     $task->save();
@@ -357,43 +357,35 @@ class GoalController extends Controller
                 }
             }
 
-            // TRINAM TASKUS KURIŲ NEBĖRA
+
             $tasksToDelete = array_diff($existingTaskIds, $submittedTaskIds);
             if (!empty($tasksToDelete)) {
                 $milestone->tasks()->whereIn('id', $tasksToDelete)->delete();
             }
         }
 
-        // 9️. TRINAM MILESTONES KURIŲ NEBĖRA
+        foreach ($goal->milestones as $m) {
+            app(\App\Http\Controllers\TaskController::class)
+                ->recalculateMilestoneProgress($m);
+        }
+
+        app(\App\Http\Controllers\TaskController::class)
+            ->recalculateGoalProgress($goal);
+
+        \App\Services\GamificationService::recalcGoal($goal);
+
+
         $milestonesToDelete = array_diff($existingMilestoneIds, $submittedMilestoneIds);
         if (!empty($milestonesToDelete)) {
             $goal->milestones()->whereIn('id', $milestonesToDelete)->delete();
         }
 
-        // 🔟 RECALCS
-        foreach ($goal->milestones as $m) {
-            app(TaskController::class)->recalculateMilestoneProgress($m);
-        }
-
-        app(TaskController::class)->recalculateGoalProgress($goal);
-
-        \App\Services\GamificationService::recalcGoal($goal);
-
-        $user = $goal->user;
-        $newCategory = $goal->category_id;
-
-        if ($oldCategory != $newCategory) {
-            \App\Services\PointsService::recalcCategory($user, $oldCategory);
-        }
-
-        \App\Services\PointsService::recalcCategory($user, $newCategory);
+                dd($request->category_id);
 
         return redirect()
             ->route('goals.index', ['locale' => $locale])
             ->with('success', 'Tikslas atnaujintas!');
     }
-
-
 
     /**
      * Remove the specified resource from storage.
