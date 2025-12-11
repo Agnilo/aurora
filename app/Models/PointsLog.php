@@ -14,6 +14,8 @@ class PointsLog extends Model
     protected $fillable = [
         'user_id',
         'task_id',
+        'milestone_id',
+        'goal_id',
         'category_id',
         'points',
         'amount',

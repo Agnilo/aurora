@@ -15,11 +15,13 @@
         <button class="accordion-button collapsed fw-semibold" type="button"
                 data-bs-toggle="collapse" data-bs-target="#collapse-{{ $goal->id }}">
             
+            {{-- ICONS --}}
             @if($goal->is_favorite) ⭐ @endif
             @if($goal->is_important) ❗ @endif
 
             <span class="ms-1">{{ $goal->title }}</span>
 
+            {{-- STATUS --}}
             @if($goal->status)
                 @php
                     $slug = \Illuminate\Support\Str::slug($goal->status->name, '_');
@@ -31,7 +33,8 @@
                 </span>
             @endif
 
-            <span class="badge bg-light text-dark ms-2 goal-progress-badge">
+            {{-- PROGRESS --}}
+            <span class="badge bg-light text-dark ms-2">
                 {{ $goal->progress }}%
             </span>
 
@@ -42,6 +45,7 @@
 
         <div class="accordion-body bg-white">
 
+            {{-- GOAL DETAILS --}}
             <p class="mb-0 text-muted">{{ $goal->description ?: t('goals.noDescription') }}</p>
 
             <div class="small mt-2">
@@ -56,6 +60,7 @@
                             $slug = \Illuminate\Support\Str::slug($goal->category->name, '_');
                             $key = "lookup.categories.category.$slug";
                         @endphp
+
                         <strong>{{ t($key) }}</strong>
                     @endif
                 </span>
@@ -66,6 +71,7 @@
                             $slug = \Illuminate\Support\Str::slug($goal->type->name, '_');
                             $key = "lookup.goals.type.$slug";
                         @endphp
+
                         <strong>{{ t($key) }}</strong>
                     @endif
                 </span>
@@ -76,6 +82,7 @@
                             $slug = \Illuminate\Support\Str::slug($goal->priority->name, '_');
                             $key = "lookup.goals.priority.$slug";
                         @endphp
+
                         <strong>{{ t($key) }}</strong>
                     @endif
                 </span>
@@ -86,12 +93,14 @@
                 </span>
                 @endif
 
+                {{-- COLOR --}}
                 <span class="ms-2"
                       style="display:inline-block;width:14px;height:14px;background:{{ $goal->color }};border-radius:50%;">
                 </span>
 
             </div>
 
+            {{-- TAGS --}}
             @if(!empty($goal->tags))
                 <div class="mt-2">
                     @foreach($goal->tags as $tag)
@@ -115,17 +124,6 @@
                         @endif
                     </h5>
 
-                    <div class="milestone-progress mt-1 mb-2">
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar milestone-progress-bar"
-                                role="progressbar"
-                                style="width: {{ $milestone->progress }}%;"></div>
-                        </div>
-                        <div class="small text-muted milestone-progress-label mt-1">
-                            {{ $milestone->progress }}%
-                        </div>
-                    </div>
-
                     {{-- TASKS --}}
                     @foreach($milestone->tasks as $task)
                         <div class="list-group-item px-2 py-1 mb-1 border rounded">
@@ -133,12 +131,6 @@
                             <div class="d-flex justify-content-between">
 
                                 <div>
-
-                                    <input type="checkbox"
-                                        class="task-done-toggle"
-                                        data-task-id="{{ $task->id }}"
-                                        {{ $task->completed_at ? 'checked' : '' }}>
-
                                     @if($task->is_favorite) ⭐ @endif
                                     @if($task->is_important) ❗ @endif
 
@@ -156,7 +148,13 @@
                                     @endphp
 
                                     <span class="badge"
-                                        style="background: {{ $color }}; color:white; padding:4px 10px; border-radius:12px; font-weight:600;">
+                                        style="
+                                            background: {{ $color }};
+                                            color: white;
+                                            padding:4px 10px;
+                                            border-radius: 12px;
+                                            font-weight: 600;
+                                        ">
                                         {{ t("lookup.categories.category." . \Illuminate\Support\Str::slug($task->category->name, '_')) }}
                                     </span>
 
@@ -166,8 +164,9 @@
                                             $key = "lookup.tasks.status.$slug";
                                             $color = $task->status->color ?? '#ccc';
                                         @endphp
-                                        <span class="badge text-dark task-status-badge"
-                                              style="background: {{ $color }}; color:#000;">
+
+                                        <span class="badge text-dark"
+                                            style="background: {{ $color }}; color: #000;">
                                             {{ t($key) }}
                                         </span>
                                     @endif
@@ -178,8 +177,9 @@
                                             $key = "lookup.tasks.type.$slug";
                                             $color = $task->type->color ?? '#ccc';
                                         @endphp
+
                                         <span class="badge text-dark"
-                                              style="background: {{ $color }}; color:#000;">
+                                            style="background: {{ $color }}; color: #000;">
                                             {{ t($key) }}
                                         </span>
                                     @endif
@@ -190,8 +190,9 @@
                                             $key = "lookup.tasks.priority.$slug";
                                             $color = $task->priority->color ?? '#ccc';
                                         @endphp
+
                                         <span class="badge text-dark"
-                                              style="background: {{ $color }}; color:#000;">
+                                            style="background: {{ $color }}; color: #000;">
                                             {{ t($key) }}
                                         </span>
                                     @endif
@@ -227,5 +228,4 @@
 @endforeach
 
 </div>
-
 @endif

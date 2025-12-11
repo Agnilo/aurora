@@ -27,9 +27,12 @@ use App\Services\GamificationService;
 
 class GoalController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index($locale, Request $request)
     {
-        $categories = Category::all();
+        $categories = \App\Models\Category::all();
 
         $categoryLevels = auth()->user()
             ->categoryLevels()
@@ -52,7 +55,7 @@ class GoalController extends Controller
 
         $allGoals = $goalsQuery->get();
 
-        $favoriteGoals  = $allGoals->where('is_favorite', true);
+        $favoriteGoals = $allGoals->where('is_favorite', true);
         $importantGoals = $allGoals->where('is_important', true);
 
         $otherGoals = $allGoals->filter(function ($goal) {
@@ -80,6 +83,9 @@ class GoalController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create($locale)
     {
         $statuses   = GoalStatus::orderBy('order')->get();
@@ -98,6 +104,9 @@ class GoalController extends Controller
         ));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request, $locale)
     {
         $validated = $request->validate([
@@ -143,7 +152,7 @@ class GoalController extends Controller
 
         if (($validated['progress'] ?? 0) == 100) {
             $validated['is_completed'] = true;
-            $validated['end_date']     = $validated['end_date'] ?? Carbon::today();
+            $validated['end_date'] = $validated['end_date'] ?? Carbon::today();
         }
 
         $validated['user_id'] = auth()->id() ?? 1;
@@ -176,11 +185,17 @@ class GoalController extends Controller
             ->with('success', 'Tikslas sėkmingai sukurtas su milestone ir užduotimis!');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
         //
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit($locale, $id)
     {
         $goal       = Goal::findOrFail($id);
@@ -200,33 +215,43 @@ class GoalController extends Controller
         ));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $locale, $id)
     {
         /* ------------------------------
-         * 0) Load goal + snapshot
-         * ------------------------------ */
+        0) Load goal + old state
+        ------------------------------ */
         $goal = Goal::with('milestones.tasks.priority')->findOrFail($id);
         $user = $goal->user;
 
         $oldCategory = $goal->category_id;
+        $goalWasCompleted = (bool) $goal->is_completed;
 
-        // XP ir kategorijos per task ID (iki pakeitimų)
-        $oldTaskXps        = [];
+        // milestone old completion states
+        $milestoneWasCompletedMap = [];
+        foreach ($goal->milestones as $m) {
+            $milestoneWasCompletedMap[$m->id] = (bool) $m->is_completed;
+        }
+
+        // task old XP and categories
+        $oldTaskXps = [];
         $oldTaskCategories = [];
-
         foreach ($goal->milestones as $m) {
             foreach ($m->tasks as $t) {
-                $oldTaskXps[$t->id]        = PointsService::calculateXp($t);
+                $oldTaskXps[$t->id]       = PointsService::calculateXp($t);
                 $oldTaskCategories[$t->id] = $t->category_id;
             }
         }
 
-        // Taskai, kuriems keitėsi completion (kad vėliau neperrašytume XP antrą kartą)
+        // track which tasks changed completion (complete / uncomplete)
         $completionChanged = [];
 
+
         /* ------------------------------
-         * 1) Validate request
-         * ------------------------------ */
+        1) Validate request
+        ------------------------------ */
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -261,17 +286,18 @@ class GoalController extends Controller
             'milestones.*.tasks.*.priority_id'  => 'nullable|exists:task_priorities,id',
         ]);
 
-        /* ------------------------------
-         * 2) Update main goal fields
-         * ------------------------------ */
-        $goal->update($validated);
 
+        /* ------------------------------
+        2) Update main goal fields
+        ------------------------------ */
+        $goal->update($validated);
         $newCategory     = $goal->category_id;
         $categoryChanged = ($oldCategory != $newCategory);
 
+
         /* ------------------------------
-         * 3) If category changed → update ALL existing task categories
-         * ------------------------------ */
+        3) If category changed → update ALL task categories
+        ------------------------------ */
         if ($categoryChanged) {
             foreach ($goal->milestones as $m) {
                 foreach ($m->tasks as $t) {
@@ -280,9 +306,11 @@ class GoalController extends Controller
             }
         }
 
+
         /* ------------------------------
-         * 4) Update milestones & tasks
-         * ------------------------------ */
+        4) Update milestones & tasks
+            – completion logika tokia pati kaip AJAX
+        ------------------------------ */
         $existingMilestones  = $goal->milestones()->pluck('id')->toArray();
         $submittedMilestones = [];
 
@@ -293,8 +321,6 @@ class GoalController extends Controller
                 [
                     'title'    => $mData['title'] ?? '',
                     'deadline' => $mData['deadline'] ?? null,
-                    'is_completed'=> $milestone->is_completed ?? false,
-                    'progress'    => $milestone->progress ?? 0,
                 ]
             );
 
@@ -305,11 +331,11 @@ class GoalController extends Controller
 
             foreach ($mData['tasks'] ?? [] as $tData) {
 
-                // Būsena prieš update
+                // old state (before update)
                 $oldTask      = !empty($tData['id']) ? Task::find($tData['id']) : null;
                 $oldCompleted = $oldTask && $oldTask->completed_at;
 
-                // Update / create
+                // update/create
                 $task = $milestone->tasks()->updateOrCreate(
                     ['id' => $tData['id'] ?? null],
                     [
@@ -322,7 +348,7 @@ class GoalController extends Controller
                     ]
                 );
 
-                // Nauja completion būsena pagal statusą
+                // new completion status (pagal status_id)
                 $newCompleted = false;
                 if (!empty($tData['status_id'])) {
                     $status = TaskStatus::find($tData['status_id']);
@@ -331,16 +357,18 @@ class GoalController extends Controller
                     }
                 }
 
+                /* --- completion keitimo logika (KAIP AJAX) --- */
+
                 // A) completed → uncompleted
                 if ($oldCompleted && !$newCompleted) {
                     $completionChanged[$task->id] = true;
 
-                    // nuimam XP už taską
                     PointsService::uncomplete($oldTask);
-
-                    // žymim kaip ne-completed
                     $task->completed_at = null;
                     $task->save();
+
+                    // leisk GamificationService sutvarkyti milestone/goal kaip per AJAX
+                    GamificationService::taskUncompleted($task, true, true);
                 }
 
                 // B) uncompleted → completed
@@ -351,84 +379,110 @@ class GoalController extends Controller
                     $task->save();
 
                     PointsService::complete($task);
+                    GamificationService::taskCompleted($task);
                 }
 
-                // C) completed → completed arba uncompleted → uncompleted:
-                //    XP per points/priority keitimą sutvarkysim 6 žingsnyje
+                // C) uncompleted → uncompleted ARBA completed → completed
+                //    XP per points/priority keitimą tvarkysim vėliau (7 žingsnis)
 
                 $submittedTasks[] = $task->id;
             }
 
-            // Ištrinti užduotis, kurių neliko formoje
+            /* --- delete removed tasks (tarsi juos "uncomplete") --- */
             $toDelete = array_diff($existingTasks, $submittedTasks);
 
-            if (!empty($toDelete)) {
-                $tasksToDelete = $milestone->tasks()->whereIn('id', $toDelete)->get();
-
-                foreach ($tasksToDelete as $removed) {
-                    if ($removed->completed_at) {
-                        // nuimam XP už taską
-                        PointsService::uncomplete($removed);
-
-                        // užfiksuojam kaip uncompleted prieš trinant
-                        $removed->completed_at = null;
-                        $removed->save();
-                    }
+            foreach ($milestone->tasks()->whereIn('id', $toDelete)->get() as $removed) {
+                if ($removed->completed_at) {
+                    PointsService::uncomplete($removed);
+                    GamificationService::taskUncompleted($removed, true, true);
                 }
-
-                $milestone->tasks()->whereIn('id', $toDelete)->delete();
             }
+
+            $milestone->tasks()->whereIn('id', $toDelete)->delete();
         }
 
+
         /* ------------------------------
-         * 5) Delete removed milestones
-         * ------------------------------ */
+        5) Delete removed milestones
+            – prieš trinant nuimam completed task XP per GamificationService
+        ------------------------------ */
         $toDeleteMilestones = array_diff($existingMilestones, $submittedMilestones);
 
-        if (!empty($toDeleteMilestones)) {
-            $milestonesToDelete = $goal->milestones()->whereIn('id', $toDeleteMilestones)->get();
-
-            foreach ($milestonesToDelete as $removedM) {
-                foreach ($removedM->tasks as $t) {
-                    if ($t->completed_at) {
-                        PointsService::uncomplete($t);
-                        $t->completed_at = null;
-                        $t->save();
-                    }
+        foreach ($goal->milestones()->whereIn('id', $toDeleteMilestones)->get() as $removedM) {
+            foreach ($removedM->tasks as $t) {
+                if ($t->completed_at) {
+                    PointsService::uncomplete($t);
+                    GamificationService::taskUncompleted($t, true, true);
                 }
             }
+        }
 
-            $goal->milestones()->whereIn('id', $toDeleteMilestones)->delete();
+        $goal->milestones()->whereIn('id', $toDeleteMilestones)->delete();
+
+
+        /* ------------------------------
+        6) Perskaičiuojam goal completion (leisim tam pačiam šaltiniui)
+        ------------------------------ */
+        $goal->refresh();
+        // is_completed lauką čia gali palikti GamificationService, bet jeigu turi stulpelį:
+        $goal->is_completed = $goal->milestones()->where('is_completed', false)->count() === 0;
+        $goal->save();
+
+        $newGoalCompleted = $goal->is_completed;
+
+        // GOAL → UNCOMPLETED
+        if ($goalWasCompleted && !$newGoalCompleted) {
+            PointsService::removeGoalBonus($goal);
+
+            // svarbu pažymėti būseną kaip AJAX
+            if (method_exists(GamificationService::class, 'goalUncompleted')) {
+                GamificationService::goalUncompleted($goal);
+            }
+        }
+
+        // GOAL → COMPLETED
+        if (!$goalWasCompleted && $newGoalCompleted) {
+            $xp = GamificationService::calculateGoalXp($goal);
+            PointsService::grantRawXP($user, $goal->category_id, $xp);
+
+            PointsLog::create([
+                'user_id' => $user->id,
+                'goal_id' => $goal->id,
+                'type'    => 'goal_completed',
+                'points'  => $xp,
+                'amount'  => $xp,
+            ]);
         }
 
         /* ------------------------------
-         * 6) XP per-subtask (points/priority keitimas)
-         *    – tik TIEMS taskams, kurių completion NESIKEITĖ
-         * ------------------------------ */
+        7) XP per-subtask (points/priority keitimas)
+            – tik TIEMS taskams, kurių completion NESIKEITĖ
+        ------------------------------ */
         $goal->load('milestones.tasks.priority');
 
         foreach ($goal->milestones as $m) {
             foreach ($m->tasks as $t) {
 
-                // Nauji taskai – neturime seno XP snapshot
+                // jei task naujas – senų xp neturim
                 if (!isset($oldTaskXps[$t->id])) {
                     continue;
                 }
 
-                // Jei completion keitėsi – XP jau buvo pakoreguotas per complete/uncomplete
+                // jei completion keitėsi – XP jau sujudintas per complete/uncomplete
                 if (!empty($completionChanged[$t->id])) {
-                    continue;
-                }
-
-                // Domina tik completed tasks
-                if (!$t->completed_at) {
                     continue;
                 }
 
                 $oldXp = $oldTaskXps[$t->id];
                 $newXp = PointsService::calculateXp($t);
 
+                // jeigu XP realiai nepasikeitė
                 if ($oldXp == $newXp) {
+                    continue;
+                }
+
+                // mus domina tik completed taskai
+                if (!$t->completed_at) {
                     continue;
                 }
 
@@ -440,7 +494,7 @@ class GoalController extends Controller
                 // 2) uždedam naują
                 PointsService::grantRawXP($user, $t->category_id, $newXp);
 
-                // 3) pataisom task_completed log amount
+                // 3) pataisom task_completed log į naują amount
                 $log = PointsLog::where('task_id', $t->id)
                     ->where('type', 'task_completed')
                     ->latest()
@@ -455,25 +509,27 @@ class GoalController extends Controller
             }
         }
 
+
         /* ------------------------------
-         * 7) Jei pasikeitė goal kategorija – per-suskaičiuojam kategorijų XP
-         *    (task XP dalį; milestone/goal bonusus tvarko GamificationService)
-         * ------------------------------ */
+        8) Jeigu pasikeitė goal kategorija – per-suskaičiuojam kategorijų XP
+            (task XP dalį)
+        ------------------------------ */
         if ($categoryChanged) {
             PointsService::recalcCategory($user, $oldCategory);
             PointsService::recalcCategory($user, $newCategory);
         }
 
-        /* ------------------------------
-         * 8) GALUTINIS: milestone/goal completion + bonusai + progress
-         * ------------------------------ */
-        GamificationService::recalcGoalAndMilestones($goal);
+        // Bendra progreso juosta (tas pats kaip AJAX gale)
+        GamificationService::recalcGoalProgress($goal);
 
         return redirect()
             ->route('goals.index', ['locale' => $locale])
             ->with('success', 'Tikslas atnaujintas!');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy($locale, $id)
     {
         $goal = Goal::findOrFail($id);

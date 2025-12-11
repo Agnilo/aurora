@@ -29,7 +29,7 @@ class PointsService
         $xpGain = self::calculateXp($task);
 
         self::applyXp($game, $xpGain);
-        self::applyCategoryXpFromTask($user, $task, $xpGain);
+        self::applyCategoryXpFromTask($user, $task->category_id, $xpGain);
 
         PointsLog::create([
             'user_id' => $user->id,
@@ -59,9 +59,11 @@ class PointsService
 
         $xpLoss = $log->amount;
 
+        // global XP -
         $game->xp = max(0, $game->xp - $xpLoss);
         $game->save();
 
+        // category XP -
         $cat = $user->categoryLevels()
             ->where('category_id', $task->category_id)
             ->first();
@@ -79,8 +81,8 @@ class PointsService
     public static function calculateXp(Task $task)
     {
         $multiplier = match (strtolower($task->priority->name ?? 'low')) {
-            'high', 'aukštas' => 2.0,
-            'medium', 'vidutinis' => 1.5,
+            'high' => 2.0,
+            'medium' => 1.5,
             default => 1.0,
         };
 
@@ -101,11 +103,24 @@ class PointsService
         $game->save();
     }
 
-    private static function applyCategoryXpFromTask($user, Task $task, int $xpGain)
+    private static function addXpToCategory($cat, int $xpGain)
+    {
+        $cat->xp += $xpGain;
+
+        while ($cat->xp >= $cat->xp_next) {
+            $cat->xp -= $cat->xp_next;
+            $cat->level++;
+            $cat->xp_next = intval($cat->xp_next * 1.15);
+        }
+
+        $cat->save();
+    }
+
+    private static function applyCategoryXpFromTask($user, int $categoryId, int $xpGain)
     {
         $cat = $user->categoryLevels()
             ->firstOrCreate(
-                ['category_id' => $task->category_id],
+                ['category_id' => $categoryId],
                 ['level' => 1, 'xp' => 0, 'xp_next' => 100]
             );
 
@@ -123,21 +138,9 @@ class PointsService
         self::addXpToCategory($cat, $xpGain);
     }
 
-    private static function addXpToCategory($cat, int $xpGain)
-    {
-        $cat->xp += $xpGain;
-
-        while ($cat->xp >= $cat->xp_next) {
-            $cat->xp -= $cat->xp_next;
-            $cat->level++;
-            $cat->xp_next = intval($cat->xp_next * 1.15);
-        }
-
-        $cat->save();
-    }
-
     public static function recalcCategory($user, $categoryId)
     {
+        // išvalom tik *_recalc logus šiai kategorijai, istorijos neliečiam
         PointsLog::where('user_id', $user->id)
             ->where('category_id', $categoryId)
             ->whereIn('type', [
@@ -147,6 +150,7 @@ class PointsService
             ])
             ->delete();
 
+        // resetinam category level
         $cat = $user->categoryLevels()
             ->firstOrCreate(
                 ['category_id' => $categoryId],
@@ -158,6 +162,7 @@ class PointsService
         $cat->xp_next = 100;
         $cat->save();
 
+        // TASKAI
         $tasks = Task::where('category_id', $categoryId)
             ->whereNotNull('completed_at')
             ->get();
@@ -177,6 +182,7 @@ class PointsService
             ]);
         }
 
+        // MILESTONE AI
         $milestones = Milestone::whereHas('goal', fn($q) =>
             $q->where('category_id', $categoryId)
         )->get();
@@ -190,6 +196,7 @@ class PointsService
                 PointsLog::create([
                     'user_id' => $user->id,
                     'category_id' => $categoryId,
+                    'milestone_id' => $m->id,
                     'points' => $xp,
                     'amount' => $xp,
                     'type' => 'milestone_completed_recalc',
@@ -197,6 +204,7 @@ class PointsService
             }
         }
 
+        // GOAL AI
         $goals = Goal::where('category_id', $categoryId)->get();
 
         foreach ($goals as $goal) {
@@ -210,6 +218,7 @@ class PointsService
                 PointsLog::create([
                     'user_id' => $user->id,
                     'category_id' => $categoryId,
+                    'goal_id' => $goal->id,
                     'points' => $xp,
                     'amount' => $xp,
                     'type' => 'goal_completed_recalc',
@@ -255,25 +264,46 @@ class PointsService
         $game->xp_next = 100;
         $game->coins = 0;
 
-        $logs = PointsLog::where('user_id', $user->id)
-            ->whereIn('type', [
-                'task_completed_recalc',
-                'milestone_completed_recalc',
-                'goal_completed_recalc'
-            ])
-            ->get();
+        // skaičiuojam iš REALIOS būsenos, ne iš logų
+        foreach ($user->categoryLevels as $cat) {
 
-        foreach ($logs as $log) {
-            $game->xp += $log->amount;
+            $xp = self::sumCategoryRawXP($user, $cat->category_id);
+
+            $game->xp += $xp;
 
             while ($game->xp >= $game->xp_next) {
                 $game->xp -= $game->xp_next;
                 $game->level++;
                 $game->xp_next = intval($game->xp_next * 1.15);
-                $game->coins += 1;
+                $game->coins++;
             }
         }
 
         $game->save();
+    }
+
+    public static function sumCategoryRawXP($user, $categoryId)
+    {
+        // taskų XP
+        $taskXp = Task::where('category_id', $categoryId)
+            ->whereNotNull('completed_at')
+            ->get()
+            ->sum(fn($t) => self::calculateXp($t));
+
+        // milestone XP
+        $milestoneXp = Milestone::whereHas('goal', fn($q) =>
+                $q->where('category_id', $categoryId)
+            )
+            ->get()
+            ->filter(fn($m) => $m->tasks()->whereNull('completed_at')->count() === 0)
+            ->sum(fn($m) => GamificationService::calculateMilestoneXp($m));
+
+        // goal XP
+        $goalXp = Goal::where('category_id', $categoryId)
+            ->get()
+            ->filter(fn($g) => GamificationService::isGoalComplete($g))
+            ->sum(fn($g) => GamificationService::calculateGoalXp($g));
+
+        return $taskXp + $milestoneXp + $goalXp;
     }
 }

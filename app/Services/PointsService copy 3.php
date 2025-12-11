@@ -145,60 +145,12 @@ class PointsService
     {
         $game = $user->gameDetails;
 
-        // Remove XP starting from current xp
-        $remaining = $xp;
-
-        while ($remaining > 0) {
-
-            if ($game->xp >= $remaining) {
-                // XP užtenka dabartiniame lygyje
-                $game->xp -= $remaining;
-                $remaining = 0;
-            } else {
-                // XP neužtenka → einam į žemesnį lygį
-                $remaining -= $game->xp;
-
-                if ($game->level > 1) {
-                    $game->level--;
-                    // Recalculate XP_next backwards
-                    $game->xp_next = intval($game->xp_next / 1.15);
-                    $game->xp = $game->xp_next; // full bar
-                } else {
-                    // jau 1 level → tiesiog išvalom
-                    $game->xp = 0;
-                    $remaining = 0;
-                }
-            }
-        }
-
+        $game->xp = max(0, $game->xp - $xp);
         $game->save();
 
-        // --- CATEGORY XP ---
         $cat = $user->categoryLevels()->where('category_id', $categoryId)->first();
         if ($cat) {
-
-            $remaining = $xp;
-
-            while ($remaining > 0) {
-
-                if ($cat->xp >= $remaining) {
-                    $cat->xp -= $remaining;
-                    $remaining = 0;
-
-                } else {
-                    $remaining -= $cat->xp;
-
-                    if ($cat->level > 1) {
-                        $cat->level--;
-                        $cat->xp_next = intval($cat->xp_next / 1.15);
-                        $cat->xp = $cat->xp_next;
-                    } else {
-                        $cat->xp = 0;
-                        $remaining = 0;
-                    }
-                }
-            }
-
+            $cat->xp = max(0, $cat->xp - $xp);
             $cat->save();
         }
     }
@@ -233,7 +185,7 @@ class PointsService
         $user = $goal->user;
 
         // Recalculate XP for this milestone
-        $xp = GamificationService::calculateMilestoneXp($milestone);
+        $xp = \App\Services\GamificationService::calculateMilestoneXp($milestone);
 
         if ($xp <= 0) return;
 
@@ -251,7 +203,7 @@ class PointsService
         $user = $goal->user;
 
         // Recalculate XP for this goal
-        $xp = GamificationService::calculateGoalXp($goal);
+        $xp = \App\Services\GamificationService::calculateGoalXp($goal);
 
         if ($xp <= 0) return;
 

@@ -21,7 +21,12 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $game = $user->gameDetails;
-        $totalPoints = $user->pointsLog()->sum('points');
+        
+        $totalPoints = $user->pointsLog()
+            ->where(function ($q) {
+                $q->where('type', 'task_completed');
+            })
+            ->sum('amount');
 
         if (!$game) {
             $game = (object) [
@@ -123,7 +128,13 @@ class ProfileController extends Controller
             ];
         }
 
-        $totalPoints = $user->pointsLog()->sum('points');
+        $totalPoints = $user->pointsLog()
+            ->where(function ($q) {
+                $q->where('type', 'task_completed')
+                ->orWhere('type', 'milestone_completed')
+                ->orWhere('type', 'goal_completed');
+            })
+            ->sum('amount');
 
         return view('profile.password', [
             'user' => $user,
@@ -167,7 +178,13 @@ class ProfileController extends Controller
             ];
         }
 
-        $totalPoints = $user->pointsLog()->sum('points');
+        $totalPoints = $user->pointsLog()
+            ->where(function ($q) {
+                $q->where('type', 'task_completed')
+                ->orWhere('type', 'milestone_completed')
+                ->orWhere('type', 'goal_completed');
+            })
+            ->sum('amount');
 
         return view('profile.avatar',[
             'user' => $user,
