@@ -194,7 +194,6 @@ class GoalController extends Controller
                 'milestones.*.tasks.*.status_id'     => 'nullable|exists:task_statuses,id',
                 'milestones.*.tasks.*.type_id'       => 'nullable|exists:task_types,id',
                 'milestones.*.tasks.*.priority_id'   => 'nullable|exists:task_priorities,id',
-                // jei formoje turi atskirą task category:
                 'milestones.*.tasks.*.category_id'   => 'nullable|exists:categories,id',
             ]);
 
@@ -203,7 +202,6 @@ class GoalController extends Controller
             $newCategory = $goal->category_id;
             $categoryChanged = ($oldCategory != $newCategory);
 
-            // Existing milestone ids
             $existingMilestones = $goal->milestones()->pluck('id')->toArray();
             $submittedMilestones = [];
 
@@ -236,7 +234,6 @@ class GoalController extends Controller
                         ]
                     );
 
-                    // completed_at pagal status pavadinimą
                     $newCompleted = false;
                     if (!empty($tData['status_id'])) {
                         $status = TaskStatus::find($tData['status_id']);
@@ -258,7 +255,6 @@ class GoalController extends Controller
                     $submittedTasks[] = $task->id;
                 }
 
-                // Delete removed tasks (ir jų logai)
                 $toDelete = array_diff($existingTasks, $submittedTasks);
                 if (!empty($toDelete)) {
                     $tasksToDelete = $milestone->tasks()->whereIn('id', $toDelete)->get();
@@ -269,7 +265,6 @@ class GoalController extends Controller
                 }
             }
 
-            // Delete removed milestones (ir jų task logai)
             $toDeleteMilestones = array_diff($existingMilestones, $submittedMilestones);
             if (!empty($toDeleteMilestones)) {
                 $milestonesToDelete = $goal->milestones()->whereIn('id', $toDeleteMilestones)->get();
@@ -281,9 +276,7 @@ class GoalController extends Controller
                 $goal->milestones()->whereIn('id', $toDeleteMilestones)->delete();
             }
 
-            // Jei keitėsi goal kategorija ir tavo logika yra "visi tasks turi peršokti į goal cat"
             if ($categoryChanged) {
-                // 1) perrašom visų goal taskų category_id
                 $goal->load('milestones.tasks');
                 foreach ($goal->milestones as $m) {
                     foreach ($m->tasks as $t) {
@@ -292,7 +285,6 @@ class GoalController extends Controller
                     }
                 }
 
-                // 2) perrašom visų susijusių logų category_id
                 $taskIds = $goal->milestones->flatMap->tasks->pluck('id');
 
                 PointsLog::whereIn('task_id', $taskIds)

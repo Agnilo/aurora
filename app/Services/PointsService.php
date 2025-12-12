@@ -8,9 +8,6 @@ use App\Models\User;
 
 class PointsService
 {
-    /* -----------------------------
-     | TASK XP -> LOG
-     * ----------------------------- */
 
     public static function calculateXp(Task $task): int
     {
@@ -23,10 +20,6 @@ class PointsService
         return (int) floor(((float) $task->points) * $mult);
     }
 
-    /**
-     * Užtikrina, kad completed task turi 1 logą su teisingu amount ir category_id.
-     * Jei task ne completed -> nieko nedaro (naudok deleteTaskLog).
-     */
     public static function upsertTaskLog(Task $task): void
     {
         if (is_null($task->completed_at)) {
@@ -66,32 +59,21 @@ class PointsService
             ->delete();
     }
 
-    /* -----------------------------
-     | USER XP = SUM(LOGS)
-     * ----------------------------- */
-
     public static function syncUserGamification(User $user): void
     {
         $user->loadMissing(['gameDetails', 'categoryLevels']);
 
-        // 1) Reset game
         $game = $user->gameDetails()->firstOrCreate([], [
             'level' => 1,
             'xp' => 0,
             'xp_next' => 100,
-            'coins' => 0,
-            'streak_current' => 0,
-            'streak_best' => 0,
-            'last_activity_date' => now(),
         ]);
 
         $game->level = 1;
         $game->xp = 0;
         $game->xp_next = 100;
-        $game->coins = 0;
         $game->save();
 
-        // 2) Reset all categories (paliekam įrašus, tik resetinam)
         foreach ($user->categoryLevels as $cat) {
             $cat->level = 1;
             $cat->xp = 0;
@@ -99,7 +81,6 @@ class PointsService
             $cat->save();
         }
 
-        // 3) Replay logs -> general + category
         $logs = PointsLog::where('user_id', $user->id)
             ->orderBy('id')
             ->get();
@@ -153,4 +134,5 @@ class PointsService
             self::deleteTaskLog($task);
         }
     }
+
 }

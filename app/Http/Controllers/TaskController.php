@@ -22,6 +22,7 @@ class TaskController extends Controller
             $user = $goal->user;
 
             $isCompleted = !is_null($task->completed_at);
+            $wasCompletedBefore = !is_null($task->getOriginal('completed_at'));
 
             if ($isCompleted) {
                 $task->completed_at = null;
@@ -36,10 +37,12 @@ class TaskController extends Controller
 
             $task->save();
 
-            // 🔁 VIENA TIESA
+            if (!$wasCompletedBefore && !is_null($task->completed_at)) {
+                GamificationService::registerStreak($user);
+            }
+
             PointsService::syncTaskCompletion($task);
 
-            // 🎯 milestone + goal
             $goal->refresh();
             $goal->load('milestones.tasks');
             GamificationService::recalcGoalAndMilestones($goal);
@@ -47,7 +50,6 @@ class TaskController extends Controller
             $milestone->refresh();
             $goal->refresh(); 
 
-            // 🧮 XP iš logų
             PointsService::syncUserGamification($user);
 
             $task->refresh();
@@ -88,6 +90,8 @@ class TaskController extends Controller
             $goal = $task->milestone->goal;
             $user = $goal->user;
 
+            $wasCompletedBefore = !is_null($task->getOriginal('completed_at'));
+
             $task->update(request()->validate([
                 'title'       => 'sometimes|string|max:255',
                 'points'      => 'sometimes|numeric|min:1',
@@ -98,11 +102,14 @@ class TaskController extends Controller
             $task->refresh();
             $task->loadMissing('priority');
 
-            // Jei task completed -> logas turi būti atnaujintas (xp + category)
             if (!is_null($task->completed_at)) {
                 PointsService::upsertTaskLog($task);
             } else {
                 PointsService::deleteTaskLog($task);
+            }
+
+            if (!$wasCompletedBefore && !is_null($task->completed_at)) {
+                GamificationService::registerStreak($user);
             }
 
             PointsService::syncTaskCompletion($task);
