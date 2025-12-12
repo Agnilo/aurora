@@ -4,22 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 use App\Models\Category;
-
 use App\Models\Goal;
 use App\Models\GoalType;
 use App\Models\GoalStatus;
 use App\Models\GoalPriority;
-
-use App\Models\Milestone;
-
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\TaskStatus;
 use App\Models\TaskPriority;
-
 use App\Models\PointsLog;
 
 use App\Services\PointsService;
@@ -40,11 +36,10 @@ class GoalController extends Controller
         $activeCategory = null;
 
         $goalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
-            ->where('user_id', Auth::id() ?? 1);
+            ->where('user_id', Auth::id());
 
         if ($request->has('category') && $request->category !== null) {
             $activeCategory = Category::find($request->category);
-
             if ($activeCategory) {
                 $goalsQuery->where('category_id', $activeCategory->id);
             }
@@ -55,28 +50,22 @@ class GoalController extends Controller
         $favoriteGoals  = $allGoals->where('is_favorite', true);
         $importantGoals = $allGoals->where('is_important', true);
 
-        $otherGoals = $allGoals->filter(function ($goal) {
-            return !$goal->is_favorite && !$goal->is_important;
-        });
+        $otherGoals = $allGoals->filter(fn ($goal) => !$goal->is_important);
 
         if ($request->ajax()) {
-            return view('goals.partials.content', [
-                'activeCategory'  => $activeCategory,
-                'goals'           => $allGoals,
-                'favoriteGoals'   => $favoriteGoals,
-                'importantGoals'  => $importantGoals,
-                'otherGoals'      => $otherGoals,
-            ])->render();
+            return view('goals.partials.content', compact(
+                'activeCategory', 'allGoals', 'favoriteGoals', 'importantGoals', 'otherGoals'
+            ))->render();
         }
 
         return view('goals.index', [
-            'categories'      => $categories,
-            'activeCategory'  => $activeCategory,
-            'categoryLevels'  => $categoryLevels,
-            'goals'           => $allGoals,
-            'favoriteGoals'   => $favoriteGoals,
-            'importantGoals'  => $importantGoals,
-            'otherGoals'      => $otherGoals,
+            'categories'     => $categories,
+            'activeCategory' => $activeCategory,
+            'categoryLevels' => $categoryLevels,
+            'goals'          => $allGoals,
+            'favoriteGoals'  => $favoriteGoals,
+            'importantGoals' => $importantGoals,
+            'otherGoals'     => $otherGoals,
         ]);
     }
 
@@ -105,85 +94,53 @@ class GoalController extends Controller
             'description'  => 'nullable|string',
             'category_id'  => 'required|exists:categories,id',
             'color'        => 'nullable|string|max:20',
-
             'deadline'     => 'nullable|date',
             'start_date'   => 'nullable|date',
             'end_date'     => 'nullable|date',
-
-            'progress'     => 'nullable|integer|min:0|max:100',
-            'is_completed' => 'nullable|boolean',
             'is_favorite'  => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
-
             'visibility'   => 'nullable|string|in:private,shared,public',
             'reminder_date'=> 'nullable|date',
             'tags'         => 'nullable|string',
-
             'priority_id'  => 'nullable|exists:goal_priorities,id',
             'status_id'    => 'nullable|exists:goal_statuses,id',
             'type_id'      => 'nullable|exists:goal_types,id',
-
-            'milestones'                => 'array',
-            'milestones.*.id'           => 'nullable|exists:milestones,id',
-            'milestones.*.title'        => 'nullable|string|max:255',
-            'milestones.*.deadline'     => 'nullable|date',
-            
-            'milestones.*.tasks'                => 'array',
-            'milestones.*.tasks.*.id'           => 'nullable|exists:tasks,id',
-            'milestones.*.tasks.*.title'        => 'nullable|string|max:255',
-            'milestones.*.tasks.*.points'       => 'nullable|numeric',
-            'milestones.*.tasks.*.status_id'    => 'nullable|exists:task_statuses,id',
-            'milestones.*.tasks.*.type_id'      => 'nullable|exists:task_types,id',
-            'milestones.*.tasks.*.priority_id'  => 'nullable|exists:task_priorities,id',
+            'milestones'   => 'array',
         ]);
 
         if (!empty($validated['tags'])) {
             $validated['tags'] = array_map('trim', explode(',', $validated['tags']));
         }
 
-        if (($validated['progress'] ?? 0) == 100) {
-            $validated['is_completed'] = true;
-            $validated['end_date']     = $validated['end_date'] ?? Carbon::today();
-        }
-
-        $validated['user_id'] = auth()->id() ?? 1;
+        $validated['user_id'] = Auth::id();
 
         $goal = Goal::create($validated);
 
-        if ($request->has('milestones')) {
-            foreach ($request->milestones as $milestoneData) {
-                $milestone = $goal->milestones()->create([
-                    'title'    => $milestoneData['title'] ?? 'Be pavadinimo',
-                    'deadline' => $milestoneData['deadline'] ?? null,
-                ]);
+        foreach ($request->milestones ?? [] as $milestoneData) {
+            $milestone = $goal->milestones()->create([
+                'title'    => $milestoneData['title'] ?? 'Be pavadinimo',
+                'deadline' => $milestoneData['deadline'] ?? null,
+            ]);
 
-                if (isset($milestoneData['tasks'])) {
-                    foreach ($milestoneData['tasks'] as $taskData) {
-                        $milestone->tasks()->create([
-                            'title'       => $taskData['title'] ?? '',
-                            'points'      => $taskData['points'] ?? 0,
-                            'category_id' => $goal->category_id,
-                            'status_id'   => $taskData['status_id'] ?? null,
-                            'type_id'     => $taskData['type_id'] ?? null,
-                            'priority_id' => $taskData['priority_id'] ?? null,
-                        ]);
-                    }
-                }
+            foreach ($milestoneData['tasks'] ?? [] as $taskData) {
+                $milestone->tasks()->create([
+                    'title'       => $taskData['title'] ?? '',
+                    'points'      => $taskData['points'] ?? 0,
+                    'category_id' => $goal->category_id,
+                    'status_id'   => $taskData['status_id'] ?? null,
+                    'type_id'     => $taskData['type_id'] ?? null,
+                    'priority_id' => $taskData['priority_id'] ?? null,
+                ]);
             }
         }
 
         return redirect()->route('goals.index', ['locale' => $locale])
-            ->with('success', 'Tikslas sėkmingai sukurtas su milestone ir užduotimis!');
-    }
-
-    public function show(string $id)
-    {
-        //
+            ->with('success', 'Tikslas sėkmingai sukurtas!');
     }
 
     public function edit($locale, $id)
     {
-        $goal       = Goal::findOrFail($id);
+        $goal       = Goal::with('milestones.tasks')->findOrFail($id);
         $statuses   = GoalStatus::orderBy('order')->get();
         $priorities = GoalPriority::orderBy('order')->get();
         $types      = GoalType::orderBy('order')->get();
@@ -202,285 +159,183 @@ class GoalController extends Controller
 
     public function update(Request $request, $locale, $id)
     {
-        /* ------------------------------
-         * 0) Load goal + snapshot
-         * ------------------------------ */
-        $goal = Goal::with('milestones.tasks.priority')->findOrFail($id);
-        $user = $goal->user;
+        return DB::transaction(function () use ($request, $locale, $id) {
 
-        $oldCategory = $goal->category_id;
+            $goal = Goal::with('milestones.tasks')->findOrFail($id);
+            $user = $goal->user;
 
-        // XP ir kategorijos per task ID (iki pakeitimų)
-        $oldTaskXps        = [];
-        $oldTaskCategories = [];
+            $oldCategory = $goal->category_id;
 
-        foreach ($goal->milestones as $m) {
-            foreach ($m->tasks as $t) {
-                $oldTaskXps[$t->id]        = PointsService::calculateXp($t);
-                $oldTaskCategories[$t->id] = $t->category_id;
-            }
-        }
+            $validated = $request->validate([
+                'title'       => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'category_id' => 'required|exists:categories,id',
+                'color'       => 'nullable|string|max:20',
+                'deadline'    => 'nullable|date',
+                'start_date'  => 'nullable|date',
+                'end_date'    => 'nullable|date',
+                'is_favorite' => 'nullable|boolean',
+                'is_important'=> 'nullable|boolean',
+                'visibility'  => 'nullable|string|in:private,shared,public',
+                'reminder_date'=> 'nullable|date',
+                'priority_id' => 'nullable|exists:goal_priorities,id',
+                'status_id'   => 'nullable|exists:goal_statuses,id',
+                'type_id'     => 'nullable|exists:goal_types,id',
 
-        // Taskai, kuriems keitėsi completion (kad vėliau neperrašytume XP antrą kartą)
-        $completionChanged = [];
+                'milestones'                => 'array',
+                'milestones.*.id'           => 'nullable|exists:milestones,id',
+                'milestones.*.title'        => 'nullable|string|max:255',
+                'milestones.*.deadline'     => 'nullable|date',
 
-        /* ------------------------------
-         * 1) Validate request
-         * ------------------------------ */
-        $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'color'       => 'nullable|string|max:20',
+                'milestones.*.tasks'                 => 'array',
+                'milestones.*.tasks.*.id'            => 'nullable|exists:tasks,id',
+                'milestones.*.tasks.*.title'         => 'nullable|string|max:255',
+                'milestones.*.tasks.*.points'        => 'nullable|numeric',
+                'milestones.*.tasks.*.status_id'     => 'nullable|exists:task_statuses,id',
+                'milestones.*.tasks.*.type_id'       => 'nullable|exists:task_types,id',
+                'milestones.*.tasks.*.priority_id'   => 'nullable|exists:task_priorities,id',
+                // jei formoje turi atskirą task category:
+                'milestones.*.tasks.*.category_id'   => 'nullable|exists:categories,id',
+            ]);
 
-            'deadline'    => 'nullable|date',
-            'start_date'  => 'nullable|date',
-            'end_date'    => 'nullable|date',
+            $goal->update($validated);
 
-            'is_favorite'  => 'nullable|boolean',
-            'is_important' => 'nullable|boolean',
+            $newCategory = $goal->category_id;
+            $categoryChanged = ($oldCategory != $newCategory);
 
-            'visibility'   => 'nullable|string|in:private,shared,public',
-            'reminder_date'=> 'nullable|date',
+            // Existing milestone ids
+            $existingMilestones = $goal->milestones()->pluck('id')->toArray();
+            $submittedMilestones = [];
 
-            'priority_id'  => 'nullable|exists:goal_priorities,id',
-            'status_id'    => 'nullable|exists:goal_statuses,id',
-            'type_id'      => 'nullable|exists:goal_types,id',
+            foreach (($request->milestones ?? []) as $mData) {
 
-            'milestones'                => 'array',
-            'milestones.*.id'           => 'nullable|exists:milestones,id',
-            'milestones.*.title'        => 'nullable|string|max:255',
-            'milestones.*.deadline'     => 'nullable|date',
-
-            'milestones.*.tasks'                => 'array',
-            'milestones.*.tasks.*.id'           => 'nullable|exists:tasks,id',
-            'milestones.*.tasks.*.title'        => 'nullable|string|max:255',
-            'milestones.*.tasks.*.points'       => 'nullable|numeric',
-            'milestones.*.tasks.*.status_id'    => 'nullable|exists:task_statuses,id',
-            'milestones.*.tasks.*.type_id'      => 'nullable|exists:task_types,id',
-            'milestones.*.tasks.*.priority_id'  => 'nullable|exists:task_priorities,id',
-        ]);
-
-        /* ------------------------------
-         * 2) Update main goal fields
-         * ------------------------------ */
-        $goal->update($validated);
-
-        $newCategory     = $goal->category_id;
-        $categoryChanged = ($oldCategory != $newCategory);
-
-        /* ------------------------------
-         * 3) If category changed → update ALL existing task categories
-         * ------------------------------ */
-        if ($categoryChanged) {
-            foreach ($goal->milestones as $m) {
-                foreach ($m->tasks as $t) {
-                    $t->update(['category_id' => $newCategory]);
-                }
-            }
-        }
-
-        /* ------------------------------
-         * 4) Update milestones & tasks
-         * ------------------------------ */
-        $existingMilestones  = $goal->milestones()->pluck('id')->toArray();
-        $submittedMilestones = [];
-
-        foreach ($request->milestones ?? [] as $mData) {
-
-            $milestone = $goal->milestones()->updateOrCreate(
-                ['id' => $mData['id'] ?? null],
-                [
-                    'title'    => $mData['title'] ?? '',
-                    'deadline' => $mData['deadline'] ?? null,
-                    'is_completed'=> $milestone->is_completed ?? false,
-                    'progress'    => $milestone->progress ?? 0,
-                ]
-            );
-
-            $submittedMilestones[] = $milestone->id;
-
-            $existingTasks  = $milestone->tasks()->pluck('id')->toArray();
-            $submittedTasks = [];
-
-            foreach ($mData['tasks'] ?? [] as $tData) {
-
-                // Būsena prieš update
-                $oldTask      = !empty($tData['id']) ? Task::find($tData['id']) : null;
-                $oldCompleted = $oldTask && $oldTask->completed_at;
-
-                // Update / create
-                $task = $milestone->tasks()->updateOrCreate(
-                    ['id' => $tData['id'] ?? null],
+                $milestone = $goal->milestones()->updateOrCreate(
+                    ['id' => $mData['id'] ?? null],
                     [
-                        'title'       => $tData['title'] ?? '',
-                        'points'      => $tData['points'] ?? 0,
-                        'status_id'   => $tData['status_id'] ?? null,
-                        'type_id'     => $tData['type_id'] ?? null,
-                        'priority_id' => $tData['priority_id'] ?? null,
-                        'category_id' => $goal->category_id,
+                        'title'    => $mData['title'] ?? '',
+                        'deadline' => $mData['deadline'] ?? null,
                     ]
                 );
 
-                // Nauja completion būsena pagal statusą
-                $newCompleted = false;
-                if (!empty($tData['status_id'])) {
-                    $status = TaskStatus::find($tData['status_id']);
-                    if ($status && strtolower($status->name) === 'completed') {
-                        $newCompleted = true;
+                $submittedMilestones[] = $milestone->id;
+
+                $existingTasks = $milestone->tasks()->pluck('id')->toArray();
+                $submittedTasks = [];
+
+                foreach (($mData['tasks'] ?? []) as $tData) {
+
+                    $task = $milestone->tasks()->updateOrCreate(
+                        ['id' => $tData['id'] ?? null],
+                        [
+                            'title'       => $tData['title'] ?? '',
+                            'points'      => $tData['points'] ?? 0,
+                            'status_id'   => $tData['status_id'] ?? null,
+                            'type_id'     => $tData['type_id'] ?? null,
+                            'priority_id' => $tData['priority_id'] ?? null,
+                            'category_id' => $tData['category_id'] ?? $goal->category_id,
+                        ]
+                    );
+
+                    // completed_at pagal status pavadinimą
+                    $newCompleted = false;
+                    if (!empty($tData['status_id'])) {
+                        $status = TaskStatus::find($tData['status_id']);
+                        $newCompleted = $status && strtolower($status->name) === 'completed';
                     }
-                }
 
-                // A) completed → uncompleted
-                if ($oldCompleted && !$newCompleted) {
-                    $completionChanged[$task->id] = true;
-
-                    // nuimam XP už taską
-                    PointsService::uncomplete($oldTask);
-
-                    // žymim kaip ne-completed
-                    $task->completed_at = null;
-                    $task->save();
-                }
-
-                // B) uncompleted → completed
-                if (!$oldCompleted && $newCompleted) {
-                    $completionChanged[$task->id] = true;
-
-                    $task->completed_at = now();
+                    $task->completed_at = $newCompleted ? now() : null;
                     $task->save();
 
-                    PointsService::complete($task);
+                    $task->refresh();
+                    $task->loadMissing(['priority', 'status']);
+
+                    if ($task->completed_at) {
+                        PointsService::upsertTaskLog($task);
+                    } else {
+                        PointsService::deleteTaskLog($task);
+                    }
+
+                    $submittedTasks[] = $task->id;
                 }
 
-                // C) completed → completed arba uncompleted → uncompleted:
-                //    XP per points/priority keitimą sutvarkysim 6 žingsnyje
-
-                $submittedTasks[] = $task->id;
+                // Delete removed tasks (ir jų logai)
+                $toDelete = array_diff($existingTasks, $submittedTasks);
+                if (!empty($toDelete)) {
+                    $tasksToDelete = $milestone->tasks()->whereIn('id', $toDelete)->get();
+                    foreach ($tasksToDelete as $t) {
+                        PointsService::deleteTaskLog($t);
+                    }
+                    $milestone->tasks()->whereIn('id', $toDelete)->delete();
+                }
             }
 
-            // Ištrinti užduotis, kurių neliko formoje
-            $toDelete = array_diff($existingTasks, $submittedTasks);
-
-            if (!empty($toDelete)) {
-                $tasksToDelete = $milestone->tasks()->whereIn('id', $toDelete)->get();
-
-                foreach ($tasksToDelete as $removed) {
-                    if ($removed->completed_at) {
-                        // nuimam XP už taską
-                        PointsService::uncomplete($removed);
-
-                        // užfiksuojam kaip uncompleted prieš trinant
-                        $removed->completed_at = null;
-                        $removed->save();
+            // Delete removed milestones (ir jų task logai)
+            $toDeleteMilestones = array_diff($existingMilestones, $submittedMilestones);
+            if (!empty($toDeleteMilestones)) {
+                $milestonesToDelete = $goal->milestones()->whereIn('id', $toDeleteMilestones)->get();
+                foreach ($milestonesToDelete as $m) {
+                    foreach ($m->tasks as $t) {
+                        PointsService::deleteTaskLog($t);
                     }
                 }
-
-                $milestone->tasks()->whereIn('id', $toDelete)->delete();
+                $goal->milestones()->whereIn('id', $toDeleteMilestones)->delete();
             }
-        }
 
-        /* ------------------------------
-         * 5) Delete removed milestones
-         * ------------------------------ */
-        $toDeleteMilestones = array_diff($existingMilestones, $submittedMilestones);
-
-        if (!empty($toDeleteMilestones)) {
-            $milestonesToDelete = $goal->milestones()->whereIn('id', $toDeleteMilestones)->get();
-
-            foreach ($milestonesToDelete as $removedM) {
-                foreach ($removedM->tasks as $t) {
-                    if ($t->completed_at) {
-                        PointsService::uncomplete($t);
-                        $t->completed_at = null;
+            // Jei keitėsi goal kategorija ir tavo logika yra "visi tasks turi peršokti į goal cat"
+            if ($categoryChanged) {
+                // 1) perrašom visų goal taskų category_id
+                $goal->load('milestones.tasks');
+                foreach ($goal->milestones as $m) {
+                    foreach ($m->tasks as $t) {
+                        $t->category_id = $goal->category_id;
                         $t->save();
                     }
                 }
+
+                // 2) perrašom visų susijusių logų category_id
+                $taskIds = $goal->milestones->flatMap->tasks->pluck('id');
+
+                PointsLog::whereIn('task_id', $taskIds)
+                    ->update(['category_id' => $goal->category_id]);
+
+                PointsLog::where('goal_id', $goal->id)
+                    ->orWhereIn('milestone_id', $goal->milestones->pluck('id'))
+                    ->update(['category_id' => $goal->category_id]);
             }
 
-            $goal->milestones()->whereIn('id', $toDeleteMilestones)->delete();
-        }
+            $goal->refresh();
+            $goal->load('milestones.tasks');
 
-        /* ------------------------------
-         * 6) XP per-subtask (points/priority keitimas)
-         *    – tik TIEMS taskams, kurių completion NESIKEITĖ
-         * ------------------------------ */
-        $goal->load('milestones.tasks.priority');
+            GamificationService::recalcGoalAndMilestones($goal);
 
-        foreach ($goal->milestones as $m) {
-            foreach ($m->tasks as $t) {
+            PointsService::syncUserGamification($user);
 
-                // Nauji taskai – neturime seno XP snapshot
-                if (!isset($oldTaskXps[$t->id])) {
-                    continue;
-                }
-
-                // Jei completion keitėsi – XP jau buvo pakoreguotas per complete/uncomplete
-                if (!empty($completionChanged[$t->id])) {
-                    continue;
-                }
-
-                // Domina tik completed tasks
-                if (!$t->completed_at) {
-                    continue;
-                }
-
-                $oldXp = $oldTaskXps[$t->id];
-                $newXp = PointsService::calculateXp($t);
-
-                if ($oldXp == $newXp) {
-                    continue;
-                }
-
-                $oldCatId = $oldTaskCategories[$t->id] ?? $t->category_id;
-
-                // 1) nuimam seną XP
-                PointsService::removeRawXP($user, $oldCatId, $oldXp);
-
-                // 2) uždedam naują
-                PointsService::grantRawXP($user, $t->category_id, $newXp);
-
-                // 3) pataisom task_completed log amount
-                $log = PointsLog::where('task_id', $t->id)
-                    ->where('type', 'task_completed')
-                    ->latest()
-                    ->first();
-
-                if ($log) {
-                    $log->amount      = $newXp;
-                    $log->points      = $newXp;
-                    $log->category_id = $t->category_id;
-                    $log->save();
-                }
-            }
-        }
-
-        /* ------------------------------
-         * 7) Jei pasikeitė goal kategorija – per-suskaičiuojam kategorijų XP
-         *    (task XP dalį; milestone/goal bonusus tvarko GamificationService)
-         * ------------------------------ */
-        if ($categoryChanged) {
-            PointsService::recalcCategory($user, $oldCategory);
-            PointsService::recalcCategory($user, $newCategory);
-        }
-
-        /* ------------------------------
-         * 8) GALUTINIS: milestone/goal completion + bonusai + progress
-         * ------------------------------ */
-        GamificationService::recalcGoalAndMilestones($goal);
-
-        return redirect()
-            ->route('goals.index', ['locale' => $locale])
-            ->with('success', 'Tikslas atnaujintas!');
+            return redirect()
+                ->route('goals.index', ['locale' => $locale])
+                ->with('success', 'Tikslas atnaujintas!');
+        });
     }
 
     public function destroy($locale, $id)
     {
-        $goal = Goal::findOrFail($id);
-        $goal->delete();
 
-        return redirect()
-            ->route('goals.index', ['locale' => $locale])
-            ->with('success', 'Tikslas sėkmingai ištrintas!');
+        return DB::transaction(function () use ($locale, $id) {
+
+            $goal = Goal::with('milestones.tasks')->findOrFail($id);
+            $user = $goal->user;
+
+            PointsLog::where('goal_id', $goal->id)
+                ->orWhereIn('milestone_id', $goal->milestones->pluck('id'))
+                ->orWhereIn('task_id', $goal->milestones->flatMap->tasks->pluck('id'))
+                ->delete();
+
+            $goal->delete();
+
+            PointsService::syncUserGamification($user);
+
+            return redirect()
+                ->route('goals.index', ['locale' => $locale])
+                ->with('success', 'Tikslas sėkmingai ištrintas!');
+        });
     }
 }

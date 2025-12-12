@@ -2,280 +2,133 @@
 
 namespace App\Services;
 
-use App\Models\Task;
-use App\Models\Milestone;
 use App\Models\Goal;
+use App\Models\Milestone;
 use App\Models\PointsLog;
 
 class GamificationService
 {
-    /**
-     * Kai task'as tampa completed/uncompleted per AJAX
-     * – dabar tiesiog permesim į bendrą per-skaičiavimą.
-     */
-    public static function taskCompleted(Task $task)
+    public static function recalcGoalAndMilestones(Goal $goal): void
     {
-        $goal = $task->milestone->goal;
-        $goal->load('milestones.tasks');
+        $goal->loadMissing(['milestones.tasks.priority']);
 
-        self::recalcGoalAndMilestones($goal);
-    }
-
-    public static function taskUncompleted(Task $task, bool $milestoneWasCompleted = false, bool $goalWasCompleted = false)
-    {
-        $goal = $task->milestone->goal;
-        $goal->load('milestones.tasks');
-
-        self::recalcGoalAndMilestones($goal);
-    }
-
-    public static function taskUpdated(Task $task)
-    {
-        $goal = $task->milestone->goal;
-        $goal->load('milestones.tasks');
-
-        self::recalcGoalAndMilestones($goal);
-    }
-
-    public static function recalcGoalAndMilestones(Goal $goal)
-    {
-        // 1) Pirmiausia: perskaičiuojam progress + is_completed flagus
         self::recalcGoalProgress($goal);
 
-        // 2) Atsikeliam šviežiausius duomenis
         $goal->refresh();
-        $goal->load('milestones.tasks');
+        $goal->loadMissing(['milestones.tasks.priority']);
 
-        $user = $goal->user;
+        self::syncMilestoneBonusLogs($goal);
+        self::syncGoalBonusLog($goal);
+    }
 
-        /* ------------------------------------
-        * 3) MILESTONE BONUSŲ SINCHRONIZAVIMAS
-        * ------------------------------------ */
+    public static function recalcGoalProgress(Goal $goal): void
+    {
+        $goal->loadMissing('milestones.tasks');
+
         foreach ($goal->milestones as $milestone) {
-            // saugumo dėlei
-            $milestone->load('tasks');
+            $total = $milestone->tasks->count();
+            $done  = $milestone->tasks->whereNotNull('completed_at')->count();
 
-            $isCompleted = (bool) $milestone->is_completed;
-            $xp          = self::calculateMilestoneXp($milestone);
+            $milestone->progress = $total > 0 ? (int) floor(($done / $total) * 100) : 0;
+            $milestone->is_completed = ($milestone->progress >= 100);
+            $milestone->save();
+        }
 
-            // ar jau turim logą šitam milestone?
+        $mTotal = $goal->milestones->count();
+        $mDone  = $goal->milestones->where('is_completed', true)->count();
+
+        $goal->progress = $mTotal > 0 ? (int) floor(($mDone / $mTotal) * 100) : 0;
+        $goal->is_completed = ($goal->progress >= 100);
+        $goal->save();
+    }
+
+    private static function syncMilestoneBonusLogs(Goal $goal): void
+    {
+        foreach ($goal->milestones as $milestone) {
+            $milestone->loadMissing('tasks.priority');
+
+            $shouldHave = (bool) $milestone->is_completed;
+            $xp = self::calculateMilestoneXp($milestone);
+
             $log = PointsLog::where('milestone_id', $milestone->id)
                 ->where('type', 'milestone_completed')
                 ->first();
 
-            if ($isCompleted) {
-                if (!$log && $xp > 0) {
-                    // nebuvo log'o → uždedam visą bonusą
-                    PointsService::grantRawXP($user, $goal->category_id, $xp);
-
+            if ($shouldHave && $xp > 0) {
+                if (!$log) {
                     PointsLog::create([
-                        'user_id'      => $user->id,
+                        'user_id'      => $goal->user_id,
                         'category_id'  => $goal->category_id,
                         'milestone_id' => $milestone->id,
                         'points'       => $xp,
                         'amount'       => $xp,
                         'type'         => 'milestone_completed',
                     ]);
-                } elseif ($log && $log->amount != $xp) {
-                    // buvo log'as, bet XP pasikeitė → koreguojam skirtumą
-                    $diff = $xp - $log->amount;
-
-                    if ($diff > 0) {
-                        PointsService::grantRawXP($user, $goal->category_id, $diff);
-                    } elseif ($diff < 0) {
-                        PointsService::removeRawXP($user, $goal->category_id, -$diff);
-                    }
-
-                    $log->amount = $xp;
+                } else {
+                    $log->category_id = $goal->category_id;
                     $log->points = $xp;
+                    $log->amount = $xp;
                     $log->save();
                 }
             } else {
-                // milestone nebe completed → jei turėjom bonusą, nuimam
-                if ($log) {
-                    PointsService::removeRawXP($user, $goal->category_id, $log->amount);
-                    $log->delete();
-                }
+                if ($log) $log->delete();
             }
         }
+    }
 
-        /* --------------------------------
-        * 4) GOAL BONUSO SINCHRONIZAVIMAS
-        * -------------------------------- */
-        $goal->refresh(); // kad turėtume atnaujintą is_completed
-        $isGoalCompleted = (bool) $goal->is_completed;
-        $goalXp          = self::calculateGoalXp($goal);
+    private static function syncGoalBonusLog(Goal $goal): void
+    {
+        $shouldHave = (bool) $goal->is_completed;
+        $xp = self::calculateGoalXp($goal);
 
-        $goalLog = PointsLog::where('goal_id', $goal->id)
+        $log = PointsLog::where('goal_id', $goal->id)
             ->where('type', 'goal_completed')
             ->first();
 
-        if ($isGoalCompleted) {
-            if (!$goalLog && $goalXp > 0) {
-                PointsService::grantRawXP($user, $goal->category_id, $goalXp);
-
+        if ($shouldHave && $xp > 0) {
+            if (!$log) {
                 PointsLog::create([
-                    'user_id'     => $user->id,
+                    'user_id'     => $goal->user_id,
                     'category_id' => $goal->category_id,
                     'goal_id'     => $goal->id,
-                    'points'      => $goalXp,
-                    'amount'      => $goalXp,
+                    'points'      => $xp,
+                    'amount'      => $xp,
                     'type'        => 'goal_completed',
                 ]);
-            } elseif ($goalLog && $goalLog->amount != $goalXp) {
-                $diff = $goalXp - $goalLog->amount;
-
-                if ($diff > 0) {
-                    PointsService::grantRawXP($user, $goal->category_id, $diff);
-                } elseif ($diff < 0) {
-                    PointsService::removeRawXP($user, $goal->category_id, -$diff);
-                }
-
-                $goalLog->amount = $goalXp;
-                $goalLog->points = $goalXp;
-                $goalLog->save();
+            } else {
+                $log->category_id = $goal->category_id;
+                $log->points = $xp;
+                $log->amount = $xp;
+                $log->save();
             }
         } else {
-            if ($goalLog) {
-                PointsService::removeRawXP($user, $goal->category_id, $goalLog->amount);
-                $goalLog->delete();
-            }
+            if ($log) $log->delete();
         }
     }
 
-    /* -----------------------------
-       BONUS XP APPLY / REMOVE
-       ----------------------------- */
-
-    public static function milestoneCompleted(Milestone $milestone)
+    public static function calculateMilestoneXp(Milestone $milestone): int
     {
-        $goal = $milestone->goal;
-        $user = $goal->user;
+        $milestone->loadMissing('tasks.priority');
 
-        $xp = self::calculateMilestoneXp($milestone);
+        if ($milestone->tasks->count() === 0) return 0;
 
-        PointsService::grantRawXP($user, $goal->category_id, $xp);
+        $avg = $milestone->tasks
+            ->map(fn($t) => PointsService::calculateXp($t))
+            ->avg();
 
-        PointsLog::create([
-            'user_id'      => $user->id,
-            'category_id'  => $goal->category_id,
-            'milestone_id' => $milestone->id,
-            'points'       => $xp,
-            'amount'       => $xp,
-            'type'         => 'milestone_completed',
-        ]);
+        return (int) floor(((float) $avg) * 1.2);
     }
 
-    public static function milestoneUncompleted(Milestone $milestone)
+    public static function calculateGoalXp(Goal $goal): int
     {
-        $goal = $milestone->goal;
-        $user = $goal->user;
+        $goal->loadMissing('milestones.tasks.priority');
 
-        $xp = self::calculateMilestoneXp($milestone);
+        if ($goal->milestones->count() === 0) return 0;
 
-        PointsService::removeRawXP($user, $goal->category_id, $xp);
+        $avg = $goal->milestones
+            ->map(fn($m) => self::calculateMilestoneXp($m))
+            ->avg();
 
-        PointsLog::where('milestone_id', $milestone->id)
-            ->where('type', 'milestone_completed')
-            ->delete();
-    }
-
-    public static function goalCompleted(Goal $goal)
-    {
-        $user = $goal->user;
-
-        $xp = self::calculateGoalXp($goal);
-
-        PointsService::grantRawXP($user, $goal->category_id, $xp);
-
-        PointsLog::create([
-            'user_id'     => $user->id,
-            'category_id' => $goal->category_id,
-            'goal_id'     => $goal->id,
-            'points'      => $xp,
-            'amount'      => $xp,
-            'type'        => 'goal_completed',
-        ]);
-    }
-
-    public static function goalUncompleted(Goal $goal)
-    {
-        $user = $goal->user;
-
-        $xp = self::calculateGoalXp($goal);
-
-        PointsService::removeRawXP($user, $goal->category_id, $xp);
-
-        PointsLog::where('goal_id', $goal->id)
-            ->where('type', 'goal_completed')
-            ->delete();
-    }
-
-    /* -----------------------------
-       XP FORMULOS
-       ----------------------------- */
-
-    public static function calculateMilestoneXp($milestone)
-    {
-        $taskXps = $milestone->tasks->map(fn($task) =>
-            PointsService::calculateXp($task)
-        );
-
-        if ($taskXps->count() === 0) return 0;
-
-        return intval($taskXps->avg() * 1.2);
-    }
-
-    public static function calculateGoalXp($goal)
-    {
-        $milestoneXps = $goal->milestones->map(fn($m) =>
-            self::calculateMilestoneXp($m)
-        );
-
-        if ($milestoneXps->count() === 0) return 0;
-
-        return intval($milestoneXps->avg() * 1.3);
-    }
-
-    /* -----------------------------
-       STATE CHECKS (paliekam jei kur nors naudoji)
-       ----------------------------- */
-
-    private static function isMilestoneComplete(Milestone $milestone)
-    {
-        return $milestone->tasks()->whereNull('completed_at')->count() === 0;
-    }
-
-    public static function isGoalComplete(Goal $goal)
-    {
-        return $goal->milestones()->where('is_completed', false)->count() === 0;
-    }
-
-    /* -----------------------------
-       PROGRESS RE-CALC
-       ----------------------------- */
-
-    public static function recalcGoalProgress(Goal $goal)
-    {
-        $goal->load('milestones.tasks');
-
-        // Milestone progress + is_completed
-        foreach ($goal->milestones as $milestone) {
-            $totalTasks = $milestone->tasks->count();
-            $completed  = $milestone->tasks->whereNotNull('completed_at')->count();
-            $milestone->progress = $totalTasks > 0 ? intval(($completed / $totalTasks) * 100) : 0;
-            $milestone->is_completed = ($milestone->progress === 100) ? 1 : 0;
-            $milestone->save();
-        }
-
-        // Goal progress + is_completed
-        $milesTotal = $goal->milestones->count();
-        $milesDone  = $goal->milestones->where('is_completed', true)->count();
-
-        $goal->progress = $milesTotal > 0 ? intval(($milesDone / $milesTotal) * 100) : 0;
-        $goal->is_completed  = ($goal->progress === 100) ? 1 : 0;
-        $goal->save();
-
-
+        return (int) floor(((float) $avg) * 1.3);
     }
 }

@@ -17,13 +17,13 @@
             <label class="form-label fw-semibold">{{ t('goals.category') }}</label>
 
 <select name="category_id" class="form-select" required>
-    <option value="" disabled {{ !$goal->category_id ? 'selected' : '' }}>
+    <option value="" disabled {{ old('category_id', $goal->category_id ?? null) ? '' : 'selected' }}>
         {{ t('goals.choose') }}
     </option>
 
     @foreach($categories as $category)
         <option value="{{ $category->id }}"
-            {{ old('category_id', $goal->category_id) == $category->id ? 'selected' : '' }}>
+            {{ old('category_id', $goal->category_id ?? null) == $category->id ? 'selected' : '' }}>
             {{ $category->name }}
         </option>
     @endforeach

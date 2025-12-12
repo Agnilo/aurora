@@ -220,14 +220,6 @@ class GoalController extends Controller
      */
     public function update(Request $request, $locale, $id)
     {
-
-        $goalWasCompleted = $goal->is_completed;
-        $milestoneWasCompletedMap = [];
-
-        foreach ($goal->milestones as $m) {
-            $milestoneWasCompletedMap[$m->id] = $m->is_completed;
-        }
-
         /* ------------------------------
            1) VALIDACIJA
         ------------------------------ */

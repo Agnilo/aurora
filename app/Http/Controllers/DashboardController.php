@@ -24,7 +24,12 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        return view('dashboard', compact('featuredGoal', 'recentGoals'));
+        return view('dashboard.index', [
+            'user'           => auth()->user(),
+            'categoryLevels' => auth()->user()->categoryLevels()->with('category')->get(),
+            'featuredGoal'   => $featuredGoal,
+            'recentGoals'    => $recentGoals,
+        ]);
     }
 
     /**
@@ -73,5 +78,10 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getXpPercentAttribute()
+    {
+        return min(100, ($this->xp / max(1, $this->xp_next)) * 100);
     }
 }

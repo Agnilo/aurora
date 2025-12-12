@@ -15,14 +15,24 @@
                 </p>
             </div>
 
-            <div class="text-end text-white">
-                <div class="fw-bold fs-5">25,00</div>
-                <div class="small">95 taškai / 100 taškų</div>
+            @if($user->gameDetails)
+                <div class="text-end text-white">
+                    <div class="fw-bold fs-5">
+                        Lvl {{ $user->gameDetails->level }}
+                    </div>
 
-                <div class="progress mt-2" style="height: 6px; width: 150px;">
-                    <div class="progress-bar bg-light" style="width: 80%;"></div>
+                    <div class="small">
+                        {{ $user->gameDetails->xp }} / {{ $user->gameDetails->xp_next }} XP
+                    </div>
+
+                    <div class="progress mt-2" style="height: 6px; width: 150px;">
+                        <div
+                            class="progress-bar bg-light"
+                            style="width: {{ ($user->gameDetails->xp / max(1, $user->gameDetails->xp_next)) * 100 }}%;">
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
@@ -34,16 +44,24 @@
 
 
     {{-- ============================
-         GYVENIMO ASPEKTAI
+         GYVENIMO ASPEKTAI (REAL)
     ============================= --}}
     <h5 class="fw-bold mb-3">Gyvenimo aspektai</h5>
 
     <div class="d-flex flex-wrap gap-3 mb-5">
-        @for($i = 1; $i <= 8; $i++)
-            <div class="aspect-icon rounded-circle d-flex align-items-center justify-content-center">
-                <span class="text-muted small">?</span>
+        @foreach($categoryLevels as $level)
+            <div
+                class="aspect-icon rounded-circle d-flex flex-column align-items-center justify-content-center text-center"
+                title="{{ $level->category->name }}"
+            >
+                <div class="fw-semibold small">
+                    {{ $level->category->name }}
+                </div>
+                <div class="text-muted small">
+                    {{ $level->xp }} XP
+                </div>
             </div>
-        @endfor
+        @endforeach
     </div>
 
 
@@ -63,7 +81,7 @@
         </div>
 
         {{-- ============================
-             UŽDUOTYS (placeholder list)
+             UŽDUOTYS (placeholder)
         ============================= --}}
         <div class="col-md-4">
             <div class="dashboard-card h-100">
@@ -122,13 +140,13 @@
 
 
     {{-- ============================
-         TIKSLŲ SEKCJA (REAL DATA)
+         TIKSLAI / PROJEKTAI (REAL)
     ============================= --}}
     <h5 class="fw-bold mb-3">Tikslai arba projektai</h5>
 
     <div class="row g-4">
 
-        {{-- Featured Goal --}}
+        {{-- Featured goal --}}
         @if($featuredGoal)
             <div class="col-md-12">
                 <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $featuredGoal->id]) }}"
@@ -136,13 +154,14 @@
                     <h6 class="fw-bold mb-2">{{ $featuredGoal->title }}</h6>
 
                     <div class="progress mb-2" style="height: 6px;">
-                        <div class="progress-bar bg-warning"
-                             style="width: {{ $featuredGoal->progress_percent }}%;">
+                        <div
+                            class="progress-bar bg-warning"
+                            style="width: {{ $featuredGoal->progress }}%;">
                         </div>
                     </div>
 
                     <small class="text-muted">
-                        {{ $featuredGoal->progress_percent }}% atlikta
+                        {{ $featuredGoal->progress }}% atlikta
                     </small>
                 </a>
             </div>
@@ -153,8 +172,12 @@
             <div class="col-md-4">
                 <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
                    class="goal-item p-3 rounded d-block shadow-sm">
-                    <div class="fw-semibold mb-1">{{ $goal->title }}</div>
-                    <small class="text-muted">{{ $goal->progress_percent }}% atlikta</small>
+                    <div class="fw-semibold mb-1">
+                        {{ $goal->title }}
+                    </div>
+                    <small class="text-muted">
+                        {{ $goal->progress }}% atlikta
+                    </small>
                 </a>
             </div>
         @endforeach

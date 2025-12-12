@@ -3,21 +3,79 @@
 namespace App\Services;
 
 use App\Models\Task;
-use App\Models\Milestone;
-use App\Models\Goal;
 use App\Models\PointsLog;
+use App\Models\User;
 
 class PointsService
 {
-    /**
-     * TASK COMPLETED
-     */
-    public static function complete(Task $task)
-    {
-        $user = $task->milestone->goal->user;
+    /* -----------------------------
+     | TASK XP -> LOG
+     * ----------------------------- */
 
-        // Ensure gameDetails exists
-        $game = $user->gameDetails ?? $user->gameDetails()->create([
+    public static function calculateXp(Task $task): int
+    {
+        $mult = match (strtolower(optional($task->priority)->name ?? '')) {
+            'high', 'aukštas'       => 2.0,
+            'medium', 'vidutinis'   => 1.5,
+            default                => 1.0,
+        };
+
+        return (int) floor(((float) $task->points) * $mult);
+    }
+
+    /**
+     * Užtikrina, kad completed task turi 1 logą su teisingu amount ir category_id.
+     * Jei task ne completed -> nieko nedaro (naudok deleteTaskLog).
+     */
+    public static function upsertTaskLog(Task $task): void
+    {
+        if (is_null($task->completed_at)) {
+            return;
+        }
+
+        $task->loadMissing(['priority', 'milestone.goal']);
+
+        $xp = self::calculateXp($task);
+
+        $log = PointsLog::where('task_id', $task->id)
+            ->where('type', 'task_completed')
+            ->first();
+
+        if (!$log) {
+            PointsLog::create([
+                'user_id'     => $task->milestone->goal->user_id,
+                'task_id'     => $task->id,
+                'category_id' => $task->category_id,
+                'points'      => $xp,
+                'amount'      => $xp,
+                'type'        => 'task_completed',
+            ]);
+            return;
+        }
+
+        $log->category_id = $task->category_id;
+        $log->points      = $xp;
+        $log->amount      = $xp;
+        $log->save();
+    }
+
+    public static function deleteTaskLog(Task $task): void
+    {
+        PointsLog::where('task_id', $task->id)
+            ->where('type', 'task_completed')
+            ->delete();
+    }
+
+    /* -----------------------------
+     | USER XP = SUM(LOGS)
+     * ----------------------------- */
+
+    public static function syncUserGamification(User $user): void
+    {
+        $user->loadMissing(['gameDetails', 'categoryLevels']);
+
+        // 1) Reset game
+        $game = $user->gameDetails()->firstOrCreate([], [
             'level' => 1,
             'xp' => 0,
             'xp_next' => 100,
@@ -27,93 +85,46 @@ class PointsService
             'last_activity_date' => now(),
         ]);
 
-        $xpGain = self::calculateXp($task);
-
-        // Add global XP
-        self::applyXp($game, $xpGain);
-
-        // Add category XP
-        self::applyCategoryXp($user, $task->category_id, $xpGain);
-
-        // Log XP
-        PointsLog::create([
-            'user_id' => $user->id,
-            'task_id' => $task->id,
-            'category_id' => $task->category_id,
-            'points' => $xpGain,
-            'amount' => $xpGain,
-            'type' => 'task_completed',
-        ]);
-
-        return $xpGain;
-    }
-
-    /**
-     * TASK UNCOMPLETED
-     */
-    public static function uncomplete(Task $task)
-    {
-        $log = PointsLog::where('task_id', $task->id)
-            ->where('type', 'task_completed')
-            ->latest()
-            ->first();
-
-        if (!$log) return;
-
-        $user = $task->milestone->goal->user;
-        $game = $user->gameDetails;
-
-        $xpLoss = $log->amount;
-
-        // Remove global XP
-        $game->xp = max(0, $game->xp - $xpLoss);
+        $game->level = 1;
+        $game->xp = 0;
+        $game->xp_next = 100;
+        $game->coins = 0;
         $game->save();
 
-        // Remove category XP
-        $cat = $user->categoryLevels()->where('category_id', $task->category_id)->first();
-        if ($cat) {
-            $cat->xp = max(0, $cat->xp - $xpLoss);
+        // 2) Reset all categories (paliekam įrašus, tik resetinam)
+        foreach ($user->categoryLevels as $cat) {
+            $cat->level = 1;
+            $cat->xp = 0;
+            $cat->xp_next = 100;
             $cat->save();
         }
 
-        $log->delete();
+        // 3) Replay logs -> general + category
+        $logs = PointsLog::where('user_id', $user->id)
+            ->orderBy('id')
+            ->get();
+
+        foreach ($logs as $log) {
+            self::applyXpToGame($game, (int) $log->amount);
+            self::applyXpToCategory($user, (int) $log->category_id, (int) $log->amount);
+        }
     }
 
-    /**
-     * XP CALCULATION
-     */
-    public static function calculateXp(Task $task)
-    {
-        $mult = match (strtolower(optional($task->priority)->name)) {
-            'high', 'aukštas' => 2.0,
-            'medium', 'vidutinis' => 1.5,
-            default => 1.0,
-        };
-
-        return intval($task->points * $mult);
-    }
-
-    /**
-     * APPLY GLOBAL XP (general XP)
-     */
-    private static function applyXp($game, int $xp)
+    private static function applyXpToGame($game, int $xp): void
     {
         $game->xp += $xp;
 
         while ($game->xp >= $game->xp_next) {
             $game->xp -= $game->xp_next;
             $game->level++;
-            $game->xp_next = intval($game->xp_next * 1.15);
+            $game->xp_next = (int) floor($game->xp_next * 1.15);
             $game->coins += 1;
         }
 
         $game->save();
     }
 
-    /**
-     * APPLY CATEGORY XP
-     */
-    private static function applyCategoryXp($user, int $categoryId, int $xp)
+    private static function applyXpToCategory(User $user, int $categoryId, int $xp): void
     {
         $cat = $user->categoryLevels()->firstOrCreate(
             ['category_id' => $categoryId],
@@ -125,143 +136,21 @@ class PointsService
         while ($cat->xp >= $cat->xp_next) {
             $cat->xp -= $cat->xp_next;
             $cat->level++;
-            $cat->xp_next = intval($cat->xp_next * 1.15);
+            $cat->xp_next = (int) floor($cat->xp_next * 1.15);
         }
 
         $cat->save();
     }
 
-    /**
-     * RAW XP – used ONLY by GamificationService
-     * For milestone/goal bonuses
-     */
-    public static function grantRawXP($user, int $categoryId, int $xp)
+    public static function syncTaskCompletion(Task $task): void
     {
-        self::applyXp($user->gameDetails, $xp);
-        self::applyCategoryXp($user, $categoryId, $xp);
-    }
+        $task->refresh();
+        $task->loadMissing(['priority', 'status']);
 
-    public static function removeRawXP($user, int $categoryId, int $xp)
-    {
-        $game = $user->gameDetails;
-
-        // Remove XP starting from current xp
-        $remaining = $xp;
-
-        while ($remaining > 0) {
-
-            if ($game->xp >= $remaining) {
-                // XP užtenka dabartiniame lygyje
-                $game->xp -= $remaining;
-                $remaining = 0;
-            } else {
-                // XP neužtenka → einam į žemesnį lygį
-                $remaining -= $game->xp;
-
-                if ($game->level > 1) {
-                    $game->level--;
-                    // Recalculate XP_next backwards
-                    $game->xp_next = intval($game->xp_next / 1.15);
-                    $game->xp = $game->xp_next; // full bar
-                } else {
-                    // jau 1 level → tiesiog išvalom
-                    $game->xp = 0;
-                    $remaining = 0;
-                }
-            }
-        }
-
-        $game->save();
-
-        // --- CATEGORY XP ---
-        $cat = $user->categoryLevels()->where('category_id', $categoryId)->first();
-        if ($cat) {
-
-            $remaining = $xp;
-
-            while ($remaining > 0) {
-
-                if ($cat->xp >= $remaining) {
-                    $cat->xp -= $remaining;
-                    $remaining = 0;
-
-                } else {
-                    $remaining -= $cat->xp;
-
-                    if ($cat->level > 1) {
-                        $cat->level--;
-                        $cat->xp_next = intval($cat->xp_next / 1.15);
-                        $cat->xp = $cat->xp_next;
-                    } else {
-                        $cat->xp = 0;
-                        $remaining = 0;
-                    }
-                }
-            }
-
-            $cat->save();
+        if ($task->completed_at) {
+            self::upsertTaskLog($task);
+        } else {
+            self::deleteTaskLog($task);
         }
     }
-
-    /**
-     * CATEGORY RECALC — used ONLY on category change
-     * Recalculates ONLY task XP (milestone/goal handled by GamificationService)
-     */
-    public static function recalcCategory($user, $categoryId)
-    {
-        $cat = $user->categoryLevels()->firstOrCreate(
-            ['category_id' => $categoryId],
-            ['level' => 1, 'xp' => 0, 'xp_next' => 100]
-        );
-
-        // Reset
-        $cat->level = 1;
-        $cat->xp = 0;
-        $cat->xp_next = 100;
-        $cat->save();
-
-        // Re-add only completed task XP
-        foreach (Task::where('category_id', $categoryId)->whereNotNull('completed_at')->get() as $task) {
-            $xp = self::calculateXp($task);
-            self::applyCategoryXp($user, $categoryId, $xp);
-        }
-    }
-
-    public static function removeMilestoneBonus($milestone)
-    {
-        $goal = $milestone->goal;
-        $user = $goal->user;
-
-        // Recalculate XP for this milestone
-        $xp = GamificationService::calculateMilestoneXp($milestone);
-
-        if ($xp <= 0) return;
-
-        // Remove XP from global + category
-        self::removeRawXP($user, $goal->category_id, $xp);
-
-        // Delete the milestone_completed PointsLog
-        PointsLog::where('milestone_id', $milestone->id)
-            ->where('type', 'milestone_completed')
-            ->delete();
-    }
-
-    public static function removeGoalBonus($goal)
-    {
-        $user = $goal->user;
-
-        // Recalculate XP for this goal
-        $xp = GamificationService::calculateGoalXp($goal);
-
-        if ($xp <= 0) return;
-
-        // Remove XP
-        self::removeRawXP($user, $goal->category_id, $xp);
-
-        // Delete goal_completed entry
-        PointsLog::where('goal_id', $goal->id)
-            ->where('type', 'goal_completed')
-            ->delete();
-    }
-
 }
