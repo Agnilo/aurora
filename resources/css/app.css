@@ -556,6 +556,28 @@
     opacity: 0.6;
 }
 
+.hero-streak {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.hero-streak .line {
+    width: 60px;
+    height: 1px;
+    background: rgba(255,255,255,0.65);
+}
+
+.hero-streak .value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+
 /* ============================================================
    RESPONSIVE
 ============================================================ */

@@ -231,7 +231,7 @@ class GamificationService
         }
     }
 
-    private static function streakRewardCoins(int $day): int
+    public static function streakRewardCoins(int $day): int
     {
         if ($day <= 30) {
             return match ($day) {
@@ -245,6 +245,26 @@ class GamificationService
 
         return (int) floor(60 + (($day - 30) / 30) * 25);
     }
+
+    public static function nextStreakRewardDay(int $current): ?int
+    {
+        $fixed = [3, 7, 14, 30];
+
+        foreach ($fixed as $day) {
+            if ($current < $day) {
+                return $day;
+            }
+        }
+
+        return (int) (ceil($current / 30) * 30);
+    }
+
+    public static function nextStreakRewardCoins(int $day): int
+    {
+        return self::streakRewardCoins($day);
+    }
+
+
 
     private static function game(User $user)
     {

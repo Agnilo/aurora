@@ -32,4 +32,12 @@
         @endif
 
     </div>
+
+    <div class="hero-streak">
+        <span class="line"></span>
+        <span class="value">
+            {{ auth()->user()->gameDetails->streak_current ?? 0 }}🔥
+        </span>
+        <span class="line"></span>
+    </div>
 </div>
