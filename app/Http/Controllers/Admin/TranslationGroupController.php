@@ -36,7 +36,6 @@ class TranslationGroupController extends Controller
             'key' => $key,
         ]);
 
-        // Create default translations for group label
         $languages = Language::where('is_active', true)->pluck('code');
 
         foreach ($languages as $lang) {
@@ -44,7 +43,7 @@ class TranslationGroupController extends Controller
                 'group'         => 'group',
                 'key'           => $group->key . '.group',
                 'language_code' => $lang,
-                'value'         => $group->name, // fallback – original name
+                'value'         => $group->name,
             ]);
         }
 

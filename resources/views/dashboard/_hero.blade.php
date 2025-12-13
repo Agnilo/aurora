@@ -1,43 +1,48 @@
-<div class="aurora-hero p-4 rounded mb-5">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="aurora-hero">
 
-        <div>
-            <h2 class="fw-bold text-white mb-1">
-                {{ t('dashboard.you_can') }}
-            </h2>
-            <p class="text-white-50 small mb-0">
-                Šiandien puiki diena judėti pirmyn ✨
-            </p>
+    <!-- TOP GRID -->
+    <div class="hero-top">
+
+        <!-- LEFT TEXT -->
+        <div class="hero-left">
+            <h2>{{ t('dashboard.you_can') }}</h2>
+            <p>Šiandien puiki diena judėti pirmyn ✨</p>
         </div>
 
-        @if($user->gameDetails)
-            <div class="text-end text-white">
-                <div class="fw-bold fs-5">
-                    Lvl {{ $user->gameDetails->level }}
-                </div>
+        <!-- RIGHT UI (CHARACTER CARD) -->
+        <div class="hero-right">
 
-                <div class="small">
-                    {{ $user->gameDetails->xp }}
-                    /
-                    {{ $user->gameDetails->xp_next }} XP
-                </div>
+            <div class="hero-coins">
+                {{ $user->gameDetails->coins }} 🪙
+            </div>
 
-                <div class="progress mt-2" style="height: 6px; width: 150px;">
-                    <div
-                        class="progress-bar bg-light"
-                        style="width: {{ $user->gameDetails->xp_percent }}%;">
+            <div class="hero-xp">
+                <div class="xp-pill-overlap">
+                    <span class="xp-bubble">{{ $user->gameDetails->level }}</span>
+
+                    <div class="xp-bar-behind">
+                        <div class="xp-fill"
+                            style="width: {{ $user->gameDetails->xp_percent }}%;">
+                        </div>
                     </div>
+
+                    <span class="xp-bubble">{{ $user->gameDetails->level + 1 }}</span>
+                </div>
+
+                <div class="xp-text">
+                    {{ $user->gameDetails->xp }} / {{ $user->gameDetails->xp_next }} XP
                 </div>
             </div>
-        @endif
 
+        </div>
     </div>
 
+
+    <!-- STREAK -->
     <div class="hero-streak">
         <span class="line"></span>
-        <span class="value">
-            {{ auth()->user()->gameDetails->streak_current ?? 0 }}🔥
-        </span>
+        <span class="value">{{ $user->gameDetails->streak_current ?? 0 }} 🔥</span>
         <span class="line"></span>
     </div>
+
 </div>

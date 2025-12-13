@@ -1,0 +1,56 @@
+:root {
+    /* ===== BRAND / PRIMARY ===== */
+    --color-primary: #ffb300;
+    --color-primary-hover: #e89b00;
+    --color-primary-soft: #ffd27a;
+
+    /* ===== BACKGROUNDS ===== */
+    --color-bg-page: #fff7eb;
+    --color-bg-card: #ffffff;
+    --color-bg-soft: #fff7e0;
+    --color-bg-muted: #e5e5e5;
+
+    /* ===== TEXT ===== */
+    --color-text-main: #3c2f1c;
+    --color-text-muted: #7a6c4b;
+    --color-text-soft: #86775a;
+    --color-text-invert: #ffffff;
+
+    /* ===== BORDERS ===== */
+    --color-border-soft: #f0e4cc;
+    --color-border-muted: #f3e9d4;
+
+    /* ===== SHADOWS ===== */
+    --shadow-soft: 0 4px 14px rgba(0,0,0,0.08);
+    --shadow-medium: 0 8px 24px rgba(0,0,0,0.12);
+
+    /* ===== STATUS / UI ===== */
+    --color-progress-bg: #f3e7c5;
+    --color-overlay-soft: rgba(255,255,255,.35);
+
+    --color-bg-soft-2: #fff7e6;
+    --color-bg-soft-3: #fff6e2;
+    --color-bg-soft-4: #fffef8;
+    --color-bg-soft-5: #fffdf5;
+    --color-bg-soft-6: #fff7ec;
+
+    --color-hero-grad-start: #FFD27A;
+    --color-hero-grad-end: #FFB347;
+    --color-hero-shadow: rgba(255, 179, 71, 0.35);
+
+    --color-xp-grad-start: #56ab2f;
+    --color-xp-grad-end: #a8e063;
+
+    --color-text-nav: #555;
+    --color-text-nav-muted: #777;
+
+    --color-skeleton-1: #e6e6e6;
+    --color-skeleton-2: #f3f3f3;
+
+    --color-avatar-placeholder: #f4d98c;
+    --color-text-dark-muted: #444;
+    --color-text-grey: #666;
+    --color-border-light: #eee;
+    --color-border-dashed: #eee2c4;
+
+}

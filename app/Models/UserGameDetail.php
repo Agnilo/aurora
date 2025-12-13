@@ -26,8 +26,22 @@ class UserGameDetail extends Model
         'last_activity_date' => 'date',
     ];
 
+    protected $appends = ['xp_percent'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getXpPercentAttribute(): float
+    {
+        if ($this->xp_next <= 0) {
+            return 0;
+        }
+
+        return min(
+            100,
+            round(($this->xp / $this->xp_next) * 100, 2)
+        );
     }
 }

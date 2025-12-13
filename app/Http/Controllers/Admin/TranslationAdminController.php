@@ -56,7 +56,6 @@ class TranslationAdminController extends Controller
         $groupKey = $request->group;
         $key = $request->key;
 
-        // Group MUST already exist
         $groupModel = TranslationGroup::where('key', $groupKey)->first();
 
         if (!$groupModel) {
@@ -126,14 +125,12 @@ class TranslationAdminController extends Controller
         $newKey = $request->key;
         $newGroup = $request->group;
 
-        // Surenkam senus verčiamus įrašus
         $rows = Translation::where('key', $translationKey)->get();
 
         if ($rows->isEmpty()) {
             abort(404, "Translation key not found: $translationKey");
         }
 
-        // Patikrinam ar jau egzistuoja
         foreach ($rows as $row) {
             $exists = Translation::where('group', $newGroup)
                 ->where('key', $newKey)
@@ -148,13 +145,11 @@ class TranslationAdminController extends Controller
             }
         }
 
-        // Atnaujinam key + group visiems
         Translation::where('key', $translationKey)->update([
             'key'   => $newKey,
             'group' => $newGroup,
         ]);
 
-        // Atnaujinam value
         foreach ($request->value as $lang => $val) {
             Translation::where('key', $newKey)
                 ->where('group', $newGroup)

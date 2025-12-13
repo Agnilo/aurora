@@ -19,21 +19,16 @@ class TranslationService
     {
         [$group, $key] = $this->splitKey($fullKey);
 
-        // 1) Try cache first
         $cached = $this->cachedTranslations();
-        
-        // 2) Translation for current locale
+
         $value = $cached[$this->locale][$group][$key] ?? null;
 
-        // 3) Fallback to English
         if (!$value && $this->locale !== $this->fallback) {
             $value = $cached[$this->fallback][$group][$key] ?? null;
         }
 
-        // 4) If still nothing → return key
         if (!$value) return $fullKey;
 
-        // 5) Replace placeholders
         foreach ($replace as $k => $v) {
             $value = str_replace(':'.$k, $v, $value);
         }

@@ -21,6 +21,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => false,
+                    'has_image' => false,
                 ],
                 'status' => [
                     'title' => 'lookup.goals.block.statuses',
@@ -28,6 +29,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => false,
+                    'has_image' => false,
                 ],
                 'type' => [
                     'title' => 'lookup.goals.block.types',
@@ -35,6 +37,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => false,
                     'has_icon' => true,
+                    'has_image' => false,
                 ],
             ],
         ],
@@ -48,6 +51,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => false,
+                    'has_image' => false,
                 ],
                 'status' => [
                     'title' => 'lookup.tasks.block.statuses',
@@ -55,6 +59,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => false,
+                    'has_image' => false,
                 ],
                 'type' => [
                     'title' => 'lookup.tasks.block.types',
@@ -62,6 +67,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => false,
                     'has_icon' => true,
+                    'has_image' => false,
                 ],
             ],
         ],
@@ -75,6 +81,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => true,
+                    'has_image' => true,
                 ],
             ],
         ],
@@ -286,6 +293,26 @@ class LookupAdminController extends Controller
 
             $update['icon'] = $icon ?: null;
         }
+
+        if (($def['has_image'] ?? false) && $request->hasFile('image')) {
+
+            $file = $request->file('image');
+
+            $request->validate([
+                'image' => 'image|max:2048',
+            ]);
+
+            if (!empty($item->image)) {
+                \Storage::disk('public')->delete('categories/'.$item->image);
+            }
+
+            $filename = Str::slug($item->name).'_'.time().'.'.$file->getClientOriginalExtension();
+
+            $file->storeAs('categories', $filename, 'public');
+
+            $update['image'] = $filename;
+        }
+
 
         if (!empty($update)) {
             DB::table($def['table'])->where('id', $id)->update($update);

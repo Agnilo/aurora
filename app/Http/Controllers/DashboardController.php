@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Category;
+use App\Models\CategoryLevel;
 
 class DashboardController extends Controller
 {
@@ -13,20 +15,56 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Svarbiausias tikslas
         $featuredGoal = $user->goals()
             ->where('is_favorite', true)
             ->first();
 
-        // 3 paskutiniai tikslai
         $recentGoals = $user->goals()
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
 
+        $categoryLevels = $user->categoryLevels()
+            ->with('category')
+            ->get()
+            ->map(function ($level) {
+
+                $xp    = $level->xp ?? 0;
+                $maxXp = $level->category->max_points ?? 100;
+
+                $percent = $maxXp > 0
+                    ? ($xp / $maxXp) * 100
+                    : 0;
+
+                $fullSquares = (int) floor($percent / 10);
+
+                $partialFill = (int) round(($percent % 10) * 10);
+                
+                $lvl = max(1, (int) floor($xp / 100) + 1);
+
+                $levelName = match (true) {
+                    $lvl <= 1 => 'Seed',
+                    $lvl <= 2 => 'Growing',
+                    $lvl <= 4 => 'Stable',
+                    default   => 'Thriving',
+                };
+
+                $level->full_squares = $fullSquares;
+                $level->partial_fill = $partialFill;
+                $level->level        = $lvl;
+                $level->level_name   = $levelName;
+
+                return $level;
+            });
+
+        $categories = Category::with(['categoryLevels' => function ($q) {
+            $q->where('user_id', auth()->id());
+        }])->get();
+
         return view('dashboard.index', [
-            'user'           => auth()->user(),
-            'categoryLevels' => auth()->user()->categoryLevels()->with('category')->get(),
+            'user'           => $user,
+            'categories' => $categories,
+            'categoryLevels' => $categoryLevels,
             'featuredGoal'   => $featuredGoal,
             'recentGoals'    => $recentGoals,
         ]);
@@ -80,8 +118,4 @@ class DashboardController extends Controller
         //
     }
 
-    public function getXpPercentAttribute()
-    {
-        return min(100, ($this->xp / max(1, $this->xp_next)) * 100);
-    }
 }

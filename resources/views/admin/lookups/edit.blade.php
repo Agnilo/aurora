@@ -12,7 +12,7 @@
         'type'    => $type,
         'id'      => $item->id,
     ]) }}"
-    method="POST" class="w-100">
+    method="POST" enctype="multipart/form-data" class="w-100">
 
     @csrf
     @method('PUT')
@@ -76,6 +76,30 @@
                         <div id="emojiPicker"
                             style="display:none; position:absolute; z-index:9999; background:white; border:1px solid #ddd; border-radius:8px;">
                         </div>
+                </div>
+            @endif
+
+            @if($blockDefinition['has_image'] ?? false)
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">
+                        {{ t('lookup.image') ?? 'Background image' }}
+                    </label>
+
+                    <input type="file"
+                        name="image"
+                        class="form-control"
+                        accept="image/*">
+
+                    @if(!empty($item->image))
+                        <div class="mt-2">
+                            <img src="{{ asset('storage/categories/'.$item->image) }}"
+                                style="max-width: 100%; border-radius: 8px;">
+                        </div>
+                    @endif
+
+                    <div class="form-text">
+                        JPG / PNG · bus naudojama kategorijos fone
+                    </div>
                 </div>
             @endif
 

@@ -14,8 +14,10 @@ class Category extends Model
     protected $fillable = [
         'name',
         'color',
-        'max_points',
         'icon',
+        'image',
+        'max_points',
+        'order',
     ];
 
     public function goals()
@@ -50,5 +52,12 @@ class Category extends Model
         $slug = Str::slug($this->name, '_');
 
         return t("lookup.categories.category.{$slug}");
+    }
+
+        public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) return null;
+
+        return asset('storage/categories/' . $this->image);
     }
 }
