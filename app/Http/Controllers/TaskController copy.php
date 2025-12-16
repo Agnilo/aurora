@@ -41,10 +41,6 @@ class TaskController extends Controller
                 GamificationService::registerStreak($user);
             }
 
-            \Log::debug('AFTER TOGGLE', [
-                'completed_at' => $task->completed_at,
-            ]);
-
             PointsService::syncTaskCompletion($task);
 
             $goal->refresh();
@@ -57,12 +53,6 @@ class TaskController extends Controller
             PointsService::syncUserGamification($user);
 
             $task->refresh();
-
-
-            \Log::debug('AFTER SYNC', [
-                'completed_at' => $task->completed_at,
-            ]);
-
             $task->load('status');
             $user->load(['gameDetails', 'categoryLevels']);
 

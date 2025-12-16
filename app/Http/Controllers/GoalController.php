@@ -25,6 +25,7 @@ class GoalController extends Controller
 {
     public function index($locale, Request $request)
     {
+
         $categories = Category::all();
 
         $categoryLevels = auth()->user()
@@ -35,49 +36,70 @@ class GoalController extends Controller
 
         $activeCategory = null;
 
-        $goalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
+        $statusFilter = $request->get('status', 'active');
+
+        $baseGoalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
             ->where('user_id', Auth::id());
 
         if ($request->has('category') && $request->category !== null) {
             $activeCategory = Category::find($request->category);
             if ($activeCategory) {
-                $goalsQuery->where('category_id', $activeCategory->id);
+                $baseGoalsQuery->where('category_id', $activeCategory->id);
             }
         }
 
-        $allGoals = $goalsQuery->get();
+        match ($statusFilter) {
+            'completed' => $baseGoalsQuery->where('is_completed', true),
+            'planned' => $baseGoalsQuery->whereHas('status', fn ($q) =>
+                $q->where('slug', 'planned')
+            ),
+            'all' => null,
+            default => $baseGoalsQuery->where('is_completed', false),
+        };
 
-        $favoriteGoals  = $allGoals->where('is_favorite', true);
-        $importantGoals = $allGoals->where('is_important', true);
+        $favoriteGoals  = (clone $baseGoalsQuery)
+            ->where('is_important', true)
+            ->get();
 
-        $otherGoals = $allGoals->filter(fn ($goal) => !$goal->is_important);
+        $importantGoals = (clone $baseGoalsQuery)
+            ->where('is_important', true)
+            ->get();
+
+        $goals = (clone $baseGoalsQuery)
+            ->where('is_important', false)
+            ->paginate(10)
+            ->withQueryString();
 
         if ($request->ajax()) {
-            return view('goals.partials.content', compact(
-                'activeCategory', 'allGoals', 'favoriteGoals', 'importantGoals', 'otherGoals'
-            ))->render();
+            return view('goals.partials.content', [
+                'activeCategory' => $activeCategory,
+                'importantGoals' => $importantGoals,
+                'goals' => $goals,
+                'statusFilter' => $statusFilter,
+            ])->render();
         }
 
         return view('goals.index', [
-            'categories'     => $categories,
+            'categories' => $categories,
             'activeCategory' => $activeCategory,
             'categoryLevels' => $categoryLevels,
-            'goals'          => $allGoals,
-            'favoriteGoals'  => $favoriteGoals,
+
+            'goals' => $goals,
+            'favoriteGoals' => $favoriteGoals,
             'importantGoals' => $importantGoals,
-            'otherGoals'     => $otherGoals,
+            'statusFilter' => $statusFilter,
         ]);
     }
 
     public function create($locale)
     {
-        $statuses   = GoalStatus::orderBy('order')->get();
+        $statuses = GoalStatus::orderBy('order')->get();
         $priorities = GoalPriority::orderBy('order')->get();
-        $types      = GoalType::orderBy('order')->get();
+        $types = GoalType::orderBy('order')->get();
         $categories = Category::orderBy('order')->get();
 
-        $taskStatuses   = TaskStatus::orderBy('order')->get();
-        $taskTypes      = TaskType::orderBy('order')->get();
+        $taskStatuses = TaskStatus::orderBy('order')->get();
+        $taskTypes = TaskType::orderBy('order')->get();
         $taskPriorities = TaskPriority::orderBy('order')->get();
         $taskCategories = Category::orderBy('order')->get();
 
@@ -90,22 +112,22 @@ class GoalController extends Controller
     public function store(Request $request, $locale)
     {
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'category_id'  => 'required|exists:categories,id',
-            'color'        => 'nullable|string|max:20',
-            'deadline'     => 'nullable|date',
-            'start_date'   => 'nullable|date',
-            'end_date'     => 'nullable|date',
-            'is_favorite'  => 'nullable|boolean',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+            'color' => 'nullable|string|max:20',
+            'deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'is_favorite' => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
-            'visibility'   => 'nullable|string|in:private,shared,public',
+            'visibility' => 'nullable|string|in:private,shared,public',
             'reminder_date'=> 'nullable|date',
-            'tags'         => 'nullable|string',
-            'priority_id'  => 'nullable|exists:goal_priorities,id',
-            'status_id'    => 'nullable|exists:goal_statuses,id',
-            'type_id'      => 'nullable|exists:goal_types,id',
-            'milestones'   => 'array',
+            'tags' => 'nullable|string',
+            'priority_id' => 'nullable|exists:goal_priorities,id',
+            'status_id' => 'nullable|exists:goal_statuses,id',
+            'type_id' => 'nullable|exists:goal_types,id',
+            'milestones' => 'array',
         ]);
 
         if (!empty($validated['tags'])) {
@@ -118,17 +140,17 @@ class GoalController extends Controller
 
         foreach ($request->milestones ?? [] as $milestoneData) {
             $milestone = $goal->milestones()->create([
-                'title'    => $milestoneData['title'] ?? 'Be pavadinimo',
+                'title' => $milestoneData['title'] ?? 'Be pavadinimo',
                 'deadline' => $milestoneData['deadline'] ?? null,
             ]);
 
             foreach ($milestoneData['tasks'] ?? [] as $taskData) {
                 $milestone->tasks()->create([
-                    'title'       => $taskData['title'] ?? '',
-                    'points'      => $taskData['points'] ?? 0,
+                    'title' => $taskData['title'] ?? '',
+                    'points' => $taskData['points'] ?? 0,
                     'category_id' => $goal->category_id,
-                    'status_id'   => $taskData['status_id'] ?? null,
-                    'type_id'     => $taskData['type_id'] ?? null,
+                    'status_id' => $taskData['status_id'] ?? null,
+                    'type_id' => $taskData['type_id'] ?? null,
                     'priority_id' => $taskData['priority_id'] ?? null,
                 ]);
             }
@@ -138,16 +160,55 @@ class GoalController extends Controller
             ->with('success', 'Tikslas sėkmingai sukurtas!');
     }
 
+    public function show(string $locale, Goal $goal)
+    {
+        if ($goal->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $goal->load([
+            'category',
+            'status',
+            'priority',
+            'milestones.tasks.status',
+        ]);
+
+        $tasks = $goal->milestones->flatMap->tasks;
+
+        $milestonesCount = $goal->milestones->count();
+
+        $tasksCount = $goal->milestones->flatMap->tasks->count();
+
+        $doneTasksCount = $goal->milestones
+            ->flatMap->tasks
+            ->filter(fn ($task) =>
+                $task->pointsLog()->exists()
+            )
+            ->count();
+
+        $progressPercent = $tasksCount > 0
+            ? round(($doneTasksCount / $tasksCount) * 100)
+            : 0;
+
+        return view('goals.show', compact(
+            'goal',
+            'milestonesCount',
+            'tasksCount',
+            'doneTasksCount',
+            'progressPercent',
+        ));
+    }
+
     public function edit($locale, $id)
     {
-        $goal       = Goal::with('milestones.tasks')->findOrFail($id);
-        $statuses   = GoalStatus::orderBy('order')->get();
+        $goal = Goal::with('milestones.tasks')->findOrFail($id);
+        $statuses = GoalStatus::orderBy('order')->get();
         $priorities = GoalPriority::orderBy('order')->get();
-        $types      = GoalType::orderBy('order')->get();
+        $types = GoalType::orderBy('order')->get();
         $categories = Category::orderBy('order')->get();
 
-        $taskStatuses   = TaskStatus::orderBy('order')->get();
-        $taskTypes      = TaskType::orderBy('order')->get();
+        $taskStatuses = TaskStatus::orderBy('order')->get();
+        $taskTypes = TaskType::orderBy('order')->get();
         $taskPriorities = TaskPriority::orderBy('order')->get();
         $taskCategories = Category::orderBy('order')->get();
 
@@ -167,34 +228,34 @@ class GoalController extends Controller
             $oldCategory = $goal->category_id;
 
             $validated = $request->validate([
-                'title'       => 'required|string|max:255',
+                'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'category_id' => 'required|exists:categories,id',
-                'color'       => 'nullable|string|max:20',
-                'deadline'    => 'nullable|date',
-                'start_date'  => 'nullable|date',
-                'end_date'    => 'nullable|date',
+                'color' => 'nullable|string|max:20',
+                'deadline' => 'nullable|date',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
                 'is_favorite' => 'nullable|boolean',
                 'is_important'=> 'nullable|boolean',
-                'visibility'  => 'nullable|string|in:private,shared,public',
+                'visibility' => 'nullable|string|in:private,shared,public',
                 'reminder_date'=> 'nullable|date',
                 'priority_id' => 'nullable|exists:goal_priorities,id',
-                'status_id'   => 'nullable|exists:goal_statuses,id',
-                'type_id'     => 'nullable|exists:goal_types,id',
+                'status_id' => 'nullable|exists:goal_statuses,id',
+                'type_id' => 'nullable|exists:goal_types,id',
 
-                'milestones'                => 'array',
-                'milestones.*.id'           => 'nullable|exists:milestones,id',
-                'milestones.*.title'        => 'nullable|string|max:255',
-                'milestones.*.deadline'     => 'nullable|date',
+                'milestones' => 'array',
+                'milestones.*.id' => 'nullable|exists:milestones,id',
+                'milestones.*.title' => 'nullable|string|max:255',
+                'milestones.*.deadline' => 'nullable|date',
 
-                'milestones.*.tasks'                 => 'array',
-                'milestones.*.tasks.*.id'            => 'nullable|exists:tasks,id',
-                'milestones.*.tasks.*.title'         => 'nullable|string|max:255',
-                'milestones.*.tasks.*.points'        => 'nullable|numeric',
-                'milestones.*.tasks.*.status_id'     => 'nullable|exists:task_statuses,id',
-                'milestones.*.tasks.*.type_id'       => 'nullable|exists:task_types,id',
-                'milestones.*.tasks.*.priority_id'   => 'nullable|exists:task_priorities,id',
-                'milestones.*.tasks.*.category_id'   => 'nullable|exists:categories,id',
+                'milestones.*.tasks' => 'array',
+                'milestones.*.tasks.*.id' => 'nullable|exists:tasks,id',
+                'milestones.*.tasks.*.title' => 'nullable|string|max:255',
+                'milestones.*.tasks.*.points' => 'nullable|numeric',
+                'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
+                'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
+                'milestones.*.tasks.*.priority_id' => 'nullable|exists:task_priorities,id',
+                'milestones.*.tasks.*.category_id' => 'nullable|exists:categories,id',
             ]);
 
             $goal->update($validated);
@@ -210,7 +271,7 @@ class GoalController extends Controller
                 $milestone = $goal->milestones()->updateOrCreate(
                     ['id' => $mData['id'] ?? null],
                     [
-                        'title'    => $mData['title'] ?? '',
+                        'title' => $mData['title'] ?? '',
                         'deadline' => $mData['deadline'] ?? null,
                     ]
                 );
@@ -225,10 +286,10 @@ class GoalController extends Controller
                     $task = $milestone->tasks()->updateOrCreate(
                         ['id' => $tData['id'] ?? null],
                         [
-                            'title'       => $tData['title'] ?? '',
-                            'points'      => $tData['points'] ?? 0,
-                            'status_id'   => $tData['status_id'] ?? null,
-                            'type_id'     => $tData['type_id'] ?? null,
+                            'title' => $tData['title'] ?? '',
+                            'points' => $tData['points'] ?? 0,
+                            'status_id' => $tData['status_id'] ?? null,
+                            'type_id' => $tData['type_id'] ?? null,
                             'priority_id' => $tData['priority_id'] ?? null,
                             'category_id' => $tData['category_id'] ?? $goal->category_id,
                         ]

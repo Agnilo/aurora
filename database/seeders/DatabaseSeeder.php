@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             LanguageSeeder::class,
             TranslationSeeder::class,
             RolePermissionSeeder::class,
+            GamificationSeeder::class,
         ]);
 
     }

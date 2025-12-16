@@ -47,4 +47,9 @@ class Task extends Model
     {
         return $this->belongsTo(TaskPriority::class, 'priority_id');
     }
+
+    public function pointsLog()
+    {
+        return $this->hasOne(PointsLog::class);
+    }
 }

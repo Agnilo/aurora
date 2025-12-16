@@ -7,18 +7,24 @@
 
     @include('dashboard._aspects')
 
-    <div class="row g-4">
-        <div class="col-md-4">
+    <div class="row g-3 align-items-stretch">
+
+        {{-- LEFT --}}
+        <div class="col-md-4 d-flex">
             @include('dashboard._focus')
         </div>
 
-        <div class="col-md-4">
-            @include('dashboard._daily_tasks')
+        {{-- RIGHT --}}
+        <div class="col-md-8 d-flex flex-column">
+            <div class="mb-3">
+                @include('dashboard._daily_tasks')
+            </div>
+
+            <div>
+                @include('dashboard._quick_habits')
+            </div>
         </div>
 
-        <div class="col-md-4">
-            @include('dashboard._quick_habits')
-        </div>
     </div>
 
     @include('dashboard._skills')

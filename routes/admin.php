@@ -79,4 +79,18 @@ Route::group([
 
     Route::resource('languages', LanguageController::class);
 
+    Route::prefix('gamification')->as('gamification.')->group(function () {
+
+        Route::get('/', [GamificationDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::resource('levels', LevelAdminController::class)->except(['show']);
+        Route::resource('xp-rules', XpRuleAdminController::class)->except(['show']);
+        Route::resource('bonuses', BonusAdminController::class)->except(['show']);
+        Route::resource('badges', BadgeAdminController::class)->except(['show']);
+        Route::resource('goal-bonuses', GoalBonusAdminController::class)->except(['show']);
+
+    });
+
+
 });

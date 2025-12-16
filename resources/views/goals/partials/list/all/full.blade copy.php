@@ -113,8 +113,7 @@
 
             {{-- MILESTONES --}}
             @foreach($goal->milestones as $milestone)
-                <div class="milestone-item border-start border-4 milestone-side-border ps-3 mb-3">
-
+                <div class="border-start border-4 border-warning ps-3 mb-3">
 
                     <h5 class="fw-bold">
                         {{ $milestone->title }}
@@ -129,10 +128,7 @@
                         <div class="progress" style="height: 6px;">
                             <div class="progress-bar milestone-progress-bar"
                                 role="progressbar"
-                                style="
-                                    width: {{ $milestone->progress }}%;
-                                    background-color: {{ $goal->category->color }};
-                                    ">
+                                style="width: {{ $milestone->progress }}%;">
                             </div>
                         </div>
                         <div class="small text-muted milestone-progress-label mt-1">
@@ -159,7 +155,7 @@
                                     {{ $task->title }}
 
                                     <span class="badge bg-secondary ms-2">
-                                        {{ $task->points }} {{ t('goals.points.short') }}
+                                        {{ $task->points }} tšk
                                     </span>
                                 </div>
 
@@ -169,6 +165,17 @@
                                         $color = $task->category->color ?? '#ccc';
                                     @endphp
 
+                                    <span class="badge"
+                                        style="
+                                            background: {{ $color }};
+                                            color: white;
+                                            padding:4px 10px;
+                                            border-radius: 12px;
+                                            font-weight: 600;
+                                        ">
+                                        {{ t("lookup.categories.category." . \Illuminate\Support\Str::slug($task->category->name, '_')) }}
+                                    </span>
+
                                     @if($task->status)
                                         @php
                                             $slug = \Illuminate\Support\Str::slug($task->status->name, '_');
@@ -177,6 +184,32 @@
                                         @endphp
 
                                         <span class="badge text-dark task-status-badge"
+                                            style="background: {{ $color }}; color: #000;">
+                                            {{ t($key) }}
+                                        </span>
+                                    @endif
+
+                                    @if($task->type)
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($task->type->name, '_');
+                                            $key = "lookup.tasks.type.$slug";
+                                            $color = $task->type->color ?? '#ccc';
+                                        @endphp
+
+                                        <span class="badge text-dark"
+                                            style="background: {{ $color }}; color: #000;">
+                                            {{ t($key) }}
+                                        </span>
+                                    @endif
+
+                                    @if($task->priority)
+                                        @php
+                                            $slug = \Illuminate\Support\Str::slug($task->priority->name, '_');
+                                            $key = "lookup.tasks.priority.$slug";
+                                            $color = $task->priority->color ?? '#ccc';
+                                        @endphp
+
+                                        <span class="badge text-dark"
                                             style="background: {{ $color }}; color: #000;">
                                             {{ t($key) }}
                                         </span>
@@ -215,146 +248,91 @@
 </div>
 @endif
 
-@if($goals instanceof \Illuminate\Pagination\AbstractPaginator)
-    <div class="d-flex justify-content-center mt-4">
-        {{ $goals->withQueryString()->links('pagination::bootstrap-5') }}
-    </div>
-@endif
-
-
-
 <script>
-    window.routes = {
-        toggleTask: "{{ route('tasks.toggle-complete', ['locale' => app()->getLocale(), 'task' => '__TASK__']) }}"
-    };
-</script>
+document.addEventListener("change", function(e) {
+    if (!e.target.classList.contains("task-done-toggle")) return;
 
-<script>
-(() => {
+    let checkbox = e.target;
+    let taskId = checkbox.dataset.taskId;
+    let locale = "{{ app()->getLocale() }}";
 
-    const setText = (id, value) => {
-        const el = document.getElementById(id);
-        if (el && value !== undefined && value !== null) {
-            el.innerText = value;
+    checkbox.disabled = true;
+
+    fetch(`/${locale}/tasks/${taskId}/toggle-complete`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
         }
-    };
+    })
+    .then(res => res.json())
+    .then(data => {
 
-    document.addEventListener("click", function (e) {
-        const checkbox = e.target;
-        if (!checkbox.classList.contains("task-done-toggle")) return;
+        checkbox.checked = !!data.completed_at;
+        checkbox.disabled = false;
 
-        e.preventDefault();
-        if (checkbox.dataset.loading === "1") return;
+        let badge = checkbox.closest(".list-group-item").querySelector(".task-status-badge");
+        if (badge) {
+            badge.innerText = data.status_label;
+            badge.style.background = data.status_color || "#ccc";
+        }
 
-        checkbox.dataset.loading = "1";
-        checkbox.disabled = true;
+        let milestoneContainer = checkbox.closest(".border-start");
+        if (milestoneContainer && data.milestone_progress !== null) {
+            let bar = milestoneContainer.querySelector(".milestone-progress-bar");
+            let label = milestoneContainer.querySelector(".milestone-progress-label");
+            if (bar) bar.style.width = data.milestone_progress + "%";
+            if (label) label.innerText = data.milestone_progress + "%";
+        }
 
-        const taskId = checkbox.dataset.taskId;
-        const url = window.routes.toggleTask.replace("__TASK__", taskId);
+        let goalAcc = checkbox.closest(".accordion-item");
+        if (goalAcc && data.goal_progress !== null) {
+            let goalBadge = goalAcc.querySelector(".goal-progress-badge");
+            if (goalBadge) goalBadge.innerText = data.goal_progress + "%";
+        }
 
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Accept": "application/json"
-            }
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Request failed");
-            return res.json();
-        })
-        .then(data => {
-            checkbox.checked = !!data.completed_at;
-            checkbox.disabled = false;
-            checkbox.dataset.loading = "0";
+        if (data.level !== undefined) {
+        document.getElementById("g-level").innerText = data.level;
+        }
 
-            const taskItem = checkbox.closest(".list-group-item");
-            const badge = taskItem?.querySelector(".task-status-badge");
-            if (badge) {
-                badge.innerText = data.status_label;
-                badge.style.background = data.status_color || "#ccc";
-            }
+        if (data.coins !== undefined) {
+            document.getElementById("g-coins").innerText = data.coins;
+        }
 
-            const milestone = checkbox.closest(".milestone-item");
-            if (milestone && data.milestone_progress !== null) {
-                milestone.querySelector(".milestone-progress-bar").style.width =
-                    data.milestone_progress + "%";
-                milestone.querySelector(".milestone-progress-label").innerText =
-                    data.milestone_progress + "%";
-            }
+        if (data.xp !== undefined) {
+            document.getElementById("g-xp").innerText = data.xp;
+        }
 
-            const goal = checkbox.closest(".accordion-item");
-            if (goal && data.goal_progress !== null) {
-                goal.querySelector(".goal-progress-badge").innerText =
-                    data.goal_progress + "%";
-            }
+        if (data.xp_next !== undefined) {
+            document.getElementById("g-xp-next").innerText = data.xp_next;
+        }
 
-            setText("g-level", data.level);
-            setText("g-coins", data.coins);
-            setText("g-xp", data.xp);
-            setText("g-xp-next", data.xp_next);
+        // update progress bar %
+        const xpBar = document.getElementById("g-xp-bar");
+        if (xpBar) {
+            let percent = Math.round((data.xp / data.xp_next) * 100);
+            xpBar.style.width = percent + "%";
+        }
 
-            const xpBar = document.getElementById("g-xp-bar");
-            if (xpBar && data.xp_next) {
-                xpBar.style.width =
-                    Math.round((data.xp / data.xp_next) * 100) + "%";
-            }
+        if (data.category_xp) {
+            Object.entries(data.category_xp).forEach(([catId, xpData]) => {
+                let tile = document.querySelector(`.category-tile[data-category-id="${catId}"]`);
+                if (!tile) return;
 
-            if (data.category_xp) {
+                let bar = tile.querySelector(".category-progress-fill");
+                let score = tile.querySelector(".category-score");
 
-                const grid = document.getElementById("categoryGrid");
-                if (!grid) return;
+                let percent = Math.round((xpData.xp / xpData.xp_next) * 100);
 
-                Object.entries(data.category_xp).forEach(([catId, xpData]) => {
+                if (bar) bar.style.width = percent + "%";
+                if (score) score.innerText = xpData.xp + " t. / " + xpData.xp_next + " t.";
+            });
+        }
 
-                    const link = grid.querySelector(
-                        `.category-link[data-category-id="${catId}"]`
-                    );
-                    if (!link) return;
-
-                    const squares = link.querySelectorAll(".xp-squares-goals span");
-                    const small = link.querySelector(".life-area-progress small");
-
-                    if (!squares.length || !small) return;
-
-                    const xp = xpData.xp ?? 0;
-                    const max = xpData.xp_next ?? 100;
-
-                    const percent = max > 0 ? (xp / max) * 100 : 0;
-                    const fullSquares = Math.floor(percent / 10);
-                    const partialFill = Math.round(percent % 10 * 10);
-
-                    squares.forEach((sq, i) => {
-                        sq.classList.remove("filled");
-                        sq.style.background = "";
-
-                        if (i < fullSquares) {
-                            sq.classList.add("filled");
-                        }
-
-                        if (i === fullSquares && partialFill > 0) {
-                            sq.style.background = `
-                                linear-gradient(
-                                    to right,
-                                    var(--accent) ${partialFill}%,
-                                    rgba(0,0,0,.08) ${partialFill}%
-                                )
-                            `;
-                        }
-                    });
-
-                    small.innerText = `${xp} / ${max} ${small.innerText.split(' ').slice(-1)[0]}`;
-                });
-            }
-
-        })
-        .catch(err => {
-            console.error(err);
-            checkbox.disabled = false;
-            checkbox.dataset.loading = "0";
-            alert("Įvyko klaida, pabandyk vėliau.");
-        });
+    })
+    .catch(() => {
+        checkbox.disabled = false;
+        alert("Įvyko klaida, pabandyk vėliau.");
     });
+});
 
-})();
 </script>

@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        if (Schema::hasTable('goal_types')) {
-            return;
-        }
-
-        Schema::create('goal_types', function (Blueprint $table) {
+        Schema::create('bonuses', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('icon')->nullable();
+            $table->string('key')->unique();
+            $table->string('label');
+            $table->enum('type', ['flat', 'multiplier']);
+            $table->integer('value');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goal_types');
+        Schema::dropIfExists('bonuses');
     }
 };

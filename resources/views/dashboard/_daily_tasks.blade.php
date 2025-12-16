@@ -3,7 +3,7 @@
         Kasdienės užduotys
     </div>
 
-    <div class="card-body small">
+    <div class="card-body small dashboard-body">
         @if(isset($dailyTasks) && $dailyTasks->count())
             <ul class="list-unstyled mb-3">
                 @foreach($dailyTasks as $task)

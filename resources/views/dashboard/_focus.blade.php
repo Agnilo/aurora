@@ -1,6 +1,6 @@
-<div class="dashboard-card h-100">
+<div class="dashboard-card h-100 flex-fill d-flex flex-column">
     <div class="card-header dashboard-header">
-        Laikas susikaupti
+        {{ t('dashboard.focus_time') }}
     </div>
 
     <div class="card-body text-center d-flex flex-column justify-content-center">
@@ -8,8 +8,10 @@
             00:00:00
         </div>
 
-        <button class="btn btn-warning w-100">
-            Susikaupti
-        </button>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-warning px-4 rounded-pill">
+                {{ t('button.focus') }}
+            </button>
+        </div>
     </div>
 </div>

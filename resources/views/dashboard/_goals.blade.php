@@ -5,26 +5,42 @@
 <div class="row g-4">
 
     {{-- Featured --}}
-    @if($featuredGoal)
-        <div class="col-12">
-            <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $featuredGoal->id]) }}"
-               class="featured-goal-card p-4 d-block rounded">
+    @if($featuredGoals->isNotEmpty())
+    <h5 class="fw-bold mt-5 mb-3">
+        Pagrindiniai tikslai
+    </h5>
 
-                <h6 class="fw-bold mb-2">
-                    {{ $featuredGoal->title }}
-                </h6>
+    <div class="featured-carousel" data-count="{{ $featuredGoals->count() }}">
 
-                <div class="progress mb-2" style="height: 6px;">
-                    <div class="progress-bar bg-warning"
-                         style="width: {{ $featuredGoal->progress }}%;">
+        <button class="carousel-btn prev">‹</button>
+
+        <div class="carousel-track">
+            @foreach($featuredGoals as $goal)
+                <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
+                class="featured-card">
+
+                    <div class="featured-title">
+                        {{ $goal->title }}
                     </div>
-                </div>
 
-                <small class="text-muted">
-                    {{ $featuredGoal->progress }}% atlikta
-                </small>
-            </a>
+                    <div class="featured-progress">
+                        <div class="bar">
+                            <div class="fill"
+                                style="
+                                    background-color: {{ $goal->category->color }};
+                                    width: {{ $goal->progress }}%;
+                                    "></div>
+                        </div>
+                        <small>{{ $goal->progress }}%</small>
+                    </div>
+
+                </a>
+            @endforeach
         </div>
+
+        <button class="carousel-btn next">›</button>
+
+    </div>
     @endif
 
     {{-- Other goals --}}
@@ -44,11 +60,4 @@
         </div>
     @endforeach
 
-</div>
-
-<div class="text-center mt-4">
-    <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}"
-       class="btn btn-warning text-white fw-semibold px-4">
-        + Naujas tikslas
-    </a>
 </div>

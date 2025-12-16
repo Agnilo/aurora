@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        if (Schema::hasTable('goal_types')) {
-            return;
-        }
-
-        Schema::create('goal_types', function (Blueprint $table) {
+        Schema::create('goal_bonuses', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('icon')->nullable();
+            $table->string('condition_type');
+            $table->string('condition_value')->nullable();
+            $table->integer('bonus_xp');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goal_types');
+        Schema::dropIfExists('goal_bonuses');
     }
 };

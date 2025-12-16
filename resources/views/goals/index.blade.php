@@ -38,7 +38,7 @@
         <h3 class="fw-bold text-warning mb-4">{{ t('goals.yourGoals') }}</h3>
 
         {{-- GOALS LIST --}}
-        @include('goals.partials.list.other.full', [
+        @include('goals.partials.list.all.full', [
             'goals' => $goals
         ])
 

@@ -3,7 +3,7 @@
         Įpročiai greitam startui
     </div>
 
-    <div class="card-body small">
+    <div class="card-body small dashboard-body">
         <div class="row g-2">
 
             {{-- Placeholder / default --}}

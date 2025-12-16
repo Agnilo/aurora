@@ -11,16 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        if (Schema::hasTable('goal_types')) {
-            return;
-        }
-
-        Schema::create('goal_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('icon')->nullable();
-            $table->timestamps();
+        Schema::table('levels', function (Blueprint $table) {
+            $table->unsignedInteger('reward_coins')->default(0)->after('xp_required');
         });
     }
 
@@ -29,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goal_types');
+        Schema::table('levels', function (Blueprint $table) {
+            $table->dropColumn('reward_coins');
+        });
     }
 };

@@ -50,7 +50,7 @@
 
                     {{-- XP TEXT --}}
                     <small>
-                        {{ $level->xp }} / {{ $level->category->max_points ?? 100 }} t.
+                        {{ $level->xp }} / {{ $level->category->max_points ?? 100 }} {{ t('goals.points.short') }}
                     </small>
                 </div>
 

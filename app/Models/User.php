@@ -113,4 +113,18 @@ class User extends Authenticatable
         return $this->hasMany(MoodEntry::class)->latest();
     }
 
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class)
+            ->withPivot('awarded_at')
+            ->withTimestamps();
+    }
+
+    public function currentLevel()
+    {
+        return Level::where('xp_required', '<=', $this->xp)
+            ->orderByDesc('level')
+            ->first();
+    }
+
 }

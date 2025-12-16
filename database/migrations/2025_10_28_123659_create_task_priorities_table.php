@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        if (Schema::hasTable('task_priorities')) {
+            return;
+        }
+
         Schema::create('task_priorities', function (Blueprint $table) {
             $table->id();
             $table->string('name');
