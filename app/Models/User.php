@@ -59,7 +59,7 @@ class User extends Authenticatable
                 'last_activity_date' => now(),
             ]);
 
-            foreach (\App\Models\Category::all() as $category) {
+            foreach (Category::all() as $category) {
                 $user->categoryLevels()->create([
                     'category_id' => $category->id,
                     'level' => 1,
@@ -94,7 +94,7 @@ class User extends Authenticatable
 
     public function getDetailsAttribute()
     {
-        return $this->detailsRelation ?? new \App\Models\UserDetails([
+        return $this->detailsRelation ?? new UserDetails([
             'user_id' => $this->id,
             'birthdate' => null,
             'gender' => null,
@@ -125,6 +125,30 @@ class User extends Authenticatable
         return Level::where('xp_required', '<=', $this->xp)
             ->orderByDesc('level')
             ->first();
+    }
+
+    public function milestones()
+    {
+        return $this->hasManyThrough(
+            Milestone::class,
+            Goal::class,
+            'user_id',
+            'goal_id',
+            'id',
+            'id'
+        );
+    }
+
+    public function getTotalXpAttribute(): int
+    {
+        return $this->pointsLog()
+            ->whereIn('type', [
+                'task_completed',
+                'milestone_completed',
+                'goal_completed',
+                'streak',
+            ])
+            ->sum('amount');
     }
 
 }

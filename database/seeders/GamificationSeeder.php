@@ -24,18 +24,44 @@ class GamificationSeeder extends Seeder
 
     private function seedLevels(): void
     {
-        $levels = [
-            ['level' => 1, 'xp_required' => 0],
-            ['level' => 2, 'xp_required' => 100],
-            ['level' => 3, 'xp_required' => 250],
-            ['level' => 4, 'xp_required' => 500],
-            ['level' => 5, 'xp_required' => 900],
+        $tiers = [
+            [
+                'level_from'   => 1,
+                'level_to'     => 4,
+                'xp_required'  => 0,
+                'reward_coins' => 0,
+                'translation_key' => 'level.1',
+            ],
+            [
+                'level_from'   => 5,
+                'level_to'     => 9,
+                'xp_required'  => 100,
+                'reward_coins' => 10,
+                'translation_key' => 'level.5',
+            ],
+            [
+                'level_from'   => 10,
+                'level_to'     => 19,
+                'xp_required'  => 500,
+                'reward_coins' => 50,
+                'translation_key' => 'level.10',
+            ],
+            [
+                'level_from'   => 20,
+                'level_to'     => 999,
+                'xp_required'  => 2000,
+                'reward_coins' => 200,
+                'translation_key' => 'level.20',
+            ],
         ];
 
-        foreach ($levels as $data) {
+        foreach ($tiers as $tier) {
             Level::updateOrCreate(
-                ['level' => $data['level']],
-                $data
+                [
+                    'level_from' => $tier['level_from'],
+                    'level_to'   => $tier['level_to'],
+                ],
+                $tier
             );
         }
     }

@@ -38,28 +38,21 @@
         </div>
 
         @php
-            $current = $game->streak_current ?? 0;
-
-            $fixedMilestones = [3, 7, 14, 30];
-            $nextMilestone = collect($fixedMilestones)->first(fn ($d) => $d > $current);
-
-            if (!$nextMilestone && $current >= 30) {
-                $nextMilestone = ceil(($current + 1) / 30) * 30;
-            }
-
-            $daysLeft = $nextMilestone ? max($nextMilestone - $current, 0) : null;
+            $next = App\Services\GamificationService::nextStreakReward($game->streak_current ?? 0);
         @endphp
 
-        @if($daysLeft !== null)
+        @if ($next)
             <div class="stats-row stats-row-soft">
                 <div class="stats-label">
                     Kitas streak bonusas
                 </div>
                 <div class="stats-value">
-                    po {{ $daysLeft }} d. (+{{ \App\Services\GamificationService::streakRewardCoins($nextMilestone) }} 🪙)
+                    po {{ $next['day'] - ($game->streak_current ?? 0) }} d.
+                    (+{{ $next['coins'] }} 🪙)
                 </div>
             </div>
         @endif
+
 
         <div class="stats-row">
             <div class="stats-label">{{ t('profile.streak_best') ?? 'Geriausia serija' }}</div>

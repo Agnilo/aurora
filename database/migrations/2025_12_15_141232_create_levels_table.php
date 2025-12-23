@@ -11,12 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('levels');
+
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('level')->unique();
+            
+            $table->unsignedInteger('level_from');
+            $table->unsignedInteger('level_to')->nullable();
             $table->unsignedInteger('xp_required');
-            $table->string('title')->nullable();
+            $table->unsignedInteger('reward_coins')->default(0);
+            $table->string('translation_key');
+
             $table->timestamps();
+
+            $table->unique(['level_from', 'level_to']);
         });
     }
 

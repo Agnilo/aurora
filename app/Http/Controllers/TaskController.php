@@ -6,6 +6,8 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Services\GamificationService;
 use App\Services\PointsService;
+use App\Services\LevelsService;
+use App\Services\BadgeAwardingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -13,7 +15,7 @@ class TaskController extends Controller
 {
     public function toggleComplete($locale, Task $task)
     {
-        return DB::transaction(function () use ($task) {
+        return DB::transaction(function () use ($task, &$streakDay, &$user) {
 
             $task->load(['priority', 'milestone.goal.user', 'status']);
             
@@ -31,19 +33,23 @@ class TaskController extends Controller
                 $task->completed_at = now();
                 $task->status_id = TaskStatus::whereRaw("LOWER(name)='completed'")
                     ->orderBy('order', 'desc')
-                    ->first()
-                    ->id;
+                    ->first()?->id;
+            }
+
+            if (!$task->status_id) {
+                abort(500, 'TaskStatus not found (missing seed?)');
             }
 
             $task->save();
 
             if (!$wasCompletedBefore && !is_null($task->completed_at)) {
-                GamificationService::registerStreak($user);
-            }
+                $streakDay = GamificationService::registerStreak($user);
 
-            \Log::debug('AFTER TOGGLE', [
-                'completed_at' => $task->completed_at,
-            ]);
+                if ($streakDay) {
+                    GamificationService::applyStreakBonus($user, $streakDay);
+                    BadgeAwardingService::check($user, 'streak');
+                }
+            }
 
             PointsService::syncTaskCompletion($task);
 
@@ -57,12 +63,6 @@ class TaskController extends Controller
             PointsService::syncUserGamification($user);
 
             $task->refresh();
-
-
-            \Log::debug('AFTER SYNC', [
-                'completed_at' => $task->completed_at,
-            ]);
-
             $task->load('status');
             $user->load(['gameDetails', 'categoryLevels']);
 
@@ -92,6 +92,7 @@ class TaskController extends Controller
         });
     }
 
+
     public function update($locale, Task $task)
     {
         return DB::transaction(function () use ($task) {
@@ -103,8 +104,8 @@ class TaskController extends Controller
             $wasCompletedBefore = !is_null($task->getOriginal('completed_at'));
 
             $task->update(request()->validate([
-                'title'       => 'sometimes|string|max:255',
-                'points'      => 'sometimes|numeric|min:1',
+                'title' => 'sometimes|string|max:255',
+                'points' => 'sometimes|numeric|min:1',
                 'priority_id' => 'sometimes|exists:priorities,id',
                 'category_id' => 'sometimes|exists:categories,id',
             ]));
@@ -126,9 +127,12 @@ class TaskController extends Controller
 
             $goal->refresh();
             $goal->load('milestones.tasks');
+
             GamificationService::recalcGoalAndMilestones($goal);
 
             PointsService::syncUserGamification($user);
+
+            BadgeAwardingService::check($user, 'task');
 
             return response()->json(['success' => true]);
         });

@@ -18,10 +18,6 @@ class SyncStreak
     public function handle(Request $request, Closure $next): Response
     {
 
-        if (Auth::check()) {
-            GamificationService::syncStreakState(Auth::user());
-        }
-        
         return $next($request);
     }
 }

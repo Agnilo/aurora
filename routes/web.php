@@ -10,6 +10,8 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\PublicProfileController;
 
 Route::get('{locale}/lang', function ($locale) {
     $available = ['en', 'lt'];
@@ -58,6 +60,12 @@ Route::group([
     Route::post('/tasks/{task}/toggle-complete', [TaskController::class, 'toggleComplete'])
         ->name('tasks.toggle-complete');
 
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])
+        ->name('leaderboard.index');
+
+    Route::get('/public/{user}', [PublicProfileController::class, 'show'])
+        ->name('public.show');
+
     Route::middleware('auth')->group(function () {
         Route::prefix('profile')->as('profile.')->group(function () {
 
@@ -75,6 +83,8 @@ Route::group([
                 ->name('avatar');
             Route::post('/avatar', [ProfileController::class, 'updateAvatar'])
                 ->name('avatar.update');
+            Route::get('/badges', [ProfileController::class, 'badges'])
+                ->name('badges');
 
         });
     });

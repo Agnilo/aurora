@@ -12,7 +12,7 @@
         }}');">
 
 
-        {{-- OVERLAY (TU JO NETURI ŠIUO METU) --}}
+        {{-- OVERLAY --}}
         <div class="profile-hero-overlay"></div>
 
         {{-- HERO CONTENT (avatar + text) --}}
@@ -54,6 +54,11 @@
         <a href="{{ route('profile.avatar', app()->getLocale()) }}"
             class="profile-tab {{ $activeTab === 'avatar' ? 'active' : '' }}">
             {{ t('profile.tab.persona') ?? 'Avataras' }}
+        </a>
+
+        <a href="{{ route('profile.badges', app()->getLocale()) }}"
+            class="profile-tab {{ $activeTab === 'badges' ? 'active' : '' }}">
+            badge
         </a>
 
     </div>

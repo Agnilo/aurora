@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('levels', function (Blueprint $table) {
-            $table->unsignedInteger('reward_coins')->default(0)->after('xp_required');
+        Schema::create('badge_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+            $table->string('label');
+            $table->boolean('active')->default(true);
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('levels', function (Blueprint $table) {
-            $table->dropColumn('reward_coins');
-        });
+        Schema::dropIfExists('badge_categories');
     }
 };

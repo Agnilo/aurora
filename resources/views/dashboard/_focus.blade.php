@@ -3,7 +3,7 @@
         {{ t('dashboard.focus_time') }}
     </div>
 
-    <div class="card-body text-center d-flex flex-column justify-content-center">
+    <div class="card-body text-center d-flex flex-column justify-content-center dashboard-body">
         <div class="fs-3 fw-monospace mb-3">
             00:00:00
         </div>

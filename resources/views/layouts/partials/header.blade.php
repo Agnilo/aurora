@@ -18,7 +18,10 @@
                 {{ t('header.goals') }}
             </a>
 
-            <a href="#" class="">Planavimas</a>
+            <a href="{{ route('leaderboard.index', app()->getLocale()) }}"
+                class="{{ request()->routeIs('leaderboard.*') ? 'active' : '' }}">
+                Lyderiai
+            </a>
             <a href="#" class="">Personažas</a>
         </div>
 

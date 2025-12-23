@@ -6,7 +6,13 @@
 
     <title>Aurora Admin</title>
 
-    @vite(['resources/css/admin.css'])
+@vite([
+    'resources/css/theme.css',
+    'resources/css/admin/admin.css',
+    'resources/css/admin/layout.css',
+    'resources/css/admin/sidebar.css',
+    'resources/css/admin/dashboard.css',
+])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
 </head>
@@ -37,6 +43,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.css">
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.sidebar-toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('active');
+
+            const submenu = toggle.nextElementSibling;
+            if (submenu) {
+                submenu.classList.toggle('open');
+            }
+        });
+    });
+});
+</script>
 @yield('scripts')
 </body>
 </html>

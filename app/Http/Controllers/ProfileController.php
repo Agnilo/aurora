@@ -242,5 +242,38 @@ class ProfileController extends Controller
         return back()->with('success', 'Viršelis atnaujintas!');
     }
 
+    public function badges($locale)
+    {
+        $user = auth()->user();
+
+        $game = $user->gameDetails;
+        $details = $user->details;
+
+        if (!$game) {
+            $game = (object) [
+                'level' => 1,
+                'xp' => 0,
+                'xp_next' => 100,
+                'coins' => 0,
+                'streak_current' => 0,
+                'streak_best' => 0,
+                'last_activity_date' => null,
+            ];
+        }
+
+        if (!$details) {
+            $details = new \App\Models\UserDetails([
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return view('profile.badges', [
+            'user' => $user,
+            'game' => $game,
+            'details' => $details,
+            'badges' => $user->badges()->with('category')->get(),
+            'activeTab' => 'badges',
+        ]);
+    }
 
 }

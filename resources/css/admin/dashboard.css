@@ -1,0 +1,58 @@
+.admin-dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    max-width: 1100px;
+}
+
+/* Title */
+.admin-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.admin-subtitle {
+    color: #6f6f6f;
+    margin-bottom: 24px;
+}
+
+/* Cards row */
+.admin-cards-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Dashboard card */
+.admin-card {
+    flex: 1;
+    min-width: 240px;
+    background: #ffffff;
+    padding: 20px 24px;
+    border: 1px solid #f1e4c7;
+    border-radius: 14px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.admin-card span {
+    font-weight: 500;
+}
+
+/* Disabled card */
+.admin-card.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}

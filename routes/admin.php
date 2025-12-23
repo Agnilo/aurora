@@ -7,6 +7,14 @@ use App\Http\Controllers\Admin\TranslationGroupController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Admin\LookupAdminController;
 use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\Gamification\GamificationDashboardController;
+use App\Http\Controllers\Admin\Gamification\BadgeAdminController;
+use App\Http\Controllers\Admin\Gamification\BadgeCategoryAdminController;
+use App\Http\Controllers\Admin\Gamification\BonusAdminController;
+use App\Http\Controllers\Admin\Gamification\BonusContextAdminController;
+use App\Http\Controllers\Admin\Gamification\GoalBonusAdminController;
+use App\Http\Controllers\Admin\Gamification\LevelAdminController;
+use App\Http\Controllers\Admin\Gamification\XpRuleAdminController;
 
 use App\Http\Middleware\SetAppLocale;
 
@@ -89,6 +97,10 @@ Route::group([
         Route::resource('bonuses', BonusAdminController::class)->except(['show']);
         Route::resource('badges', BadgeAdminController::class)->except(['show']);
         Route::resource('goal-bonuses', GoalBonusAdminController::class)->except(['show']);
+        Route::resource('bonus-contexts', BonusContextAdminController::class)
+            ->except(['show', 'destroy']);
+        Route::resource('badge-categories', BadgeCategoryAdminController::class)
+            ->except(['show', 'destroy']);
 
     });
 

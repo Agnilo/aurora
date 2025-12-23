@@ -1,0 +1,154 @@
+.admin-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #f3e7c1;
+    padding: 10px 0;
+}
+
+.admin-navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.admin-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d28a21;
+    text-decoration: none;
+    letter-spacing: -0.3px;
+}
+
+.admin-logo:hover {
+    text-decoration: none;
+    color: #c27c1c;
+}
+
+/* LANGUAGE SWITCH */
+
+.admin-lang-switch a {
+    color: #6a5b3a;
+    padding: 4px 6px;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-right: 4px;
+    font-size: 0.9rem;
+}
+
+.admin-lang-switch a:hover {
+    background: #fff1c7;
+}
+
+.admin-lang-switch a.active {
+    background: #ffe9b6;
+    font-weight: 700;
+    color: #000;
+}
+
+/* USER BUTTON + DROPDOWN */
+
+.admin-user-btn {
+    background: #fcf7ec;
+    border: 1px solid #e0d3b4;
+    padding: 6px 16px;
+    border-radius: 20px;
+    color: #6b5c41;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.admin-user-btn:hover {
+    background: #fff1c7;
+}
+
+/* Bootstrap dropdown override */
+.dropdown-menu {
+    border-radius: 12px;
+    padding: 8px 0;
+    border: 1px solid #e0d3b4;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.dropdown-menu li {
+    list-style: none;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #5c4b32;
+}
+
+.dropdown-item:hover {
+    background: #fff1c7;
+}
+
+.admin-dropdown-divider {
+    margin: 6px 0;
+    border-top: 1px solid #e8dcc0;
+}
+
+/* LINKS / HELPERS */
+
+.hover-underline:hover {
+    text-decoration: underline;
+}
+
+/*  TABLES (ADMIN) */
+
+.table {
+    font-size: 0.95rem;
+}
+
+.table thead th {
+    background: #f4f4f4;
+    color: #5a5a5a;
+    font-weight: 600;
+    vertical-align: middle !important;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.table tbody td {
+    vertical-align: middle !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.table tbody tr:hover {
+    background: #fafafa;
+}
+
+.table tbody td.text-end a,
+.table tbody td.text-end form {
+    margin-left: 10px;
+}
+
+.table .check-icon {
+    color: #6a4fbf;
+    font-size: 18px;
+}
+
+/* LOOKUP / ADMIN CARDS (GENERIC) */
+
+.lookup-card {
+    border: 1px solid #e9e2cc;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.lookup-card table thead th {
+    background: #f9f4e7;
+    font-weight: 600;
+    border-bottom: 1px solid #e3d8c2;
+}
+
+.lookup-card table tbody tr td {
+    vertical-align: middle;
+}

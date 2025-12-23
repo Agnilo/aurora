@@ -8,6 +8,7 @@ use App\Models\PointsLog;
 use App\Models\User;
 use App\Models\UserCoinAward;
 use App\Models\UserStreak;
+use App\Models\Bonus;
 use Carbon\Carbon;
 
 class GamificationService
@@ -74,6 +75,9 @@ class GamificationService
                             'amount' => $xp,
                             'type' => 'milestone_completed',
                         ]);
+
+                        BadgeAwardingService::check($user, 'milestones');
+
                     } else {
                         $log->category_id = $goal->category_id;
                         $log->points = $xp;
@@ -124,6 +128,9 @@ class GamificationService
                     'amount' => $xp,
                     'type' => 'goal_completed',
                 ]);
+
+                BadgeAwardingService::check($user, 'goals');
+
             } else {
                 $log->category_id = $goal->category_id;
                 $log->points = $xp;
@@ -145,7 +152,12 @@ class GamificationService
             ->map(fn($t) => PointsService::calculateXp($t))
             ->avg();
 
-        return (int) floor(((float) $avg) * 1.2);
+        return BonusService::applyForContext(
+            $milestone->goal->user,
+            'milestone_multiplication',
+            (float) $avg,
+            $milestone
+        );
     }
 
     public static function calculateGoalXp(Goal $goal): int
@@ -158,7 +170,12 @@ class GamificationService
             ->map(fn($m) => self::calculateMilestoneXp($m))
             ->avg();
 
-        return (int) floor(((float) $avg) * 1.3);
+        return BonusService::applyForContext(
+            $goal->user,
+            'goal_multiplication',
+            (float) $avg,
+            $goal
+        );
     }
 
     public static function giveCoins(User $user, int $amount = 1): void
@@ -168,27 +185,26 @@ class GamificationService
         $game->save();
     }
 
-    public static function registerStreak(User $user): void
+    public static function registerStreak(User $user): ?int
     {
         $today = Carbon::today();
 
-        if (
-            UserStreak::where('user_id', $user->id)
-                ->where('activity_date', $today)
-                ->exists()
-        ) {
-            return;
+        $existing = UserStreak::where('user_id', $user->id)
+            ->where('activity_date', $today)
+            ->first();
+
+        if ($existing) {
+            self::applyStreakBonus($user, $existing->streak_day);
+            return $existing->streak_day;
         }
 
         $last = UserStreak::where('user_id', $user->id)
             ->orderByDesc('activity_date')
             ->first();
 
-        if ($last && $last->activity_date->isYesterday()) {
-            $streakDay = $last->streak_day + 1;
-        } else {
-            $streakDay = 1;
-        }
+        $streakDay = ($last && $last->activity_date->isYesterday())
+            ? $last->streak_day + 1
+            : 1;
 
         UserStreak::create([
             'user_id' => $user->id,
@@ -202,39 +218,9 @@ class GamificationService
         $game->last_activity_date = $today;
         $game->save();
 
-        $milestone = null;
+        self::applyStreakBonus($user, $streakDay);
 
-        if ($streakDay <= 30) {
-            $fixed = [3, 7, 14, 30];
-            if (in_array($streakDay, $fixed)) {
-                $milestone = $streakDay;
-            }
-        } else {
-            if ($streakDay % 30 === 0) {
-                $milestone = $streakDay;
-            }
-        }
-
-        if ($milestone) {
-            $coins = self::streakRewardCoins($milestone);
-
-            $alreadyAwarded = UserCoinAward::where('user_id', $user->id)
-                ->where('award_type', 'streak')
-                ->where('awardable_id', $milestone)
-                ->exists();
-
-            if (!$alreadyAwarded && $coins > 0) {
-                self::giveCoins($user, $coins);
-
-                UserCoinAward::create([
-                    'user_id' => $user->id,
-                    'award_type' => 'streak',
-                    'awardable_id' => $milestone,
-                    'coins' => $coins,
-                    'awarded_at' => now(),
-                ]);
-            }
-        }
+        return $streakDay;
     }
 
     public static function syncStreakState(User $user): void
@@ -254,41 +240,72 @@ class GamificationService
         }
     }
 
-
-    public static function streakRewardCoins(int $day): int
+    public static function applyStreakBonus(User $user, int $streakDay): void
     {
-        if ($day <= 30) {
-            return match ($day) {
-                3  => 5,
-                7  => 15,
-                14 => 30,
-                30 => 60,
-                default => 0,
-            };
+        $bonus = Bonus::query()
+            ->where('active', true)
+            ->whereHas('bonusContext', fn ($q) => $q->where('key', 'streak'))
+            ->where('streak_days', $streakDay)
+            ->where('type', 'flat')
+            ->first();
+
+        if (! $bonus) {
+            return;
         }
 
-        return (int) floor(60 + (($day - 30) / 30) * 25);
-    }
+        $alreadyAwarded = UserCoinAward::where('user_id', $user->id)
+            ->where('award_type', 'streak')
+            ->where('awardable_id', $bonus->id)
+            ->exists();
 
-    public static function nextStreakRewardDay(int $current): ?int
-    {
-        $fixed = [3, 7, 14, 30];
-
-        foreach ($fixed as $day) {
-            if ($current < $day) {
-                return $day;
-            }
+        if ($alreadyAwarded) {
+            return;
         }
 
-        return (int) (ceil($current / 30) * 30);
+        PointsLog::create([
+            'user_id' => $user->id,
+            'points'  => (int) $bonus->value,
+            'amount'  => (int) $bonus->value,
+            'type'    => 'streak',
+            'meta'    => [
+                'day' => $streakDay,
+            ],
+        ]);
+
+        self::giveCoins($user, (int) $bonus->value);
+
+        UserCoinAward::create([
+            'user_id'      => $user->id,
+            'award_type'   => 'streak',
+            'awardable_id' => $bonus->id,
+            'coins'        => (int) $bonus->value,
+            'awarded_at'   => now(),
+        ]);
     }
 
-    public static function nextStreakRewardCoins(int $day): int
+    public static function nextStreakReward(int $currentStreak): ?array
     {
-        return self::streakRewardCoins($day);
+        $bonus = Bonus::query()
+            ->where('active', true)
+            ->whereHas('bonusContext', fn ($q) => $q->where('key', 'streak'))
+            ->whereRaw(
+                "CAST(SUBSTR(`key`, 8) AS INTEGER) > ?",
+                [$currentStreak]
+            )
+            ->orderByRaw("CAST(SUBSTR(`key`, 8) AS INTEGER)")
+            ->first();
+
+        if (! $bonus) {
+            return null;
+        }
+
+        $day = (int) str_replace('streak_', '', $bonus->key);
+
+        return [
+            'day'   => $day,
+            'coins' => (int) $bonus->value,
+        ];
     }
-
-
 
     private static function game(User $user)
     {

@@ -1,8 +1,29 @@
 <?php
+use App\Services\TranslationService;
 
-if (!function_exists('t')) {
-    function t($key, $replace = [])
+if (! function_exists('t')) {
+    function t(string $key, $replace = [], ?string $fallback = null)
     {
-        return app('translation')->get($key, $replace);
+
+        if ($replace === null) {
+            $replace = [];
+        }
+
+        if (is_string($replace)) {
+            $fallback = $replace;
+            $replace = [];
+        }
+
+        if (!is_array($replace)) {
+            $replace = [];
+        }
+
+        $value = app(TranslationService::class)->get($key, $replace);
+
+        if ($value === $key) {
+            return $fallback ?? $key;
+        }
+
+        return $value;
     }
 }
