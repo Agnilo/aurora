@@ -76,7 +76,7 @@ class GamificationService
                             'type' => 'milestone_completed',
                         ]);
 
-                        BadgeAwardingService::check($user, 'milestones');
+                        BadgeAwardingService::check($goal->user, 'milestones');
 
                     } else {
                         $log->category_id = $goal->category_id;
@@ -129,7 +129,7 @@ class GamificationService
                     'type' => 'goal_completed',
                 ]);
 
-                BadgeAwardingService::check($user, 'goals');
+                BadgeAwardingService::check($goal->user, 'goals');
 
             } else {
                 $log->category_id = $goal->category_id;
