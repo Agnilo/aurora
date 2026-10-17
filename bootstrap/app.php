@@ -16,14 +16,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->redirectUsersTo(function ($request) {
+            return route('dashboard', [
+                'locale' => app()->getLocale(),
+            ]);
+        });
+
         $middleware->append([
             SetAppLocale::class,
             SyncStreak::class,
         ]);
+
         $middleware->alias([
-        'role' => RoleMiddleware::class,
-        'permission' => PermissionMiddleware::class,
-    ]);
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+        ]);
     })
     ->withProviders([
         TranslationServiceProvider::class,

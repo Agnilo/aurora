@@ -1,0 +1,54 @@
+.aurora-navbar {
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border-muted);
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.aurora-logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.aurora-nav a {
+    text-decoration: none;
+    color: var(--color-text-nav);
+    font-weight: 500;
+    transition: color 0.25s ease;
+}
+.aurora-nav a:hover {
+    color: var(--color-primary-hover);
+}
+.aurora-nav a.active {
+    color: var(--color-primary);
+    font-weight: 700;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 2px;
+}
+
+.aurora-lang-switch a {
+    color: var(--color-text-nav-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.aurora-lang-switch a.active {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.aurora-user-btn {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+}
+.aurora-user-btn:hover {
+    background: var(--color-bg-soft);
+    border-color: #ffcc8a;
+}

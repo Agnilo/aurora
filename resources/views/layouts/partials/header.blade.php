@@ -1,109 +1,76 @@
-<nav class="aurora-navbar">
-    <div class="container d-flex justify-content-between align-items-center">
-
-        {{-- LEFT: LOGO --}}
-        <a href="{{ route('dashboard', app()->getLocale()) }}" class="aurora-logo">
-            aurora
+<header class="app-header">
+    <div class="app-header-inner">
+        <a class="app-logo" href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}" aria-label="Aurora">
+            @if (file_exists(public_path('images/welcome/wordmark-1024-cropped.png')))
+                <img src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="Aurora">
+            @elseif (file_exists(public_path('images/welcome/wordmark-1024.png')))
+                <img src="{{ asset('images/welcome/wordmark-1024.png') }}" alt="Aurora">
+            @else
+                AURORA
+            @endif
         </a>
 
-        {{-- CENTER NAVIGATION --}}
-        <div class="aurora-nav d-none d-md-flex gap-4">
-            <a href="{{ route('dashboard', app()->getLocale()) }}"
-               class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                {{ t('header.main') }}
+        <nav class="app-nav" aria-label="{{ t('app_shell.navigation') }}">
+            <a href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}"
+               @if (request()->routeIs('dashboard')) aria-current="page" @endif>
+                {{ t('app_shell.today') }}
             </a>
-
-            <a href="{{ route('goals.index', app()->getLocale()) }}"
-               class="{{ request()->routeIs('goals.*') ? 'active' : '' }}">
-                {{ t('header.goals') }}
+            <a href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}"
+               @if (request()->routeIs('goals.*', 'category.show')) aria-current="page" @endif>
+                {{ t('app_shell.goals') }}
             </a>
-
-            <a href="{{ route('leaderboard.index', app()->getLocale()) }}"
-                class="{{ request()->routeIs('leaderboard.*') ? 'active' : '' }}">
-                Lyderiai
+            <a href="{{ route('leaderboard.index', ['locale' => app()->getLocale()]) }}"
+               @if (request()->routeIs('leaderboard.*')) aria-current="page" @endif>
+                {{ t('app_shell.leaderboard') }}
             </a>
-            <a href="#" class="">Personažas</a>
-        </div>
+        </nav>
 
-        {{-- RIGHT SIDE --}}
-        <div class="d-flex align-items-center gap-3">
+        <div class="app-header-actions">
+            <nav class="app-languages" aria-label="{{ t('app_shell.language') }}">
+                @foreach (['lt', 'en'] as $language)
+                    <a href="{{ route('lang.switch', ['locale' => $language]) }}"
+                       lang="{{ $language }}" hreflang="{{ $language }}"
+                       @if (app()->getLocale() === $language) aria-current="page" @endif>
+                        {{ strtoupper($language) }}
+                    </a>
+                    @if ($loop->first)<span aria-hidden="true">/</span>@endif
+                @endforeach
+            </nav>
 
-            {{-- LANGUAGE SWITCH --}}
-            <div class="aurora-lang-switch d-none d-md-flex gap-2">
-                <a href="{{ route('lang.switch', ['locale' => 'lt']) }}"
-                   class="{{ app()->getLocale() == 'lt' ? 'active' : '' }}">LT</a>
-
-                <a href="{{ route('lang.switch', ['locale' => 'en']) }}"
-                   class="{{ app()->getLocale() == 'en' ? 'active' : '' }}">EN</a>
-            </div>
-
-            {{-- AUTH --}}
             @auth
+                @php
+                    $details = Auth::user()->details;
+                    $avatar = $details?->avatar ? asset('storage/'.$details->avatar) : null;
+                @endphp
                 <div class="dropdown">
-                    <button class="aurora-user-btn dropdown-toggle d-flex align-items-center gap-2"
-                        data-bs-toggle="dropdown">
-
-                    {{-- SMALL AVATAR --}}
-                    @php
-                        $details = Auth::user()->details;
-                        $avatar = $details?->avatar 
-                            ? asset('storage/' . $details->avatar) 
-                            : null;
-                    @endphp
-
-                    @if($avatar)
-                        <img src="{{ $avatar }}" class="header-avatar" alt="Avatar">
-                    @else
-                        <div class="header-avatar placeholder-avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </div>
-                    @endif
-
-                    {{-- NAME --}}
-                    <span>{{ Auth::user()->name }}</span>
-
-                </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        
-                        {{-- ADMIN ONLY --}}
+                    <button class="app-user" type="button" id="app-user-menu"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        @if ($avatar)
+                            <img class="app-avatar" src="{{ $avatar }}" alt="">
+                        @else
+                            <span class="app-avatar app-avatar-initial" aria-hidden="true">{{ mb_substr(Auth::user()->name, 0, 1) }}</span>
+                        @endif
+                        <span class="app-user-name">{{ Auth::user()->name }}</span>
+                        <span aria-hidden="true">⌄</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end app-user-menu" aria-labelledby="app-user-menu">
                         @role('admin')
-                        <li>
-                            <a class="dropdown-item"
-                            href="{{ route('admin.dashboard', app()->getLocale()) }}">
-                                Admin
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.dashboard', ['locale' => app()->getLocale()]) }}">{{ t('app_shell.admin') }}</a></li>
+                            <li><hr class="dropdown-divider"></li>
                         @endrole
-
-                        <li>
-                            <a class="dropdown-item" 
-                               href="{{ route('profile.edit', app()->getLocale()) }}">
-                                {{ t('group.profile.group') }}
-                            </a>
-                        </li>
-
+                        <li><a class="dropdown-item" href="{{ route('profile.edit', ['locale' => app()->getLocale()]) }}">{{ t('app_shell.profile') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
-
                         <li>
-                            <form method="POST" action="{{ route('logout', app()->getLocale()) }}">
+                            <form method="POST" action="{{ route('logout', ['locale' => app()->getLocale()]) }}">
                                 @csrf
-                                <button class="dropdown-item text-danger">{{ t('button.disconnect') }}</button>
+                                <button class="dropdown-item" type="submit">{{ t('app_shell.logout') }}</button>
                             </form>
                         </li>
                     </ul>
                 </div>
+            @else
+                <a class="app-login" href="{{ route('login', ['locale' => app()->getLocale()]) }}">{{ t('app_shell.login') }}</a>
             @endauth
-
-            @guest
-                <a href="{{ route('login', app()->getLocale()) }}" 
-                   class="btn btn-sm btn-outline-warning">
-                    {{ t('button.login') }}
-                </a>
-            @endguest
-
         </div>
-
     </div>
-</nav>
+</header>

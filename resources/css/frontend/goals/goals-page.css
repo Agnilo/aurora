@@ -1,0 +1,513 @@
+.aurora-app .goals-page {
+    background: transparent;
+    padding-block: 40px 56px;
+}
+
+.goals-page .gp-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.goals-page .gp-eyebrow {
+    margin: 0 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.goals-page h1 {
+    margin: 0;
+    font-size: clamp(38px, 4.5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.055em;
+}
+
+.goals-page .gp-description {
+    margin: 14px 0 0;
+    color: var(--app-muted);
+    font-size: 18px;
+}
+
+.goals-page .gp-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 22px;
+    border: 1px solid #191a1b;
+    border-radius: 6px;
+    background: #191a1b;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.goals-page .gp-primary:hover {
+    background: #303136;
+}
+
+.goals-page .gp-panel {
+    padding: 26px;
+    border: 1px solid rgba(25, 30, 40, 0.09);
+    border-radius: 14px;
+    background: rgba(255, 253, 250, 0.65);
+    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    backdrop-filter: blur(20px) saturate(125%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    min-height: 320px;
+}
+
+.goals-page .gp-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.goals-page .gp-toolbar h2 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: -0.035em;
+}
+
+.goals-page .gp-statuses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.goals-page .gp-statuses a {
+    padding: 9px 13px;
+    border-radius: 7px;
+    color: var(--app-ink);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.goals-page .gp-statuses a:hover,
+.goals-page .gp-statuses a[aria-current] {
+    background: rgba(217, 144, 156, 0.18);
+}
+
+.goals-page .gp-section-label {
+    margin: 24px 0 14px;
+    color: var(--app-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.goals-page .accordion-item {
+    overflow: hidden;
+    border: 1px solid var(--app-rule) !important;
+    border-radius: 9px !important;
+    background: rgba(255, 253, 250, 0.55);
+    box-shadow: none !important;
+}
+
+.goals-page .accordion-button {
+    gap: 8px;
+    padding: 21px 20px;
+    background: transparent;
+    color: var(--app-ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    box-shadow: none;
+}
+
+.goals-page .accordion-button:not(.collapsed) {
+    background: rgba(217, 144, 156, 0.09);
+    color: var(--app-ink);
+}
+
+.goals-page .accordion-button .badge {
+    font-size: 10px;
+    font-weight: 500;
+    white-space: normal;
+}
+
+.goals-page .accordion-button .bg-warning {
+    background: rgba(217, 144, 156, 0.18) !important;
+    color: var(--app-ink) !important;
+}
+
+.goals-page .goal-progress-badge {
+    min-width: 45px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.goals-page .accordion-body {
+    padding: 22px;
+    background: transparent !important;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.goals-page .accordion-body h5 {
+    font-size: 17px;
+}
+
+.goals-page .milestone-item {
+    border-color: rgba(217, 144, 156, 0.4) !important;
+}
+
+.goals-page .list-group-item {
+    background: rgba(255, 255, 255, 0.45);
+    border-color: var(--app-rule) !important;
+}
+
+.goals-page .task-done-toggle {
+    width: 16px;
+    height: 16px;
+    margin-right: 7px;
+    accent-color: var(--app-rose-deep);
+}
+
+.goals-page .btn-outline-warning {
+    border-color: var(--app-rule);
+    background: transparent;
+    color: var(--app-ink);
+}
+
+.goals-page .btn-outline-warning:hover {
+    background: rgba(217, 144, 156, 0.18);
+}
+
+.goals-page .btn-danger {
+    border-color: rgba(133, 40, 62, 0.25);
+    background: transparent;
+    color: #85283e;
+}
+
+.goals-page .btn-danger:hover {
+    background: rgba(133, 40, 62, 0.08);
+}
+
+.goals-page .gp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 210px;
+    text-align: center;
+}
+
+.goals-page .gp-empty-mark {
+    display: block;
+    margin-bottom: 16px;
+    color: var(--app-rose-deep);
+    font-size: 36px;
+}
+
+.goals-page .gp-empty h3 {
+    font-size: 23px;
+}
+
+.goals-page .gp-empty p {
+    margin: 12px 0 24px;
+    color: var(--app-muted);
+}
+
+.goals-page .gp-skeleton-title,
+.goals-page .gp-skeleton-tabs span,
+.goals-page .gp-skeleton-label,
+.goals-page .gp-skeleton-dot,
+.goals-page .gp-skeleton-name,
+.goals-page .gp-skeleton-badge {
+    display: block;
+    border-radius: 5px;
+
+    background: linear-gradient(
+        100deg,
+        rgba(25, 30, 40, 0.05) 25%,
+        rgba(255, 255, 255, 0.65) 50%,
+        rgba(25, 30, 40, 0.05) 75%
+    );
+    background-size: 200% 100%;
+
+    animation: gp-shimmer 1.6s ease-in-out infinite;
+}
+
+.goals-page .gp-skeleton-title {
+    width: 150px;
+    height: 26px;
+}
+
+.goals-page .gp-skeleton-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.goals-page .gp-skeleton-tabs span {
+    width: 54px;
+    height: 32px;
+}
+
+.goals-page .gp-skeleton-label {
+    width: 125px;
+    height: 12px;
+    margin-bottom: 14px;
+}
+
+.goals-page .gp-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-height: 60px;
+    margin-bottom: 12px;
+    padding: 16px 20px;
+
+    border: 1px solid var(--app-rule);
+    border-radius: 9px;
+    background: rgba(255, 253, 250, 0.35);
+}
+
+.goals-page .gp-skeleton-dot {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.goals-page .gp-skeleton-name {
+    width: 35%;
+    height: 14px;
+}
+
+.goals-page .gp-skeleton-badge {
+    width: 48px;
+    height: 20px;
+    margin-left: auto;
+}
+
+@keyframes gp-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .goals-page .gp-skeleton-tabs {
+        gap: 4px;
+    }
+
+    .goals-page .gp-skeleton-tabs span {
+        width: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .goals-page .gp-skeleton * {
+        animation: none;
+    }
+}
+
+.goals-page .gp-notice {
+    padding: 14px 18px;
+    border-left: 3px solid #64816a;
+    background: rgba(255, 253, 250, 0.8);
+}
+
+.goals-page a:focus-visible,
+.goals-page button:focus-visible,
+.goals-page input:focus-visible {
+    outline: 2px solid var(--app-rose-deep);
+    outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+    .aurora-app .goals-page {
+        padding-top: 28px;
+    }
+
+    .goals-page .gp-panel {
+        padding: 18px;
+        min-height: 320px;
+    }
+
+    .goals-page .accordion-button {
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+
+    .goals-page .accordion-body {
+        padding: 16px;
+    }
+}
+
+/* Category cards — existing interaction hooks preserved. */
+
+.goals-page .category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0 0 28px;
+}
+
+.goals-page .category-link {
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.goals-page .life-area-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    min-height: 190px;
+    padding: 22px;
+
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 14px;
+    background: rgba(255, 253, 250, 0.45);
+
+    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    backdrop-filter: blur(20px) saturate(125%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        0 8px 26px rgba(30, 26, 29, 0.04);
+
+    transition:
+        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+        opacity 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.goals-page .gc-icon {
+    display: grid;
+    place-items: center;
+
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    border-radius: 50%;
+
+    background: rgba(217, 144, 156, 0.15);
+    background: color-mix(
+        in srgb,
+        var(--accent) 20%,
+        transparent
+    );
+}
+
+.goals-page .gc-icon svg {
+    width: 25px;
+    height: 25px;
+
+    fill: none;
+    stroke: var(--app-ink);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.goals-page .life-area-title {
+    margin: 0 0 18px;
+    color: var(--app-ink);
+
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.goals-page .life-area-progress {
+    width: 100%;
+    margin-top: auto;
+}
+
+.goals-page .gc-progress {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: rgba(25, 30, 40, 0.08);
+}
+
+.goals-page .gc-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+
+    transition: width 0.35s ease;
+}
+
+.goals-page .life-area-progress small {
+    display: block;
+    margin-top: 10px;
+    color: var(--app-muted);
+
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+}
+
+.goals-page .category-link:hover .life-area-card {
+    transform: translateY(-3px);
+}
+
+.goals-page .category-grid.has-active .life-area-card {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.goals-page .category-grid.has-active
+.category-link.active .life-area-card {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+
+    border-color: var(--accent);
+    background: rgba(255, 253, 250, 0.65);
+
+    box-shadow:
+        0 0 0 1px var(--accent),
+        0 12px 28px rgba(30, 26, 29, 0.09);
+}
+
+@media (max-width: 800px) {
+    .goals-page .category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (max-width: 440px) {
+    .goals-page .life-area-card {
+        min-height: 170px;
+        padding: 16px;
+    }
+
+    .goals-page .life-area-title {
+        font-size: 15px;
+    }
+
+    .goals-page .gc-icon {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .goals-page .life-area-card,
+    .goals-page .gc-progress > span {
+        transition: none;
+    }
+}

@@ -1,29 +1,61 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', t('auth.confirm_title'))
 
 @section('content')
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-    </div>
+    <p class="auth-eyebrow">
+        {{ t('auth.confirm_label') }}
+    </p>
 
-    <form method="POST" action="{{ route('password.confirm', ['locale' => App::getLocale()]) }}">
+    <h1 id="auth-title">
+        {{ t('auth.confirm_title') }}
+    </h1>
+
+    <p class="auth-description">
+        {{ t('auth.confirm_description') }}
+    </p>
+
+    <form
+        class="auth-form"
+        method="POST"
+        action="{{ route('password.confirm', ['locale' => app()->getLocale()]) }}"
+    >
         @csrf
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="auth-field">
+            <label for="password">
+                {{ t('auth.password') }}
+            </label>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                autofocus
+                @error('password')
+                    aria-invalid="true"
+                    aria-describedby="password-error"
+                @enderror
+            >
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            @error('password')
+                <p class="auth-error" id="password-error">
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <button class="auth-submit" type="submit">
+            {{ t('auth.confirm_submit') }}
+            <span aria-hidden="true">→</span>
+        </button>
     </form>
+
+    <p class="auth-switch">
+        <a href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
+            {{ t('auth.back_to_dashboard') }}
+        </a>
+    </p>
 @endsection

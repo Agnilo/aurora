@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,27 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
        App::setLocale(Session::get('locale', config('app.locale')));
-        //
+
+       ResetPassword::createUrlUsing(function ($user, string $token) {
+            return route('password.reset', [
+                'locale' => app()->getLocale(),
+                'token' => $token,
+                'email' => $user->getEmailForPasswordReset(),
+            ]);
+        });
+
+        VerifyEmail::createUrlUsing(function ($user) {
+            return URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(
+                    config('auth.verification.expire', 60)
+                ),
+                [
+                    'locale' => app()->getLocale(),
+                    'id' => $user->getKey(),
+                    'hash' => sha1($user->getEmailForVerification()),
+                ]
+            );
+        });
     }
 }

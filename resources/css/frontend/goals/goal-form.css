@@ -1,0 +1,428 @@
+.aurora-app .goal-editor {
+    max-width: 1100px;
+    padding-top: 32px;
+    padding-bottom: 48px;
+    color: #10151e;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.goal-editor .gf-page-heading {
+    margin-bottom: 28px;
+}
+
+.goal-editor .gf-page-heading h1 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.045em;
+}
+
+.goal-form {
+    display: grid;
+    gap: 20px;
+}
+
+.goal-form .gf-panel {
+    min-width: 0;
+    padding: 28px;
+    border: 1px solid rgb(255 255 255 / 70%);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 42%);
+    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    backdrop-filter: blur(20px) saturate(125%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 65%),
+        0 12px 32px rgb(30 26 29 / 5%);
+}
+
+.goal-form .gf-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.goal-form .gf-section-heading h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+}
+
+.goal-form .gf-number {
+    color: rgb(16 21 30 / 50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.goal-form .gf-grid {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+}
+
+.goal-form .gf-grid-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.goal-form .gf-grid-four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.goal-form .gf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 20px;
+}
+
+.goal-form .gf-grid > .gf-field {
+    margin-bottom: 0;
+}
+
+.goal-form .gf-field label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.goal-form .gf-field input,
+.goal-form .gf-field select,
+.goal-form .gf-field textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 14px;
+    border: 1px solid rgb(25 30 40 / 17%);
+    border-radius: 7px;
+    background: rgb(255 255 255 / 52%);
+    color: #10151e;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.goal-form .gf-field textarea {
+    min-height: 112px;
+    resize: vertical;
+}
+
+.goal-form .gf-field input::placeholder {
+    color: rgb(16 21 30 / 42%);
+}
+
+.goal-form .gf-field select option {
+    background: #faf7f3;
+    color: #10151e;
+}
+
+.goal-form .gf-field input[type='color'] {
+    padding: 6px;
+    cursor: pointer;
+}
+
+.goal-form .gf-field input:focus,
+.goal-form .gf-field select:focus,
+.goal-form .gf-field textarea:focus {
+    border-color: #9b4f61;
+    background: rgb(255 255 255 / 75%);
+}
+
+.goal-form :focus-visible {
+    outline: 2px solid #9b4f61;
+    outline-offset: 3px;
+}
+
+.goal-form .gf-settings > summary {
+    margin: 0;
+    cursor: pointer;
+    list-style: none;
+}
+
+.goal-form .gf-settings > summary::-webkit-details-marker {
+    display: none;
+}
+
+.goal-form .gf-chevron {
+    margin-left: auto;
+    font-size: 22px;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.goal-form .gf-settings[open] .gf-chevron {
+    transform: rotate(180deg);
+}
+
+.goal-form .gf-settings-body {
+    display: grid;
+    gap: 24px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(25 30 40 / 12%);
+}
+
+.goal-form .gf-settings-body > .gf-field {
+    margin: 0;
+}
+
+.goal-form .gf-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+}
+
+.goal-form .gf-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.goal-form .gf-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: #9b4f61;
+}
+
+.goal-form .gf-help {
+    margin: -16px 0 0;
+    color: rgb(16 21 30 / 60%);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.goal-form .gf-milestone {
+    margin-bottom: 18px;
+    padding: 22px;
+    border: 1px solid rgb(255 255 255 / 70%);
+    border-radius: 12px;
+    background: rgb(255 255 255 / 25%);
+}
+
+.goal-form .gf-milestone-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.goal-form .gf-milestone-heading h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.goal-form .gf-milestone-fields {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    margin-bottom: 20px;
+}
+
+.goal-form .gf-task {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) 76px repeat(3, minmax(0, 1fr)) 32px;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-top: 18px;
+    border-top: 1px solid rgb(25 30 40 / 10%);
+}
+
+.goal-form .gf-task .gf-field {
+    margin-bottom: 0;
+}
+
+.goal-form .gf-task .gf-field label {
+    font-size: 12px;
+}
+
+.goal-form .gf-task input,
+.goal-form .gf-task select {
+    min-height: 44px;
+    padding: 9px 10px;
+    font-size: 14px;
+}
+
+.goal-form .gf-remove {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #85283e;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.goal-form .gf-task > .gf-remove {
+    margin-bottom: 6px;
+}
+
+.goal-form .gf-remove:hover {
+    background: rgb(155 79 97 / 10%);
+}
+
+.goal-form .gf-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 18px;
+    border: 1px solid rgb(25 30 40 / 18%);
+    border-radius: 7px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.goal-form .gf-button:hover {
+    background: rgb(255 255 255 / 45%);
+}
+
+.goal-form .gf-button-soft {
+    background: rgb(255 255 255 / 25%);
+}
+
+.goal-form .gf-add-milestone {
+    width: 100%;
+    min-height: 52px;
+    border-style: dashed;
+}
+
+.goal-form .gf-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 4px;
+}
+
+.goal-form .gf-button-cancel {
+    border-color: transparent;
+}
+
+.goal-form .gf-button-primary {
+    min-width: 170px;
+    min-height: 50px;
+    border-color: #191a1b;
+    background: #191a1b;
+    color: #fff;
+}
+
+.goal-form .gf-button-primary:hover {
+    background: #303136;
+    color: #fff;
+}
+
+.goal-form .gf-error,
+.goal-form .gf-error-summary {
+    color: #85283e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.goal-form .gf-error {
+    margin: 0;
+}
+
+.goal-form .gf-error-summary {
+    padding: 16px 20px;
+    border: 1px solid rgb(133 40 62 / 25%);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 65%);
+}
+
+.goal-form .gf-error-summary ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+@media (max-width: 1000px) {
+    .goal-form .gf-grid-four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .goal-form .gf-task {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) 32px;
+    }
+
+    .goal-form .gf-task-title {
+        grid-column: 1 / 3;
+    }
+
+    .goal-form .gf-task-points {
+        grid-column: 3 / 5;
+    }
+}
+
+@media (max-width: 600px) {
+    .aurora-app .goal-editor {
+        padding-top: 24px;
+    }
+
+    .goal-form .gf-panel {
+        padding: 20px;
+    }
+
+    .goal-form .gf-grid-two,
+    .goal-form .gf-grid-four,
+    .goal-form .gf-milestone-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .goal-form .gf-milestone {
+        padding: 16px;
+    }
+
+    .goal-form .gf-task {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px;
+    }
+
+    .goal-form .gf-task-title {
+        grid-column: 1 / -1;
+    }
+
+    .goal-form .gf-task-points {
+        grid-column: auto;
+    }
+
+    .goal-form .gf-task > .gf-field:nth-of-type(3) {
+        grid-column: 2 / 4;
+    }
+
+    .goal-form .gf-section-heading h2 {
+        font-size: 18px;
+    }
+
+    .goal-form .gf-actions .gf-button {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .goal-form *,
+    .goal-form *::before,
+    .goal-form *::after {
+        transition: none;
+    }
+}

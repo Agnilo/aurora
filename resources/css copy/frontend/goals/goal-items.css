@@ -1,0 +1,14 @@
+.goal-item {
+    background: var(--color-bg-card);
+    border-radius: 14px;
+    border: 1px solid var(--color-border-soft);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+}
+.goal-item:hover {
+    background: var(--color-bg-soft);
+}

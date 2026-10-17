@@ -147,30 +147,4 @@ class BadgeCategoryAdminController extends Controller
         ]);
     }
 
-    private function buildCondition(BadgeCategory $category, Request $request): array
-    {
-        return match ($category->key) {
-
-            'task' => [
-                'tasks_completed' => (int) $request->input('condition.tasks_completed'),
-            ],
-
-            'streak' => [
-                'days' => (int) $request->input('condition.days'),
-            ],
-
-            'goals' => [
-                'goals_completed' => (int) $request->input('condition.goals_completed'),
-            ],
-
-            'milestones' => [
-                'milestones_completed' => (int) $request->input('condition.milestones_completed'),
-            ],
-
-            'level' => [
-                'level' => (int) $request->input('condition.level'),
-            ],
-        };
-    }
-
 }

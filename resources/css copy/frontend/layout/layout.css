@@ -1,0 +1,132 @@
+body {
+    background: var(--color-bg-page);
+    min-height: 100vh;
+    margin: 0;
+}
+
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.page-content {
+    padding: 32px 0;
+}
+
+.dashboard-card {
+    background: var(--color-bg-card);
+    border-radius: 14px;
+    border: 1px solid var(--color-border-soft);
+}
+
+.dashboard-header {
+    background: var(--color-bg-soft-2);
+    font-weight: 600;
+    padding: 8px;
+}
+
+.dashboard-body {
+    padding: 8px;
+}
+
+.aspect-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--color-bg-soft-3);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-progress {
+    display: block;
+    width: 100%;
+    height: 14px;
+    background: var(--color-progress-bg);
+    border-radius: 999px;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+.category-tile-inner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+}
+
+ 
+.category-icon,
+.category-name,
+.category-gradient,
+.category-score {
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease,
+        font-size 0.22s ease;
+}
+
+.category-card {
+    background: var(--color-bg-card);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.05);
+    border: 1px solid var(--color-border-soft);
+    transition: transform .25s ease, box-shadow .25s ease;
+    text-align: center;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+}
+
+/* ============================================================
+   RESPONSIVE – LAYOUT LEVEL ONLY
+============================================================ */
+
+@media (max-width: 1100px) {
+    .profile-container {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 800px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .featured-card {
+        flex: 0 0 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .xp-bar-center {
+        width: 100%;
+    }
+
+    .xp-bubble {
+        margin-bottom: 6px;
+    }
+
+    .featured-card {
+        flex: 0 0 100%;
+    }
+}

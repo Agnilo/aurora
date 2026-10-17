@@ -1,64 +1,52 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', t('auth.register'))
 
 @section('content')
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h2 class="text-center mb-4">Registracija</h2>
-
-                <form method="POST" action="{{ route('register', ['locale' => App::getLocale()]) }}">
-                    @csrf
-
-                    {{-- Name --}}
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Vardas</label>
-                        <input type="text" id="name" name="name"
-                               class="form-control @error('name') is-invalid @enderror"
-                               value="{{ old('name') }}" required autofocus>
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Email --}}
-                    <div class="mb-3">
-                        <label for="email" class="form-label">El. paštas</label>
-                        <input type="email" id="email" name="email"
-                               class="form-control @error('email') is-invalid @enderror"
-                               value="{{ old('email') }}" required>
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Password --}}
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Slaptažodis</label>
-                        <input type="password" id="password" name="password"
-                               class="form-control @error('password') is-invalid @enderror"
-                               required>
-                        @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Confirm Password --}}
-                    <div class="mb-4">
-                        <label for="password_confirmation" class="form-label">Pakartoti slaptažodį</label>
-                        <input type="password" id="password_confirmation" name="password_confirmation"
-                               class="form-control" required>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ route('login', ['locale' => App::getLocale()]) }}" class="text-decoration-none small">
-                            Jau turi paskyrą?
-                        </a>
-                        <button type="submit" class="btn btn-warning">Registruotis</button>
-                    </div>
-                </form>
-            </div>
+    <p class="auth-eyebrow">{{ t('auth.register') }}</p>
+    <h1 id="auth-title">{{ t('auth.register_title') }}</h1>
+    <p class="auth-description">{{ t('auth.register_description') }}</p>
+    @if (session('status'))
+        <p class="auth-status" role="status">{{ session('status') }}</p>
+    @endif
+    <form class="auth-form" method="POST" action="{{ route('register', ['locale' => app()->getLocale()]) }}">
+        @csrf
+        <div class="auth-field">
+            <label for="name">{{ t('auth.name') }}</label>
+            <input id="name" name="name" type="text" autocomplete="name" value="{{ old('name') }}" required autofocus
+                   @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
+            @error('name')
+                <p class="auth-error" id="name-error">{{ $message }}</p>
+            @enderror
         </div>
-    </div>
-</div>
+        <div class="auth-field">
+            <label for="email">{{ t('auth.email') }}</label>
+            <input id="email" name="email" type="email" autocomplete="username" value="{{ old('email') }}" required
+                   @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+            @error('email')
+                <p class="auth-error" id="email-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <div class="auth-field">
+            <label for="password">{{ t('auth.password') }}</label>
+            <input id="password" name="password" type="password" autocomplete="new-password" required
+                   @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
+            @error('password')
+                <p class="auth-error" id="password-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <div class="auth-field">
+            <label for="password_confirmation">{{ t('auth.password_confirmation') }}</label>
+            <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required
+                   @error('password_confirmation') aria-invalid="true" aria-describedby="password_confirmation-error" @enderror>
+            @error('password_confirmation')
+                <p class="auth-error" id="password_confirmation-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <button class="auth-submit" type="submit">{{ t('auth.register_submit') }}<span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch">
+        {{ t('auth.register_switch') }}
+        <a href="{{ route('login', ['locale' => app()->getLocale()]) }}">{{ t('auth.login') }}</a>
+    </p>
 @endsection

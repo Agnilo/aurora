@@ -1,11 +1,12 @@
 :root {
+
     /* ===== BRAND / PRIMARY ===== */
     --color-primary: #ffb300;
     --color-primary-hover: #e89b00;
     --color-primary-soft: #ffd27a;
 
     /* ===== BACKGROUNDS ===== */
-    --color-bg-page: #fff7eb;
+    --color-bg-page: #fffdfb;
     --color-bg-card: #ffffff;
     --color-bg-soft: #fff7e0;
     --color-bg-muted: #e5e5e5;

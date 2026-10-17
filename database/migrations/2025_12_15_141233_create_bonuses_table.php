@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('key')->unique();
             $table->string('label');
             $table->enum('type', ['flat', 'multiplier']);
-            $table->integer('value');
+            $table->double('value');
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

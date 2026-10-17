@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <title>aurora</title>
+    <title>@yield('title', 'Aurora')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- Bootstrap CDN --}}
@@ -10,17 +10,26 @@
 
     @vite(['resources/css/frontend/app.css', 'resources/js/app.js'])
 
-    <style>
-        body {
-            background-color: #fff8f0;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 
-<body>
+<body class="aurora-app">
 
+@php
+    $appBackground = 'images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg';
+    if (!file_exists(public_path($appBackground))) {
+        $appBackground = 'images/welcome/background.webp';
+    }
+@endphp
+@if (file_exists(public_path($appBackground)))
+    <img class="app-background" src="{{ asset($appBackground) }}" alt="">
+@endif
+<a class="app-skip" href="#main">{{ t('app_shell.skip') }}</a>
 @include('layouts.partials.header')
-<main>
+<main id="main" class="app-main">
     @yield('content')
 </main>
 

@@ -1,37 +1,19 @@
-@extends('profile.layout')
+@extends('profile.layout', ['activeTab' => 'badges'])
 
 @section('profile-content')
+<h2 class="pr-section-title">{{ t('gamification.badges') }}</h2>
 
-<h2 class="mb-4">Mano pasiekimai</h2>
-
-<div class="row g-3">
+<div class="pr-badges">
     @forelse($badges as $badge)
-        <div class="col-6 col-md-4 col-lg-3">
-            <div class="badge-card text-center p-3 h-100">
-                
-                <div class="badge-icon mb-2">
-                    <img
-                        src="{{ asset('storage/' . $badge->icon_path) }}"
-                        alt="{{ $badge->name }}"
-                        style="width:96px;height:96px;"
-                    >
-                </div>
-
-                <div class="fw-bold">
-                    {{ $badge->name }}
-                </div>
-
-                @if($badge->description)
-                    <div class="text-muted small mt-1">
-                        {{ $badge->description }}
-                    </div>
-                @endif
-
-            </div>
-        </div>
+        <article class="pr-badge">
+            <img src="{{ asset('storage/'.$badge->icon_path) }}" alt="" width="80" height="80" loading="lazy">
+            <h3>{{ $badge->name }}</h3>
+            @if($badge->description)
+                <p>{{ $badge->description }}</p>
+            @endif
+        </article>
     @empty
-        <p>Dar neturi jokių pasiekimų.</p>
+        <p class="pr-empty">{{ t('profile.badges_empty') }}</p>
     @endforelse
 </div>
-
 @endsection

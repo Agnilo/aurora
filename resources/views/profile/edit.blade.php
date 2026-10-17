@@ -1,88 +1,90 @@
-@extends('profile.layout', [
-    'user' => $user,
-    'game' => $game,
-    'totalPoints' => $totalPoints,
-    'activeTab' => 'details',
-    'details' => $details,
-])
+@extends('profile.layout', ['activeTab' => 'details'])
 
 @section('profile-content')
+<h2 class="pr-section-title">{{ t('profile.tab.details') }}</h2>
 
-<div class="profile-card">
-    <form method="POST"
-          action="{{ route('profile.update', ['locale' => app()->getLocale()]) }}"
-          class="profile-form">
+<form method="POST" action="{{ route('profile.update', ['locale' => app()->getLocale()]) }}" class="pr-form">
+    @csrf
+    @method('PATCH')
 
-        @csrf
-        @method('PATCH')
-
-        {{-- VARDAS --}}
-        <div class="mb-3">
-            <label class="form-label fw-semibold">{{ t('profile.name') }}</label>
-            <input type="text"
+    <div class="pr-form-grid">
+        <div class="pr-field">
+            <label for="pr-name">{{ t('profile.name') }}</label>
+            <input
+                id="pr-name"
+                type="text"
                 name="name"
                 value="{{ old('name', $user->name) }}"
-                class="form-control @error('name') is-invalid @enderror">
+                required maxlength="255" autocomplete="name"
+                @error('name') aria-invalid="true" aria-describedby="pr-name-error" @enderror
+            >
+            @error('name')
+                <p id="pr-name-error" class="pr-error">{{ $message }}</p>
+            @enderror
         </div>
-
-        {{-- EL. PAŠTAS --}}
-        <div class="mb-3">
-            <label class="form-label fw-semibold">{{ t('profile.email') }}</label>
-            <input type="email"
+        <div class="pr-field">
+            <label for="pr-email">{{ t('auth.email') }}</label>
+            <input
+                id="pr-email"
+                type="email"
                 name="email"
                 value="{{ old('email', $user->email) }}"
-                class="form-control @error('email') is-invalid @enderror">
+                required maxlength="255" autocomplete="email"
+                @error('email') aria-invalid="true" aria-describedby="pr-email-error" @enderror
+            >
+            @error('email')
+                <p id="pr-email-error" class="pr-error">{{ $message }}</p>
+            @enderror
         </div>
-
-        {{-- GIMIMO DATA --}}
-        <div class="mb-3">
-        <label class="form-label fw-semibold">{{ t('profile.birthdate') }}</label>
-
-        <input type="date"
-            name="birthdate"
-            value="{{ old('birthdate', optional($details->birthdate)->format('Y-m-d')) }}"
-            class="form-control">
+        <div class="pr-field">
+            <label for="pr-birthdate">{{ t('profile.birthdate') }}</label>
+            <input
+                id="pr-birthdate"
+                type="date"
+                name="birthdate"
+                value="{{ old('birthdate', $details?->birthdate?->format('Y-m-d')) }}"
+                
+                @error('birthdate') aria-invalid="true" aria-describedby="pr-birthdate-error" @enderror
+            >
+            @error('birthdate')
+                <p id="pr-birthdate-error" class="pr-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <div class="pr-field">
+            <label for="pr-gender">{{ t('profile.gender') }}</label>
+            <select id="pr-gender" name="gender" @error('gender') aria-invalid="true" aria-describedby="pr-gender-error" @enderror>
+                <option value="">—</option>
+                @foreach(['female', 'male', 'other'] as $gender)
+                    <option value="{{ $gender }}" @selected(old('gender', $details?->gender) === $gender)>{{ t('profile.gender_'.$gender) }}</option>
+                @endforeach
+            </select>
+            @error('gender')
+                <p id="pr-gender-error" class="pr-error">{{ $message }}</p>
+            @enderror
+        </div>
     </div>
 
-        {{-- LYTIS --}}
-        <div class="mb-3">
-            <label class="form-label fw-semibold">{{ t('profile.gender') }}</label>
-            <select name="gender" class="form-control">
-                <option value="">—</option>
-                <option value="female" {{ $details->gender === 'female' ? 'selected' : '' }}>
-                    {{ t('profile.gender_female') }}
-                </option>
-                <option value="male" {{ $details->gender === 'male' ? 'selected' : '' }}>
-                    {{ t('profile.gender_male') }}
-                </option>
-                <option value="other" {{ $details->gender === 'other' ? 'selected' : '' }}>
-                    {{ t('profile.gender_other') }}
-                </option>
-            </select>
+    <div class="pr-field">
+        <label for="pr-description">{{ t('profile.description') }}</label>
+        <textarea id="pr-description" name="description" rows="4" @error('description') aria-invalid="true" aria-describedby="pr-description-error" @enderror>{{ old('description', $details?->description) }}</textarea>
+        @error('description')
+            <p id="pr-description-error" class="pr-error">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div class="pr-field">
+        <label for="pr-handle">{{ t('profile.hashtags') }}</label>
+        <div class="pr-input-prefix">
+            <span aria-hidden="true">@</span>
+            <input id="pr-handle" type="text" name="handle" value="{{ old('handle', $details?->handle) }}" @error('handle') aria-invalid="true" aria-describedby="pr-handle-error" @enderror>
         </div>
+        @error('handle')
+            <p id="pr-handle-error" class="pr-error">{{ $message }}</p>
+        @enderror
+    </div>
 
-        {{-- APIE MANE --}}
-        <div class="mb-3">
-            <label class="form-label fw-semibold">{{ t('profile.description') }}</label>
-            <textarea name="description" rows="3" class="form-control">{{ old('description', $details->description) }}</textarea>
-        </div>
-
-        {{-- HANDLE --}}
-        <div class="mb-3">
-            <label class="form-label fw-semibold">{{ t('profile.hashtag') }}</label>
-            <div class="input-group">
-                <span class="input-group-text">@</span>
-                <input type="text"
-                    name="handle"
-                    value="{{ old('handle', $details->handle) }}"
-                    class="form-control">
-            </div>
-        </div>
-
-        <button class="btn btn-primary w-100">
-            {{ t('button.save') }}
-        </button>
-    </form>
-</div>
-
+    <div class="pr-actions">
+        <button type="submit" class="pr-button">{{ t('button.save') }}</button>
+    </div>
+</form>
 @endsection

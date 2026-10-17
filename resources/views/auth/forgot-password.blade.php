@@ -1,28 +1,68 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', t('auth.reset_title'))
 
 @section('content')
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+    <p class="auth-eyebrow">
+        {{ t('auth.reset_label') }}
+    </p>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <h1 id="auth-title">
+        {{ t('auth.reset_title') }}
+    </h1>
 
-    <form method="POST" action="{{ route('password.email', ['locale' => App::getLocale()]) }}">
+    <p class="auth-description">
+        {{ t('auth.reset_description') }}
+    </p>
+
+    @if (session('status'))
+        <p class="auth-status" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
+
+    <form
+        class="auth-form"
+        method="POST"
+        action="{{ route('password.email', ['locale' => app()->getLocale()]) }}"
+    >
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="auth-field">
+            <label for="email">
+                {{ t('auth.email') }}
+            </label>
+
+            <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                value="{{ old('email') }}"
+                required
+                autofocus
+                @error('email')
+                    aria-invalid="true"
+                    aria-describedby="email-error"
+                @enderror
+            >
+
+            @error('email')
+                <p class="auth-error" id="email-error">
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button class="auth-submit" type="submit">
+            {{ t('auth.reset_submit') }}
+            <span aria-hidden="true">→</span>
+        </button>
     </form>
-    @endsection
 
+    <p class="auth-switch">
+        <a href="{{ route('login', ['locale' => app()->getLocale()]) }}">
+            {{ t('auth.back_to_login') }}
+        </a>
+    </p>
+@endsection

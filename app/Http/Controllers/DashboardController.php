@@ -2,99 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
 use Illuminate\Http\Request;
-use App\Models\Category;
-use App\Models\CategoryLevel;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request): View
     {
-        $user = auth()->user();
+        $user = $request->user();
+        $user->load('gameDetails');
+        $filter = $request->query('tasks') === 'completed' ? 'completed' : 'active';
 
-        $featuredGoals = $user->goals()
-            ->where('is_important', true)
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        $tasks = Task::query()
+            ->whereHas('milestone.goal', function ($query) use ($user, $filter) {
+                $query->where('user_id', $user->id);
+                if ($filter === 'active') {
+                    $query->where('is_completed', false);
+                }
+            })
+            ->with(['milestone.goal.category', 'category'])
+            ->when($filter === 'completed',
+                fn ($query) => $query->whereNotNull('completed_at')->orderByDesc('completed_at'),
+                fn ($query) => $query->whereNull('completed_at')->orderByDesc('is_important')->orderBy('created_at')
+            )
+            ->orderBy('id')
+            ->paginate(6)
+            ->withQueryString();
 
-        $favouriteGoals = $user->goals()
-            ->where('is_favourite', true)
-            ->get();
+        $completedToday = Task::query()
+            ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
+            ->whereDate('completed_at', today())
+            ->count();
 
-        $recentGoals = $user->goals()
-            ->orderBy('created_at', 'desc')
-            ->take(3)
-            ->get();
-
-        $categoryLevels = $user->categoryLevels()
+        $activeGoals = $user->goals()
+            ->where('is_completed', false)
             ->with('category')
-            ->get()
-            ->keyBy('category_id');
+            ->withCount([
+                'milestones',
+                'milestones as completed_milestones_count' => fn ($query) => $query->where('is_completed', true),
+            ])
+            ->orderByDesc('is_important')
+            ->orderByDesc('updated_at')
+            ->orderBy('id')
+            ->limit(2)
+            ->get();
 
-        $categories = Category::with(['categoryLevels' => function ($q) {
-            $q->where('user_id', auth()->id());
-        }])->get();
+        $categoryLevels = $user->categoryLevels()->with('category')->get();
 
-        return view('dashboard.index', [
-            'user' => $user,
-            'categories' => $categories,
-            'categoryLevels' => $categoryLevels,
-
-            'featuredGoals' => $featuredGoals,
-            'favouriteGoals' => $favouriteGoals,
-            'recentGoals' => $recentGoals,
-        ]);
+        return view('dashboard.index', compact(
+            'user', 'tasks', 'filter', 'completedToday', 'activeGoals', 'categoryLevels'
+        ));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
 }

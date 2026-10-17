@@ -1,0 +1,67 @@
+#goalsContentLoader {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skeleton-title,
+.skeleton-goal,
+.skeleton-goal::before,
+.skeleton-goal::after,
+.skeleton-goal .skeleton-end {
+    background: linear-gradient(
+        90deg,
+        var(--color-skeleton-1) 0%,
+        var(--color-skeleton-2) 40%,
+        var(--color-skeleton-1) 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.skeleton-title {
+    width: 160px;
+    height: 20px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.skeleton-goal {
+    position: relative;
+    background: var(--color-bg-card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--color-border-soft);
+}
+
+.skeleton-goal::before {
+    content: "";
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.skeleton-goal::after {
+    content: "";
+    height: 14px;
+    border-radius: 6px;
+    flex: 1;
+}
+
+.skeleton-goal .skeleton-end {
+    width: 32px;
+    height: 14px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}

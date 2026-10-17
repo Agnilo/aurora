@@ -6,14 +6,15 @@
     </div>
 @else
 
-<div class="accordion" id="goalsAccordion">
+<div class="accordion">
 
 @foreach($goals as $goal)
 <div class="accordion-item mb-3 border-warning shadow-sm">
 
     <h2 class="accordion-header" id="goal-{{ $goal->id }}">
         <button class="accordion-button collapsed fw-semibold" type="button"
-                data-bs-toggle="collapse" data-bs-target="#collapse-{{ $goal->id }}">
+                data-bs-toggle="collapse" data-bs-target="#collapse-{{ $goal->id }}"
+                aria-expanded="false" aria-controls="collapse-{{ $goal->id }}">
             
             {{-- ICONS --}}
             @if($goal->is_favorite) ⭐ @endif
@@ -220,141 +221,3 @@
         {{ $goals->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 @endif
-
-
-
-<script>
-    window.routes = {
-        toggleTask: "{{ route('tasks.toggle-complete', ['locale' => app()->getLocale(), 'task' => '__TASK__']) }}"
-    };
-</script>
-
-<script>
-(() => {
-
-    const setText = (id, value) => {
-        const el = document.getElementById(id);
-        if (el && value !== undefined && value !== null) {
-            el.innerText = value;
-        }
-    };
-
-    document.addEventListener("click", function (e) {
-        const checkbox = e.target;
-        if (!checkbox.classList.contains("task-done-toggle")) return;
-
-        e.preventDefault();
-        if (checkbox.dataset.loading === "1") return;
-
-        checkbox.dataset.loading = "1";
-        checkbox.disabled = true;
-
-        const taskId = checkbox.dataset.taskId;
-        const url = window.routes.toggleTask.replace("__TASK__", taskId);
-
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Accept": "application/json"
-            }
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Request failed");
-            return res.json();
-        })
-        .then(data => {
-            checkbox.checked = !!data.completed_at;
-            checkbox.disabled = false;
-            checkbox.dataset.loading = "0";
-
-            const taskItem = checkbox.closest(".list-group-item");
-            const badge = taskItem?.querySelector(".task-status-badge");
-            if (badge) {
-                badge.innerText = data.status_label;
-                badge.style.background = data.status_color || "#ccc";
-            }
-
-            const milestone = checkbox.closest(".milestone-item");
-            if (milestone && data.milestone_progress !== null) {
-                milestone.querySelector(".milestone-progress-bar").style.width =
-                    data.milestone_progress + "%";
-                milestone.querySelector(".milestone-progress-label").innerText =
-                    data.milestone_progress + "%";
-            }
-
-            const goal = checkbox.closest(".accordion-item");
-            if (goal && data.goal_progress !== null) {
-                goal.querySelector(".goal-progress-badge").innerText =
-                    data.goal_progress + "%";
-            }
-
-            setText("g-level", data.level);
-            setText("g-coins", data.coins);
-            setText("g-xp", data.xp);
-            setText("g-xp-next", data.xp_next);
-
-            const xpBar = document.getElementById("g-xp-bar");
-            if (xpBar && data.xp_next) {
-                xpBar.style.width =
-                    Math.round((data.xp / data.xp_next) * 100) + "%";
-            }
-
-            if (data.category_xp) {
-
-                const grid = document.getElementById("categoryGrid");
-                if (!grid) return;
-
-                Object.entries(data.category_xp).forEach(([catId, xpData]) => {
-
-                    const link = grid.querySelector(
-                        `.category-link[data-category-id="${catId}"]`
-                    );
-                    if (!link) return;
-
-                    const squares = link.querySelectorAll(".xp-squares-goals span");
-                    const small = link.querySelector(".life-area-progress small");
-
-                    if (!squares.length || !small) return;
-
-                    const xp = xpData.xp ?? 0;
-                    const max = xpData.xp_next ?? 100;
-
-                    const percent = max > 0 ? (xp / max) * 100 : 0;
-                    const fullSquares = Math.floor(percent / 10);
-                    const partialFill = Math.round(percent % 10 * 10);
-
-                    squares.forEach((sq, i) => {
-                        sq.classList.remove("filled");
-                        sq.style.background = "";
-
-                        if (i < fullSquares) {
-                            sq.classList.add("filled");
-                        }
-
-                        if (i === fullSquares && partialFill > 0) {
-                            sq.style.background = `
-                                linear-gradient(
-                                    to right,
-                                    var(--accent) ${partialFill}%,
-                                    rgba(0,0,0,.08) ${partialFill}%
-                                )
-                            `;
-                        }
-                    });
-
-                    small.innerText = `${xp} / ${max} ${small.innerText.split(' ').slice(-1)[0]}`;
-                });
-            }
-
-        })
-        .catch(err => {
-            console.error(err);
-            checkbox.disabled = false;
-            checkbox.dataset.loading = "0";
-            alert("Įvyko klaida, pabandyk vėliau.");
-        });
-    });
-
-})();
-</script>

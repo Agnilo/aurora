@@ -15,6 +15,14 @@ class TaskController extends Controller
 {
     public function toggleComplete($locale, Task $task)
     {
+        abort_unless(auth()->check(), 401);
+        abort_unless(
+            $task->milestone()->whereHas('goal', function ($query) {
+                $query->where('user_id', auth()->id());
+            })->exists(),
+            403
+        );
+
         return DB::transaction(function () use ($task, &$streakDay, &$user) {
 
             $task->load(['priority', 'milestone.goal.user', 'status']);

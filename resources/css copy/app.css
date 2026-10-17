@@ -1,0 +1,7 @@
+@import "./theme.css";
+
+@import "./admin/admin.css";
+@import "./admin/dashboard.css";
+@import "./admin/layout.css";
+@import "./admin/sidebar.css";
+

@@ -1,6 +1,7 @@
 @import "../theme.css";
 
 @import "./dashboard/dashboard.css";
+@import "./dashboard/dashboard-home.css";
 
 @import "./goals/goals.css";
 @import "./goals/goal-items.css";
@@ -8,9 +9,13 @@
 
 @import "./layout/layout.css";
 @import "./layout/navbar.css";
+@import "./layout/app-shell.css";
 
 @import "./components/pagination.css";
 @import "./components/skeleton.css";
 
 @import "./pages/profile.css";
 @import "./pages/public.css";
+
+@import "./goals/goals-page.css";
+@import "./goals/goal-form.css";

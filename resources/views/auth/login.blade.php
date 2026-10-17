@@ -1,64 +1,45 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', t('auth.login'))
 
 @section('content')
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h2 class="text-center mb-4">Prisijungimas</h2>
-
-                {{-- Session status --}}
-                @if (session('status'))
-                    <div class="alert alert-success">
-                        {{ session('status') }}
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login', ['locale' => App::getLocale()]) }}">
-                    @csrf
-
-                    {{-- Email --}}
-                    <div class="mb-3">
-                        <label for="email" class="form-label">El. paštas</label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror"
-                               name="email" id="email" value="{{ old('email') }}" required autofocus>
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Password --}}
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Slaptažodis</label>
-                        <input type="password" class="form-control @error('password') is-invalid @enderror"
-                               name="password" id="password" required>
-                        @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Remember Me --}}
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                        <label class="form-check-label" for="remember">
-                            Prisiminti mane
-                        </label>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        @if (Route::has('password.request'))
-                            <a class="text-decoration-none small" href="{{ route('password.request', ['locale' => App::getLocale()]) }}">
-                                Pamiršai slaptažodį?
-                            </a>
-                        @endif
-
-                        <button type="submit" class="btn btn-warning">
-                            Prisijungti
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <p class="auth-eyebrow">{{ t('auth.login') }}</p>
+    <h1 id="auth-title">{{ t('auth.login_title') }}</h1>
+    <p class="auth-description">{{ t('auth.login_description') }}</p>
+    @if (session('status'))
+        <p class="auth-status" role="status">{{ session('status') }}</p>
+    @endif
+    <form class="auth-form" method="POST" action="{{ route('login', ['locale' => app()->getLocale()]) }}">
+        @csrf
+        <div class="auth-field">
+            <label for="email">{{ t('auth.email') }}</label>
+            <input id="email" name="email" type="email" autocomplete="username" value="{{ old('email') }}" required autofocus
+                   @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+            @error('email')
+                <p class="auth-error" id="email-error">{{ $message }}</p>
+            @enderror
         </div>
-    </div>
-</div>
+        <div class="auth-field">
+            <label for="password">{{ t('auth.password') }}</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required
+                   @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
+            @error('password')
+                <p class="auth-error" id="password-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <div class="auth-options">
+            <label class="auth-remember" for="remember">
+                <input type="checkbox" name="remember" id="remember" @checked(old('remember'))>
+                <span>{{ t('auth.remember') }}</span>
+            </label>
+            @if (Route::has('password.request'))
+                <a href="{{ route('password.request', ['locale' => app()->getLocale()]) }}">{{ t('auth.forgot') }}</a>
+            @endif
+        </div>
+        <button class="auth-submit" type="submit">{{ t('auth.login_submit') }}<span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch">
+        {{ t('auth.login_switch') }}
+        <a href="{{ route('register', ['locale' => app()->getLocale()]) }}">{{ t('auth.register') }}</a>
+    </p>
 @endsection

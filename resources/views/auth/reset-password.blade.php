@@ -1,42 +1,122 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', t('auth.new_password_title'))
 
 @section('content')
-    <form method="POST" action="{{ route('password.store', ['locale' => App::getLocale()]) }}">
+    <p class="auth-eyebrow">
+        {{ t('auth.reset_label') }}
+    </p>
+
+    <h1 id="auth-title">
+        {{ t('auth.new_password_title') }}
+    </h1>
+
+    <p class="auth-description">
+        {{ t('auth.new_password_description') }}
+    </p>
+
+    <form
+        class="auth-form"
+        method="POST"
+        action="{{ route('password.store', ['locale' => app()->getLocale()]) }}"
+    >
         @csrf
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token', ['locale' => App::getLocale()]) }}">
+        <input
+            type="hidden"
+            name="token"
+            value="{{ request()->route('token') }}"
+        >
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        @error('token')
+            <p class="auth-error" role="alert">
+                {{ $message }}
+            </p>
+        @enderror
+
+        <div class="auth-field">
+            <label for="email">
+                {{ t('auth.email') }}
+            </label>
+
+            <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="username"
+                value="{{ old('email', request()->query('email')) }}"
+                required
+                @error('email')
+                    aria-invalid="true"
+                    aria-describedby="email-error"
+                @enderror
+            >
+
+            @error('email')
+                <p class="auth-error" id="email-error">
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="auth-field">
+            <label for="password">
+                {{ t('auth.password') }}
+            </label>
+
+            <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                autofocus
+                @error('password')
+                    aria-invalid="true"
+                    aria-describedby="password-error"
+                @enderror
+            >
+
+            @error('password')
+                <p class="auth-error" id="password-error">
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+        <div class="auth-field">
+            <label for="password_confirmation">
+                {{ t('auth.password_confirmation') }}
+            </label>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
+            <input
+                id="password_confirmation"
+                name="password_confirmation"
+                type="password"
+                autocomplete="new-password"
+                required
+                @error('password_confirmation')
+                    aria-invalid="true"
+                    aria-describedby="password-confirmation-error"
+                @enderror
+            >
 
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            @error('password_confirmation')
+                <p class="auth-error" id="password-confirmation-error">
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <button class="auth-submit" type="submit">
+            {{ t('auth.new_password_submit') }}
+            <span aria-hidden="true">→</span>
+        </button>
     </form>
-    @endsection
 
+    <p class="auth-switch">
+        <a href="{{ route('login', ['locale' => app()->getLocale()]) }}">
+            {{ t('auth.back_to_login') }}
+        </a>
+    </p>
+@endsection
