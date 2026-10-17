@@ -1,46 +1,35 @@
-<div class="public-profile-stats-card">
+@php
+    $xp = $game->xp ?? 0;
+    $xpNext = $game->xp_next ?? 100;
+    $xpPercent = max(0, min(100, round($xp / max($xpNext, 1) * 100)));
+@endphp
 
-    <h3 class="public-stats-title">
-        Progresas
-    </h3>
+<aside class="pr-sidebar" aria-labelledby="pp-stats-title">
+    <div class="pr-panel pr-stats">
+        <h2 id="pp-stats-title" class="pr-section-title">{{ t('public.progress') }}</h2>
 
-    {{-- LEVEL --}}
-    <div class="public-stats-row">
-        <span>Lygis</span>
-        <strong>Lv. {{ $game->level ?? 1 }}</strong>
-    </div>
-
-    @php
-        $xp = $game->xp ?? 0;
-        $xpNext = $game->xp_next ?? 100;
-        $xpPercent = min(100, round($xp / max($xpNext,1) * 100));
-    @endphp
-
-    {{-- XP --}}
-    <div class="public-xp-bar-wrapper">
-        <div class="public-xp-bar-bg">
-            <div class="public-xp-bar-fill" style="width: {{ $xpPercent }}%;"></div>
+        <div class="pr-level">
+            <span>{{ t('profile.level') }}</span>
+            <strong>{{ $game->level ?? 1 }}</strong>
         </div>
-        <div class="public-xp-bar-text">
-            {{ $xp }} / {{ $xpNext }} XP
+        <div class="pr-xp-track" role="progressbar" aria-label="XP" aria-valuenow="{{ $xpPercent }}" aria-valuemin="0" aria-valuemax="100">
+            <span style="width: {{ $xpPercent }}%"></span>
         </div>
-    </div>
+        <p class="pr-xp-label">{{ $xp }} / {{ $xpNext }} XP</p>
 
-    {{-- COINS --}}
-    <div class="public-stats-row">
-        <span>Monetos</span>
-        <strong>{{ $game->coins ?? 0 }} 🪙</strong>
+        <dl class="pr-stat-list">
+            <div>
+                <dt>{{ t('profile.coins') }}</dt>
+                <dd>{{ $game->coins ?? 0 }}</dd>
+            </div>
+            <div>
+                <dt>{{ t('profile.streak_current') }}</dt>
+                <dd>{{ $game->streak_current ?? 0 }}</dd>
+            </div>
+            <div>
+                <dt>{{ t('profile.streak_best') }}</dt>
+                <dd>{{ $game->streak_best ?? 0 }}</dd>
+            </div>
+        </dl>
     </div>
-
-    {{-- STREAK --}}
-    <div class="public-stats-row">
-        <span>Streak</span>
-        <strong>{{ $game->streak_current ?? 0 }} 🔥</strong>
-    </div>
-
-    <div class="public-stats-row">
-        <span>Best streak</span>
-        <strong>{{ $user->gameDetails->streak_best ?? 0 }} 🔥</strong>
-    </div>
-
-</div>
+</aside>

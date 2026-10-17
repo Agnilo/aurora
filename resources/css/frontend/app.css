@@ -16,6 +16,7 @@
 
 @import "./pages/profile.css";
 @import "./pages/public.css";
+@import "./pages/leaderboard.css";
 
 @import "./goals/goals-page.css";
 @import "./goals/goal-form.css";

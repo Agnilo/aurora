@@ -1,0 +1,223 @@
+.aurora-app .leaderboard-page {
+    max-width: 1180px;
+    padding-top: 36px;
+    padding-bottom: 56px;
+    color: #10151e;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.leaderboard-page .lb-heading {
+    margin-bottom: 28px;
+}
+
+.leaderboard-page .lb-heading h1 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.045em;
+}
+
+.leaderboard-page .lb-panel {
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 75%);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 48%);
+    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    backdrop-filter: blur(20px) saturate(125%);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 65%),
+        0 12px 32px rgb(30 26 29 / 5%);
+}
+
+.leaderboard-page .lb-scroll {
+    overflow-x: auto;
+}
+
+.leaderboard-page .lb-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    color: inherit;
+}
+
+.leaderboard-page .lb-table th {
+    padding: 18px 24px;
+    background: rgb(255 255 255 / 18%);
+    color: rgb(16 21 30 / 58%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.leaderboard-page .lb-table td {
+    padding: 20px 24px;
+    border-top: 1px solid rgb(25 30 40 / 10%);
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.leaderboard-page .lb-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.leaderboard-page .lb-table tbody tr:hover {
+    background: rgb(255 255 255 / 28%);
+}
+
+.leaderboard-page .lb-table tbody tr.lb-current {
+    background: rgb(217 144 156 / 12%);
+    box-shadow: inset 3px 0 0 #9b4f61;
+}
+
+.leaderboard-page .lb-position {
+    width: 80px;
+}
+
+.leaderboard-page .lb-rank {
+    display: inline-grid;
+    place-items: center;
+    min-width: 30px;
+    height: 30px;
+    color: rgb(16 21 30 / 60%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+}
+
+.leaderboard-page .lb-rank-leading {
+    border-radius: 8px;
+    background: rgb(217 144 156 / 16%);
+    color: #713d4b;
+    font-weight: 500;
+}
+
+.leaderboard-page .lb-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 100%;
+    border-radius: 5px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.leaderboard-page .lb-user:hover .lb-name {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.leaderboard-page .lb-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 75%);
+    border-radius: 50%;
+    background: #ecd5d7;
+    color: #593e47;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.leaderboard-page .lb-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.leaderboard-page .lb-user-text {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+}
+
+.leaderboard-page .lb-name {
+    overflow-wrap: anywhere;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.leaderboard-page .lb-handle {
+    overflow-wrap: anywhere;
+    color: rgb(16 21 30 / 55%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+}
+
+.leaderboard-page .lb-table .lb-level {
+    width: 120px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+}
+
+.leaderboard-page .lb-table .lb-xp {
+    width: 170px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.leaderboard-page .lb-xp span {
+    margin-left: 4px;
+    color: rgb(16 21 30 / 50%);
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.leaderboard-page .lb-table .lb-empty {
+    padding: 48px 20px;
+    color: rgb(16 21 30 / 60%);
+    text-align: center;
+}
+
+.leaderboard-page :focus-visible {
+    outline: 2px solid #9b4f61;
+    outline-offset: -3px;
+}
+
+@media (max-width: 600px) {
+    .aurora-app .leaderboard-page {
+        padding-top: 28px;
+    }
+
+    .leaderboard-page .lb-table th,
+    .leaderboard-page .lb-table td {
+        padding: 16px 12px;
+    }
+
+    .leaderboard-page .lb-position {
+        width: 48px;
+    }
+
+    .leaderboard-page .lb-table .lb-level {
+        width: 65px;
+    }
+
+    .leaderboard-page .lb-table .lb-xp {
+        width: 90px;
+    }
+
+    .leaderboard-page .lb-user {
+        gap: 9px;
+    }
+
+    .leaderboard-page .lb-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .leaderboard-page .lb-name {
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .leaderboard-page .lb-table tbody tr {
+        transition: none;
+    }
+}

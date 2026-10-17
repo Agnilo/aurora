@@ -1,70 +1,63 @@
 @extends('layouts.app')
 
+@section('title', t('leaderboard.title').' · Aurora')
+
 @section('content')
-<div class="container py-4">
+<div class="container leaderboard-page">
+    <header class="lb-heading">
+        <h1>{{ t('leaderboard.title') }}</h1>
+    </header>
 
-    <h2 class="fw-bold mb-4">Lyderių lentelė</h2>
-
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-
-            <table class="table mb-0">
-                <thead class="table-light">
+    <div class="lb-panel">
+        <div class="lb-scroll" role="region" aria-label="{{ t('leaderboard.title') }}" tabindex="0">
+            <table class="lb-table">
+                <caption class="visually-hidden">{{ t('leaderboard.title') }}</caption>
+                <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Naudotojas</th>
-                        <th>Lygis</th>
-                        <th class="text-end">XP</th>
+                        <th scope="col" class="lb-position">#</th>
+                        <th scope="col">{{ t('leaderboard.user') }}</th>
+                        <th scope="col" class="lb-level">{{ t('profile.level') }}</th>
+                        <th scope="col" class="lb-xp">XP</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach ($users as $index => $user)
-                        <tr>
-                            <td class="fw-bold">
-                                {{ $index + 1 }}
+                    @forelse($users as $user)
+                        @php
+                            $position = $loop->iteration;
+                            $isCurrentUser = auth()->id() === $user->id;
+                        @endphp
+                        <tr class="{{ $isCurrentUser ? 'lb-current' : '' }}">
+                            <td class="lb-position">
+                                <span class="lb-rank {{ $position <= 3 ? 'lb-rank-leading' : '' }}">{{ $position }}</span>
                             </td>
-
                             <td>
-                                <a href="{{ route('public.show', [app()->getLocale(), $user->id]) }}">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <img
-                                            src="{{ $user->details?->avatar
-                                                ? asset('storage/'.$user->details->avatar)
-                                                : 'https://ui-avatars.com/api/?name='.urlencode($user->name) }}"
-                                            class="rounded-circle"
-                                            width="32"
-                                            height="32"
-                                        >
-
-                                        <div>
-                                            <div class="fw-semibold">
-                                                {{ $user->name }}
-                                            </div>
-                                            @if($user->details?->handle)
-                                                <div class="text-muted small">
-                                                    {{ '@'.$user->details->handle }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
+                                <a class="lb-user" href="{{ route('public.show', [app()->getLocale(), $user->id]) }}">
+                                    <span class="lb-avatar" aria-hidden="true">
+                                        @if($user->details?->avatar)
+                                            <img src="{{ asset('storage/'.$user->details->avatar) }}" alt="" width="40" height="40" loading="lazy">
+                                        @else
+                                            <span>{{ mb_substr($user->name, 0, 1) }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="lb-user-text">
+                                        <span class="lb-name">{{ $user->name }}</span>
+                                        @if($user->details?->handle)
+                                            <span class="lb-handle">{{ '@'.$user->details->handle }}</span>
+                                        @endif
+                                    </span>
                                 </a>
                             </td>
-
-                            <td>
-                                Lv. {{ $user->gameDetails->level ?? 1 }}
-                            </td>
-
-                            <td class="text-end fw-bold">
-                                {{ number_format($user->total_xp) }} XP
-                            </td>
+                            <td class="lb-level">{{ $user->gameDetails->level ?? 1 }}</td>
+                            <td class="lb-xp">{{ number_format($user->total_xp ?? 0) }} <span>XP</span></td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="4" class="lb-empty">{{ t('leaderboard.empty') }}</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
-
         </div>
     </div>
-
 </div>
 @endsection
