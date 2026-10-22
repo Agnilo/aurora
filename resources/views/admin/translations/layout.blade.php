@@ -66,6 +66,9 @@
     </div>
 
     <form method="GET" action="{{ route('admin.translations.index', app()->getLocale()) }}" class="mb-4">
+        @if ($group)
+            <input type="hidden" name="group" value="{{ $group }}">
+        @endif
         <div class="input-group" style="max-width: 380px;">
             <input type="text"
                 name="search"

@@ -3,9 +3,10 @@
 @section('title', t('auth.register'))
 
 @section('content')
+<div class="auth-register-enter">
     <p class="auth-eyebrow">{{ t('auth.register') }}</p>
     <h1 id="auth-title">{{ t('auth.register_title') }}</h1>
-    <p class="auth-description">{{ t('auth.register_description') }}</p>
+    <p class="auth-description">{{ t('preferences.ui.register_to_save') }}</p>
     @if (session('status'))
         <p class="auth-status" role="status">{{ session('status') }}</p>
     @endif
@@ -49,4 +50,5 @@
         {{ t('auth.register_switch') }}
         <a href="{{ route('login', ['locale' => app()->getLocale()]) }}">{{ t('auth.login') }}</a>
     </p>
+</div>
 @endsection

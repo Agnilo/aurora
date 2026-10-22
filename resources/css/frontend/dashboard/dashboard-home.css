@@ -1,15 +1,17 @@
-/* Dashboard v2: shared rows align heading/tasks with the companion. */
-
 .aurora-app .dashboard-home {
     display: grid;
     grid-template-columns: minmax(0, 2.2fr) minmax(280px, 1fr);
-    grid-template-areas: "heading companion"
+
+    grid-template-areas:
+        "heading action"
         "tasks companion"
-        "goals habits"
+        "goals goals"
         "areas areas";
-    grid-template-rows: auto minmax(min-content, 1fr) auto auto;
-    align-items: stretch;
-    gap: 20px;
+
+    grid-template-rows: auto;
+    align-items: start;
+    column-gap: 28px;
+    row-gap: 28px;
     padding-block: 40px 56px;
 }
 
@@ -28,7 +30,8 @@
 
 .dashboard-home .dh-heading h1 {
     margin: 0;
-    font-size: clamp(38px, 4.5vw, 60px);
+    font-size: clamp(34px, 3.6vw, 48px);
+    font-weight: 600;
     line-height: 1.05;
     letter-spacing: -0.055em;
 }
@@ -36,7 +39,7 @@
 .dashboard-home .dh-heading > p:last-child {
     margin: 12px 0 0;
     color: var(--app-muted);
-    font-size: 20px;
+    font-size: 17px;
 }
 
 .dashboard-home .dh-tasks {
@@ -48,7 +51,8 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    padding: 8px 0 0;
+    align-self: start;
+    padding: 0;
     background: transparent;
     border: none;
     box-shadow: none;
@@ -58,10 +62,6 @@
 
 .dashboard-home .dh-goals-panel {
     grid-area: goals;
-}
-
-.dashboard-home .dh-habits {
-    grid-area: habits;
 }
 
 .dashboard-home .dh-areas {
@@ -81,7 +81,8 @@
 
 .dashboard-home h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
+    font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.035em;
 }
@@ -125,8 +126,8 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    min-height: 66px;
-    padding: 13px 0;
+    min-height: 78px;
+    padding: 16px 0;
     border-top: 1px solid var(--app-rule);
 }
 
@@ -173,8 +174,9 @@
 }
 
 .dashboard-home .dh-task-title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
+    line-height: 1.45;
     overflow-wrap: anywhere;
 }
 
@@ -186,7 +188,8 @@
 .dashboard-home .dh-task-goal {
     display: block;
     color: var(--app-muted);
-    font-size: 11px;
+    font-size: 12px;
+    line-height: 1.5;
     overflow-wrap: anywhere;
 }
 
@@ -266,22 +269,23 @@
     flex-shrink: 0;
     color: var(--app-muted);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .dashboard-home .dh-goals {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
 }
 
 .dashboard-home .dh-goal {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 16px;
-    border: 1px solid var(--app-rule);
-    border-radius: 9px;
+    padding: 20px 0;
+    border: 0;
+    border-top: 1px solid var(--app-rule);
+    border-radius: 0;
     color: var(--app-ink);
     text-decoration: none;
 }
@@ -303,7 +307,8 @@
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    font-size: 13px;
+    font-size: 16px;
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
@@ -410,8 +415,8 @@
     align-content: end;
     align-items: end;
     gap: 0;
-    min-height: 250px;
-    padding-top: 20px;
+    min-height: 0;
+    padding-top: 0;
 }
 
 .dashboard-home .dh-companion-stage .dh-mascot {
@@ -421,7 +426,7 @@
     grid-row: 1;
     justify-self: center;
     display: block;
-    width: min(80%, 250px);
+    width: min(80%, 240px);
     height: auto;
     margin: 0 0 -12px;
     pointer-events: none;
@@ -492,6 +497,74 @@
     line-height: 1.2;
 }
 
+.dashboard-home .dh-new-goal {
+    grid-area: action;
+    align-self: center;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 22px;
+    border: 1px solid #191a1b;
+    border-radius: 7px;
+    background: #191a1b;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.dashboard-home .dh-new-goal:hover {
+    background: #303136;
+}
+
+.dashboard-home .dh-goals-panel,
+.dashboard-home .dh-areas {
+    min-width: 0;
+    padding-top: 6px;
+}
+
+.dashboard-home .dh-goal > .dh-icon-badge {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+}
+
+.dashboard-home .dh-goal-top strong {
+    font-weight: 500;
+}
+
+.dashboard-home .dh-goal .dh-progress {
+    height: 5px;
+}
+
+.dashboard-home .dh-areas {
+    padding-top: 28px;
+    border-top: 1px solid var(--app-rule);
+}
+
+.dashboard-home .dh-area {
+    padding: 12px 0;
+    align-items: flex-start;
+}
+
+.dashboard-home .dh-area-content strong {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.dashboard-home .dh-area .dh-icon-badge {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+}
+
+.dashboard-home .dh-area .dh-progress {
+    height: 5px;
+    background: rgba(25, 30, 40, 0.1);
+}
+
 @media (max-width: 760px) {
     .dashboard-home .dh-companion {
         width: min(100%, 380px);
@@ -499,7 +572,7 @@
     }
 
     .dashboard-home .dh-companion-stage {
-        min-height: 240px;
+        min-height: 0;
     }
 
     .dashboard-home .dh-companion-stage .dh-mascot {
@@ -509,10 +582,10 @@
     .aurora-app .dashboard-home {
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas: "heading"
+            "action"
             "tasks"
             "companion"
             "goals"
-            "habits"
             "areas";
         grid-template-rows: auto;
         padding-top: 28px;
@@ -525,7 +598,7 @@
 
 @media (max-width: 1100px) {
     .dashboard-home .dh-task-category {
-        display: none;
+        width: 105px;
     }
 
     .dashboard-home .dh-goals {
@@ -545,5 +618,27 @@
 
     .dashboard-home .dh-task-icon {
         display: none;
+    }
+
+    .dashboard-home .dh-task-category {
+        display: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .dashboard-home .dh-new-goal {
+        justify-self: start;
+    }
+
+    .dashboard-home .dh-heading > p:last-child {
+        font-size: 17px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-home *,
+    .dashboard-home *::before,
+    .dashboard-home *::after {
+        transition: none;
     }
 }

@@ -71,4 +71,6 @@
 
 @endif
 
+@include('admin.translations.pagination')
+
 @endsection

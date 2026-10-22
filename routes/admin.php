@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\Gamification\BonusContextAdminController;
 use App\Http\Controllers\Admin\Gamification\GoalBonusAdminController;
 use App\Http\Controllers\Admin\Gamification\LevelAdminController;
 use App\Http\Controllers\Admin\Gamification\XpRuleAdminController;
+use App\Http\Controllers\Admin\Preferences\AssessmentQuestionAdminController;
 
 use App\Http\Middleware\SetAppLocale;
 
@@ -86,6 +87,21 @@ Route::group([
     });
 
     Route::resource('languages', LanguageController::class);
+
+    Route::prefix('preferences/questions')
+        ->as('preferences.questions.')
+        ->group(function () {
+
+            Route::get('/', [AssessmentQuestionAdminController::class, 'index'])
+                ->name('index');
+
+            Route::get('/{question}/edit', [AssessmentQuestionAdminController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('/{question}', [AssessmentQuestionAdminController::class, 'update'])
+                ->name('update');
+
+        });
 
     Route::prefix('gamification')->as('gamification.')->group(function () {
 

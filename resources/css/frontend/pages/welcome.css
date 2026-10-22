@@ -208,14 +208,14 @@
     font-size: 13px;
     line-height: 1.6;
     font-weight: 600;
-    letter-spacing: .2em;
+    /* letter-spacing: .2em; */
     text-transform: uppercase;
 }
 
 .welcome-copy h1 {
     font-size: clamp(54px, 6.8vw, 100px);
     line-height: .98;
-    letter-spacing: -.065em;
+    /* letter-spacing: -.065em; */
     font-weight: 600;
     margin: 0;
 }

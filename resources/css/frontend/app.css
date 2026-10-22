@@ -13,6 +13,7 @@
 
 @import "./components/pagination.css";
 @import "./components/skeleton.css";
+@import "./components/preferences-onboarding.css";
 
 @import "./pages/profile.css";
 @import "./pages/public.css";

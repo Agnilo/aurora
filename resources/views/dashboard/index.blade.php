@@ -1,6 +1,20 @@
 @extends('layouts.app')
 
-@section('title', t('dashboard.title').' · Aurora')
+@php
+    // Reuse the consolidated dashboard keys, retaining older DB keys as a fallback.
+    $dashboardText = function (string $key) {
+        $suffix = explode('.', $key, 2)[1] ?? $key;
+        foreach (array_unique(['dashboard.'.$suffix, $key]) as $candidate) {
+            $translation = t($candidate);
+            if ($translation !== $candidate) {
+                return $translation;
+            }
+        }
+        return $key;
+    };
+@endphp
+
+@section('title', $dashboardText('dashboard_home.title').' · Aurora')
 
 @section('content')
 @php
@@ -31,30 +45,32 @@
 <div class="container dashboard-home">
     <header class="dh-heading">
         <p class="dh-eyebrow">{{ now()->locale(app()->getLocale())->isoFormat('LL') }}</p>
-        <h1>{{ t('dashboard.title') }}</h1>
-        <p>{{ t('dashboard.subtitle') }}</p>
+        <h1>{{ $dashboardText('dashboard_home.title') }}</h1>
+        <p>{{ $dashboardText('dashboard_home.subtitle') }}</p>
     </header>
+
+    <a class="dh-new-goal" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}">+ {{ $dashboardText('dashboard_home.new_goal') }}</a>
 
     <section class="dh-panel dh-tasks" aria-labelledby="dh-tasks-title" data-dashboard-tasks>
         <div class="dh-section-heading">
-            <h2 id="dh-tasks-title">{{ t('dashboard.tasks') }}</h2>
-            <nav class="dh-filters" aria-label="{{ t('dashboard.task_filters') }}">
-                <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'active']) }}" @if ($filter === 'active') aria-current="page" @endif>{{ t('dashboard.active') }}</a>
-                <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'completed']) }}" @if ($filter === 'completed') aria-current="page" @endif>{{ t('dashboard.completed') }}</a>
+            <h2 id="dh-tasks-title">{{ $dashboardText('dashboard_home.tasks') }}</h2>
+            <nav class="dh-filters" aria-label="{{ $dashboardText('dashboard_v2.task_filters') }}">
+                <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'active']) }}" @if ($filter === 'active') aria-current="page" @endif>{{ $dashboardText('dashboard_v2.active') }}</a>
+                <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'completed']) }}" @if ($filter === 'completed') aria-current="page" @endif>{{ $dashboardText('dashboard_v2.completed') }}</a>
             </nav>
         </div>
-        <p class="dh-error" role="alert" data-task-error hidden>{{ t('dashboard.save_error') }}</p>
+        <p class="dh-error" role="alert" data-task-error hidden>{{ $dashboardText('dashboard_v2.save_error') }}</p>
         <div class="dh-task-list">
             @forelse ($tasks as $task)
                 @php
-                    $goal = $task->milestone->goal;
-                    $category = $task->category ?? $goal->category;
+                    $goal = $task->goal ?? $task->milestone?->goal;
+                    $category = $task->category ?? $goal?->category;
                     $done = !is_null($task->completed_at);
                 @endphp
                 <div class="dh-task {{ $done ? 'is-completed' : '' }}" style="--area-accent: {{ $colorFor($category) }}">
                     <form method="POST" action="{{ route('tasks.toggle-complete', ['locale' => app()->getLocale(), 'task' => $task->id]) }}" data-task-toggle>
                         @csrf
-                        <button class="dh-check" type="submit" aria-pressed="{{ $done ? 'true' : 'false' }}" aria-label="{{ t($done ? 'dashboard.undo' : 'dashboard.complete') }}: {{ $task->title }}">{{ $done ? '✓' : '' }}</button>
+                        <button class="dh-check" type="submit" aria-pressed="{{ $done ? 'true' : 'false' }}" aria-label="{{ $dashboardText($done ? 'dashboard_v2.undo' : 'dashboard_v2.complete') }}: {{ $task->title }}">{{ $done ? '✓' : '' }}</button>
                     </form>
                     <svg class="dh-icon dh-task-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($category) }}"/></svg>
                     <a class="dh-task-copy" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
@@ -64,99 +80,68 @@
                     @if ($category)
                         <span class="dh-task-category"><span></span>{{ $category->translated_name }}</span>
                     @endif
-                    <a class="dh-task-open" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}" aria-label="{{ t('dashboard.open_goal') }}: {{ $goal->title }}">↗</a>
+                    <a class="dh-task-open" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}" aria-label="{{ $dashboardText('dashboard_v2.open_goal') }}: {{ $goal->title }}">↗</a>
                 </div>
             @empty
                 <div class="dh-empty">
-                    <h3>{{ t($filter === 'completed' ? 'dashboard.completed_empty' : 'dashboard.tasks_empty') }}</h3>
-                    <p>{{ t($filter === 'completed' ? 'dashboard.completed_hint' : 'dashboard.tasks_empty_description') }}</p>
+                    <h3>{{ $dashboardText($filter === 'completed' ? 'dashboard_v2.completed_empty' : 'dashboard_home.tasks_empty') }}</h3>
+                    <p>{{ $dashboardText($filter === 'completed' ? 'dashboard_v2.completed_hint' : 'dashboard_home.tasks_empty_description') }}</p>
                 </div>
             @endforelse
         </div>
         <div class="dh-task-footer">
-            <span>{{ t('dashboard.completed_today') }} · <strong>{{ $completedToday }}</strong></span>
-            <a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ t('dashboard.all_goals') }} →</a>
+            <span>{{ $dashboardText('dashboard_v2.completed_today') }} · <strong>{{ $completedToday }}</strong></span>
+            <a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} →</a>
         </div>
         @if ($tasks->hasPages())
-            <nav class="dh-pagination" aria-label="{{ t('dashboard.pages') }}">
-                @if ($tasks->previousPageUrl())<a href="{{ $tasks->previousPageUrl() }}">← {{ t('dashboard.previous') }}</a>@endif
+            <nav class="dh-pagination" aria-label="{{ $dashboardText('dashboard_v2.pages') }}">
+                @if ($tasks->previousPageUrl())<a href="{{ $tasks->previousPageUrl() }}">← {{ $dashboardText('dashboard_v2.previous') }}</a>@endif
                 <span>{{ $tasks->currentPage() }} / {{ $tasks->lastPage() }}</span>
-                @if ($tasks->nextPageUrl())<a href="{{ $tasks->nextPageUrl() }}">{{ t('dashboard.next') }} →</a>@endif
+                @if ($tasks->nextPageUrl())<a href="{{ $tasks->nextPageUrl() }}">{{ $dashboardText('dashboard_v2.next') }} →</a>@endif
             </nav>
         @endif
     </section>
 
     <aside class="dh-companion" aria-labelledby="dh-companion-title">
-        <h2 id="dh-companion-title">
-            {{ t('dashboard.companion') }}
-        </h2>
-
-        @php($details = $user->gameDetails)
-
+        <h2 id="dh-companion-title">{{ $dashboardText('dashboard_home.companion') }}</h2>
+        @php
+            $details = $user->gameDetails;
+            $xpPercent = $details && $details->xp_next > 0
+                ? max(0, min(100, ($details->xp / $details->xp_next) * 100))
+                : 0;
+        @endphp
         <div class="dh-companion-stage">
+            @if (file_exists(public_path('images/welcome/Exp00_Facad.png')))
+                <img class="dh-mascot" src="{{ asset('images/welcome/Exp00_Facad.png') }}" alt="{{ $dashboardText('dashboard_home.companion') }}">
+            @endif
             @if ($details)
                 <dl class="dh-floating-stat dh-floating-coins">
-                    <dt>
-                        <svg class="dh-icon" aria-hidden="true">
-                            <use href="#dh-coin"/>
-                        </svg>
-                        {{ t('dashboard.coins') }}
-                    </dt>
+                    <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-coin"/></svg>{{ $dashboardText('dashboard_home.coins') }}</dt>
                     <dd>{{ $details->coins }}</dd>
                 </dl>
-
                 <dl class="dh-floating-stat dh-floating-streak">
-                    <dt>
-                        <svg class="dh-icon" aria-hidden="true">
-                            <use href="#dh-flame"/>
-                        </svg>
-                        {{ t('dashboard.streak') }}
-                    </dt>
+                    <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-flame"/></svg>{{ $dashboardText('dashboard_home.streak') }}</dt>
                     <dd>{{ $details->streak_current ?? 0 }}</dd>
                 </dl>
             @endif
-
-            <img
-                class="dh-mascot"
-                src="{{ asset('images/welcome/Exp00_Facad.png') }}"
-                alt="{{ t('dashboard.companion') }}"
-            >
         </div>
-
         @if ($details)
-            @php($xpPercent = max(0, min(100, (float) $details->xp_percent)))
-
             <div class="dh-companion-base">
                 <div class="dh-companion-level">
-                    <strong>
-                        {{ t('dashboard.level') }} {{ $details->level }}
-                    </strong>
-
-                    <span class="dh-number">
-                        {{ $details->xp }} / {{ $details->xp_next }} XP
-                    </span>
+                    <strong>{{ $dashboardText('dashboard_home.level') }} {{ $details->level }}</strong>
+                    <span class="dh-number">{{ $details->xp }} / {{ $details->xp_next }} XP</span>
                 </div>
-
-                <div
-                    class="dh-progress"
-                    role="progressbar"
-                    aria-label="XP"
-                    aria-valuenow="{{ $xpPercent }}"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                >
+                <div class="dh-progress" role="progressbar" aria-label="XP" aria-valuenow="{{ $xpPercent }}" aria-valuemin="0" aria-valuemax="100">
                     <span style="width: {{ $xpPercent }}%"></span>
                 </div>
             </div>
         @else
-            <p class="dh-muted">
-                {{ t('dashboard.progress_empty') }}
-            </p>
+            <p class="dh-muted">{{ $dashboardText('dashboard_home.progress_empty') }}</p>
         @endif
     </aside>
 
     <section class="dh-panel dh-goals-panel" aria-labelledby="dh-goals-title">
-        <div class="dh-section-heading"><h2 id="dh-goals-title">{{ t('dashboard.continue') }}</h2><a class="dh-text-link" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}">+ {{ t('dashboard.new_goal') }}</a></div>
+        <div class="dh-section-heading"><h2 id="dh-goals-title">{{ $dashboardText('dashboard_home.continue') }}</h2><a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} →</a></div>
         <div class="dh-goals">
             @forelse ($activeGoals as $goal)
                 @php($progress = max(0, min(100, (float) $goal->progress)))
@@ -165,22 +150,17 @@
                     <span class="dh-goal-content">
                         <span class="dh-goal-top"><strong>{{ $goal->title }}</strong><span aria-hidden="true">→</span></span>
                         <span class="dh-progress-row"><span class="dh-progress" role="progressbar" aria-label="{{ $goal->title }}" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $progress }}%"></span></span><span class="dh-number">{{ round($progress) }}%</span></span>
-                        <span class="dh-task-goal">{{ t('dashboard.milestones') }}: {{ $goal->completed_milestones_count }} / {{ $goal->milestones_count }}</span>
+                        <span class="dh-task-goal">{{ $dashboardText('dashboard_v2.milestones') }}: {{ $goal->completed_milestones_count }} / {{ $goal->milestones_count }}</span>
                     </span>
                 </a>
             @empty
-                <div class="dh-empty"><h3>{{ t('dashboard.goals_empty') }}</h3><p>{{ t('dashboard.goals_empty_description') }}</p></div>
+                <div class="dh-empty"><h3>{{ $dashboardText('dashboard_home.goals_empty') }}</h3><p>{{ $dashboardText('dashboard_home.goals_empty_description') }}</p></div>
             @endforelse
         </div>
     </section>
 
-    <section class="dh-panel dh-habits" aria-labelledby="dh-habits-title">
-        <div class="dh-section-heading"><h2 id="dh-habits-title">{{ t('dashboard.habits') }}</h2><svg class="dh-icon" aria-hidden="true"><use href="#dh-leaf"/></svg></div>
-        <p class="dh-muted">{{ t('dashboard.habits_pending') }}</p>
-    </section>
-
     <section class="dh-panel dh-areas" aria-labelledby="dh-areas-title">
-        <div class="dh-section-heading"><h2 id="dh-areas-title">{{ t('dashboard.areas') }}</h2></div>
+        <div class="dh-section-heading"><h2 id="dh-areas-title">{{ $dashboardText('dashboard_home.areas') }}</h2></div>
         <div class="dh-area-grid">
             @forelse ($categoryLevels as $level)
                 @if ($level->category)
@@ -191,7 +171,7 @@
                     </a>
                 @endif
             @empty
-                <p class="dh-muted">{{ t('dashboard.areas_empty') }}</p>
+                <p class="dh-muted">{{ $dashboardText('dashboard_home.areas_empty') }}</p>
             @endforelse
         </div>
     </section>

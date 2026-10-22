@@ -3,7 +3,7 @@
 @section('content')
     <section class="welcome-hero" aria-labelledby="welcome-heading">
         <div class="welcome-copy">
-            <p class="welcome-eyebrow">{{ t('welcome.eyebrow') }}</p>
+            
             <h1 id="welcome-heading">{{ t('welcome.headline_first') }}<br>{{ t('welcome.headline_second') }}</h1>
             <p class="welcome-description">
                 {{ t('welcome.intro_first') }}<br class="welcome-desktop-break">

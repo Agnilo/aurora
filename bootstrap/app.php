@@ -31,6 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureOnboardingCompleted::class,
+        ]);
     })
     ->withProviders([
         TranslationServiceProvider::class,

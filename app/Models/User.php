@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
+use App\Models\Preferences\UserAssessment;
+use App\Models\Preferences\UserPreference;
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
@@ -149,6 +152,16 @@ class User extends Authenticatable
                 'streak',
             ])
             ->sum('amount');
+    }
+
+    public function assessments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserAssessment::class);
+    }
+
+    public function preferences(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserPreference::class);
     }
 
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\Preferences\OnboardingController;
 
 Route::get('{locale}/lang', function ($locale) {
     $available = ['en', 'lt'];
@@ -91,6 +92,19 @@ Route::group([
 
     Route::resource('users', UserController::class);
     Route::resource('goals', GoalController::class);
+
+    Route::name('preferences.onboarding.')->group(function () {
+        Route::get('/onboarding', [OnboardingController::class, 'create'])
+            ->name('create');
+
+        Route::post('/onboarding', [OnboardingController::class, 'store'])
+            ->name('store');
+
+        Route::get('/onboarding/result/{assessment}', [OnboardingController::class, 'result'])
+            ->middleware('auth')
+            ->whereNumber('assessment')
+            ->name('result');
+    });
 
     require __DIR__.'/auth.php';
 });

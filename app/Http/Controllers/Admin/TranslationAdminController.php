@@ -15,26 +15,38 @@ class TranslationAdminController extends Controller
     {
         $group = $request->get('group');
         $search = $request->get('search');
-
         $languages = Language::where('is_active', true)->pluck('code');
         $groups = TranslationGroup::orderBy('name')->get();
 
-        $translations = Translation::query()
-            ->when($group, fn($q) => $q->where('group', $group))
+        $query = Translation::query()
+            ->when($group, fn ($q) => $q->where('group', $group))
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
-                    $sub->where('key', 'like', "%$search%")
-                        ->orWhere('value', 'like', "%$search%")
-                        ->orWhere('group', 'like', "%$search%");
+                    $sub->where('key', 'like', "%{$search}%")
+                        ->orWhere('value', 'like', "%{$search}%")
+                        ->orWhere('group', 'like', "%{$search}%");
                 });
-            })
+            });
+
+        // Paginate table rows (keys), keeping all languages together.
+        $keyPage = (clone $query)
+            ->select('key')
+            ->groupBy('key')
+            ->orderBy('key')
+            ->paginate(25)
+            ->withQueryString();
+
+        // Search selects keys; load all their language variants for display.
+        $translations = Translation::query()
+            ->when($group, fn ($q) => $q->where('group', $group))
+            ->whereIn('key', $keyPage->getCollection()->pluck('key'))
             ->orderBy('key')
             ->get()
             ->groupBy('key');
 
-        app('translation')->flushCache();
-
-        return view('admin.translations.index', compact('translations', 'groups', 'group', 'languages'));
+        return view('admin.translations.index', compact(
+            'translations', 'groups', 'group', 'languages', 'keyPage'
+        ));
     }
 
     public function create()

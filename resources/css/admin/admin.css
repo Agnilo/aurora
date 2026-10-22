@@ -1,3 +1,5 @@
+@import "./components/pagination.css";
+
 .admin-navbar {
     background: #ffffff;
     border-bottom: 1px solid #f3e7c1;

@@ -43,6 +43,11 @@
             <span>{{ t('dashboard.lookup_tables') }}</span>
         </a>
 
+        <a href="{{ route('admin.preferences.questions.index', ['locale' => app()->getLocale()]) }}"
+        class="sidebar-link {{ request()->routeIs('admin.preferences.*') ? 'active' : '' }}">
+            <span>{{ t('preferences.admin.nav') }}</span>
+        </a>
+
         {{-- Gamification --}}
         <div class="sidebar-group">
 
