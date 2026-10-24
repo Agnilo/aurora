@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Task;
+use App\Services\GamificationService;
+use App\Services\Preferences\StreakVisibilityService;
 
 class PublicProfileController extends Controller
 {
-    public function show($locale, User $user)
+    public function show($locale, User $user, StreakVisibilityService $streakVisibility)
     {
+        GamificationService::syncStreakState($user);
+
+        $showStreak = $streakVisibility->visible($user);
         $user->load([
             'detailsRelation',
             'gameDetails',
-            'badges',
+            'badges' => fn ($query) => $query->when(!$showStreak, fn ($query) =>
+                $query->whereDoesntHave('category', fn ($category) => $category->where('key', 'streak'))
+            ),
         ]);
 
         $stats = [
@@ -42,6 +49,6 @@ class PublicProfileController extends Controller
                 ->count(),
         ];
 
-        return view('public.show', compact('user', 'stats'));
+        return view('public.show', compact('user', 'stats', 'showStreak'));
     }
 }

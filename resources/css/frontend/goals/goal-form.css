@@ -227,7 +227,7 @@
 
 .goal-form .gf-task {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) 76px repeat(3, minmax(0, 1fr)) 32px;
+    grid-template-columns: minmax(0, 2fr) minmax(105px, 1fr) repeat(2, minmax(0, 1fr)) 32px;
     align-items: end;
     gap: 12px;
     margin-bottom: 16px;
@@ -403,10 +403,6 @@
 
     .goal-form .gf-task-points {
         grid-column: auto;
-    }
-
-    .goal-form .gf-task > .gf-field:nth-of-type(3) {
-        grid-column: 2 / 4;
     }
 
     .goal-form .gf-section-heading h2 {

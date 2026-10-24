@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Services\GamificationService;
-use Illuminate\Support\Facades\Auth;
 
 class SyncStreak
 {
@@ -17,6 +16,9 @@ class SyncStreak
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($user = $request->user()) {
+            GamificationService::syncStreakState($user);
+        }
 
         return $next($request);
     }

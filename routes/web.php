@@ -56,9 +56,11 @@ Route::group([
         ->name('dashboard');
 
     Route::get('/goals/category/{category}', [CategoryController::class, 'show'])
+        ->middleware('auth')
         ->name('category.show');
 
     Route::post('/tasks/{task}/toggle-complete', [TaskController::class, 'toggleComplete'])
+        ->middleware('auth')
         ->name('tasks.toggle-complete');
 
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])
@@ -90,8 +92,11 @@ Route::group([
         });
     });
 
-    Route::resource('users', UserController::class);
-    Route::resource('goals', GoalController::class);
+    Route::resource('users', UserController::class)
+        ->middleware(['auth', 'role:admin']);
+
+    Route::resource('goals', GoalController::class)
+        ->middleware('auth');
 
     Route::name('preferences.onboarding.')->group(function () {
         Route::get('/onboarding', [OnboardingController::class, 'create'])

@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
+use App\Models\Category;
 use App\Models\Task;
 use App\Models\PointsLog;
 use App\Models\User;
@@ -14,16 +15,6 @@ class PointsService
     
     public static function calculateXp(Task $task): int
     {
-        /*
-        $mult = match (strtolower(optional($task->priority)->name ?? '')) {
-            'high' => 2.0,
-            'medium' => 1.5,
-            default => 1.0,
-        };
-
-        return (int) floor(((float) $task->points) * $mult);
-        */
-
         $task->loadMissing(['priority', 'milestone.goal.user']);
 
         return BonusService::applyForContext(
@@ -75,55 +66,49 @@ class PointsService
 
     public static function syncUserGamification(User $user): void
     {
-        $user->loadMissing(['gameDetails', 'categoryLevels']);
+        DB::transaction(function () use ($user) {
+            // Rebuild from the current ledger, retaining levels already reached.
+            $game = $user->gameDetails()->lockForUpdate()->firstOrCreate([]);
+            $totals = PointsLog::where('user_id', $user->id)
+                ->selectRaw('category_id, SUM(COALESCE(amount, 0)) AS total_xp')
+                ->groupBy('category_id')
+                ->get();
 
-        $game = $user->gameDetails()->firstOrCreate([]);
-        $game->level = 1;
-        $game->xp = 0;
-        $game->xp_next = LevelsService::xpForNextLevel(1);
-        $game->save();
+            LevelsService::syncTotalXp($game, (int) $totals->sum('total_xp'));
 
-        foreach ($user->categoryLevels as $cat) {
-            $cat->level = 1;
-            $cat->xp = 0;
-            $cat->save();
-        }
+            $categoryTotals = $totals->whereNotNull('category_id')->keyBy('category_id');
+            $categoryIds = $user->categoryLevels()->pluck('category_id')
+                ->merge($categoryTotals->keys())
+                ->unique();
 
-        $logs = PointsLog::where('user_id', $user->id)
-            ->orderBy('id')
-            ->get();
+            // Ignore logs whose category was deleted; they still count globally.
+            foreach (Category::whereIn('id', $categoryIds)->pluck('id') as $categoryId) {
+                $categoryLevel = $user->categoryLevels()->lockForUpdate()->firstOrCreate(
+                    ['category_id' => $categoryId],
+                    ['level' => 1, 'xp' => 0, 'xp_next' => 100]
+                );
 
-        foreach ($logs as $log) {
-            LevelsService::applyXp($game, (int) $log->amount);
-            self::applyXpToCategory($user, (int) $log->category_id, (int) $log->amount);
-        }
-    }
+                $totalXp = max(0, (int) ($categoryTotals->get($categoryId)?->total_xp ?? 0));
+                $retainedLevel = max(1, (int) $categoryLevel->getRawOriginal('level'));
+                $level = 1;
+                $levelStartXp = 0;
+                $xpForNextLevel = 100;
 
-    private static function applyXpToCategory(User $user, int $categoryId, int $xp): void
-    {
+                while ($level < $retainedLevel || $totalXp >= $levelStartXp + $xpForNextLevel) {
+                    $levelStartXp += $xpForNextLevel;
+                    $level++;
+                    // Integer arithmetic keeps the intended 15% growth deterministic.
+                    $xpForNextLevel = intdiv($xpForNextLevel * 115, 100);
+                }
 
-        if (! $categoryId || $categoryId <= 0) {
-            Log::warning('Skipped category XP: invalid category_id', [
-                'category_id' => $categoryId,
-                'user_id' => $user->id,
-            ]);
-            return;
-        }
+                $categoryLevel->level = $level;
+                $categoryLevel->xp = max(0, $totalXp - $levelStartXp);
+                $categoryLevel->xp_next = $xpForNextLevel;
+                $categoryLevel->save();
+            }
+        });
 
-        $cat = $user->categoryLevels()->firstOrCreate(
-            ['category_id' => $categoryId],
-            ['level' => 1, 'xp' => 0, 'xp_next' => 100]
-        );
-
-        $cat->xp += $xp;
-
-        while ($cat->xp >= $cat->xp_next) {
-            $cat->xp -= $cat->xp_next;
-            $cat->level++;
-            $cat->xp_next = (int) floor($cat->xp_next * 1.15);
-        }
-
-        $cat->save();
+        $user->load(['gameDetails', 'categoryLevels']);
     }
 
     public static function syncTaskCompletion(Task $task): void

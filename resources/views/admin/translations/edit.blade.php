@@ -8,6 +8,7 @@
 
 <form action="{{ route('admin.translations.update', [
         'locale' => app()->getLocale(),
+        'translationGroup' => $group,
         'translationKey' => $translationKey
     ]) }}"
     method="POST" 

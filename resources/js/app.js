@@ -77,10 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function buildUrl(categoryId) {
-            const base = `${window.location.origin}${window.location.pathname}`;
-            return categoryId
-                ? `${base}?category=${categoryId}&ajax=1`
-                : `${base}?ajax=1`;
+            const url = new URL(window.location.href);
+
+            url.searchParams.delete('page');
+            url.searchParams.set('ajax', '1');
+
+            if (categoryId) {
+                url.searchParams.set('category', categoryId);
+            } else {
+                url.searchParams.delete('category');
+            }
+
+            return url.toString();
         }
 
         //

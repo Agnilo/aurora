@@ -22,14 +22,16 @@
                 <dt>{{ t('profile.coins') }}</dt>
                 <dd>{{ $game->coins ?? 0 }}</dd>
             </div>
-            <div>
-                <dt>{{ t('profile.streak_current') }}</dt>
-                <dd>{{ $game->streak_current ?? 0 }}</dd>
-            </div>
-            <div>
-                <dt>{{ t('profile.streak_best') }}</dt>
-                <dd>{{ $game->streak_best ?? 0 }}</dd>
-            </div>
+            @if($showStreak)
+                <div>
+                    <dt>{{ t('profile.streak_current') }}</dt>
+                    <dd>{{ $game->streak_current ?? 0 }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('profile.streak_best') }}</dt>
+                    <dd>{{ $game->streak_best ?? 0 }}</dd>
+                </div>
+            @endif
         </dl>
     </div>
 </aside>

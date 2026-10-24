@@ -82,7 +82,8 @@
             const fill = bar?.querySelector('span');
             const label = link.querySelector('.life-area-progress small');
             const xp = Number(values.xp ?? 0);
-            const maximum = Number(bar?.dataset.max ?? values.xp_next ?? 100);
+            const maximum = Number(values.xp_next ?? bar?.dataset.max ?? 100);
+            if (bar) bar.dataset.max = String(maximum);
             const progress = percent(maximum > 0 ? xp / maximum * 100 : 0);
 
             updateProgress(fill, null, progress);

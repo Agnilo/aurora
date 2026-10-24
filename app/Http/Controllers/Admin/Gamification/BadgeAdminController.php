@@ -43,7 +43,7 @@ class BadgeAdminController extends Controller
             'badge_category_id' => $category->id,
             'key' => $this->generateKey($data['name']),
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? '',
             'icon_path' => $iconPath,
             'condition' => $this->buildCondition($category, $request),
         ]);
@@ -62,6 +62,8 @@ class BadgeAdminController extends Controller
 
     public function update($locale, Request $request, Badge $badge)
     {
+        // Editing a badge retains its category and validates the matching condition.
+        $request->merge(['badge_category_id' => $badge->badge_category_id]);
         $data = $this->validated($request);
 
         if ($request->hasFile('icon')) {
@@ -72,7 +74,7 @@ class BadgeAdminController extends Controller
 
         $badge->update([
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? '',
         ]);
 
         return redirect()
@@ -118,6 +120,7 @@ class BadgeAdminController extends Controller
                 'goals' => $rules['condition.goals_completed'] = 'required|integer|min:1',
                 'milestones' => $rules['condition.milestones_completed'] = 'required|integer|min:1',
                 'level' => $rules['condition.level'] = 'required|integer|min:1',
+                default => abort(422, 'Unsupported badge category.'),
             };
         }
 
@@ -129,7 +132,7 @@ class BadgeAdminController extends Controller
         return match ($category->key) {
 
             'task' => [
-                'task_completed' => (int) $request->input('condition.task_completed'),
+                'tasks_completed' => (int) $request->input('condition.tasks_completed'),
             ],
 
             'streak' => [
@@ -137,11 +140,11 @@ class BadgeAdminController extends Controller
             ],
 
             'goals' => [
-                'goal_completed' => (int) $request->input('condition.goal_completed'),
+                'goals_completed' => (int) $request->input('condition.goals_completed'),
             ],
 
             'milestones' => [
-                'milestone_completed' => (int) $request->input('condition.milestone_completed'),
+                'milestones_completed' => (int) $request->input('condition.milestones_completed'),
             ],
 
             'level' => [

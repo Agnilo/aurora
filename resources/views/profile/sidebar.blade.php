@@ -3,7 +3,8 @@
     $xpNext = $game->xp_next ?? 100;
     $xpPercent = max(0, min(100, round($xp / max($xpNext, 1) * 100)));
     $streak = $game->streak_current ?? 0;
-    $next = App\Services\GamificationService::nextStreakReward($streak);
+    $showStreak = app(App\Services\Preferences\StreakVisibilityService::class)->visible($user);
+    $next = $showStreak ? App\Services\GamificationService::nextStreakReward($streak) : null;
 @endphp
 
 <aside class="pr-sidebar" aria-labelledby="pr-stats-title">
@@ -24,14 +25,16 @@
                 <dt>{{ t('profile.coins') }}</dt>
                 <dd>{{ $game->coins ?? 0 }}</dd>
             </div>
-            <div>
-                <dt>{{ t('profile.streak_current') }}</dt>
-                <dd>{{ $streak }}</dd>
-            </div>
-            <div>
-                <dt>{{ t('profile.streak_best') }}</dt>
-                <dd>{{ $game->streak_best ?? 0 }}</dd>
-            </div>
+            @if($showStreak)
+                <div>
+                    <dt>{{ t('profile.streak_current') }}</dt>
+                    <dd>{{ $streak }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('profile.streak_best') }}</dt>
+                    <dd>{{ $game->streak_best ?? 0 }}</dd>
+                </div>
+            @endif
             @isset($totalPoints)
                 <div>
                     <dt>{{ t('profile.total_points') }}</dt>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 use App\Models\Category;
@@ -17,14 +19,18 @@ use App\Models\TaskType;
 use App\Models\TaskStatus;
 use App\Models\TaskPriority;
 use App\Models\PointsLog;
+use App\Models\Preferences\UserPreference;
 
 use App\Services\PointsService;
 use App\Services\GamificationService;
+use App\Services\BadgeAwardingService;
+use App\Services\TaskXpService;
 
 class GoalController extends Controller
 {
     public function index($locale, Request $request)
     {
+        app(TaskXpService::class)->syncOpenTasks($request->user());
 
         $categories = Category::all();
 
@@ -36,7 +42,10 @@ class GoalController extends Controller
 
         $activeCategory = null;
 
-        $statusFilter = $request->get('status', 'active');
+        $statusFilter = $request->query('status', 'active');
+        if (!in_array($statusFilter, ['active', 'planned', 'completed', 'all'], true)) {
+            $statusFilter = 'active';
+        }
 
         $baseGoalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
             ->where('user_id', Auth::id());
@@ -51,14 +60,14 @@ class GoalController extends Controller
         match ($statusFilter) {
             'completed' => $baseGoalsQuery->where('is_completed', true),
             'planned' => $baseGoalsQuery->whereHas('status', fn ($q) =>
-                $q->where('slug', 'planned')
+                $q->whereRaw('LOWER(name) = ?', ['planned'])
             ),
             'all' => null,
             default => $baseGoalsQuery->where('is_completed', false),
         };
 
         $favoriteGoals  = (clone $baseGoalsQuery)
-            ->where('is_important', true)
+            ->where('is_favorite', true)
             ->get();
 
         $importantGoals = (clone $baseGoalsQuery)
@@ -93,6 +102,7 @@ class GoalController extends Controller
 
     public function create($locale)
     {
+        $xpMode = app(TaskXpService::class)->mode(auth()->user());
         $statuses = GoalStatus::orderBy('order')->get();
         $priorities = GoalPriority::orderBy('order')->get();
         $types = GoalType::orderBy('order')->get();
@@ -105,12 +115,15 @@ class GoalController extends Controller
 
         return view('goals.create', compact(
             'statuses', 'priorities', 'types', 'categories',
-            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories'
+            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories', 'xpMode'
         ));
     }
 
     public function store(Request $request, $locale)
     {
+        $taskXp = app(TaskXpService::class);
+        $systemXp = $taskXp->mode($request->user()) === UserPreference::XP_SYSTEM;
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -128,6 +141,14 @@ class GoalController extends Controller
             'status_id' => 'nullable|exists:goal_statuses,id',
             'type_id' => 'nullable|exists:goal_types,id',
             'milestones' => 'array',
+            'milestones.*.title' => 'nullable|string|max:255',
+            'milestones.*.deadline' => 'nullable|date',
+            'milestones.*.tasks' => 'array',
+            'milestones.*.tasks.*.title' => 'nullable|string|max:255',
+            'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'required', 'integer', 'min:0'],
+            'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
+            'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
+            'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
         ]);
 
         if (!empty($validated['tags'])) {
@@ -136,25 +157,30 @@ class GoalController extends Controller
 
         $validated['user_id'] = Auth::id();
 
-        $goal = Goal::create($validated);
+        DB::transaction(function () use ($validated, $systemXp, $taskXp) {
+            $goal = Goal::create(collect($validated)->except('milestones')->all());
 
-        foreach ($request->milestones ?? [] as $milestoneData) {
-            $milestone = $goal->milestones()->create([
-                'title' => $milestoneData['title'] ?? 'Be pavadinimo',
-                'deadline' => $milestoneData['deadline'] ?? null,
-            ]);
-
-            foreach ($milestoneData['tasks'] ?? [] as $taskData) {
-                $milestone->tasks()->create([
-                    'title' => $taskData['title'] ?? '',
-                    'points' => $taskData['points'] ?? 0,
-                    'category_id' => $goal->category_id,
-                    'status_id' => $taskData['status_id'] ?? null,
-                    'type_id' => $taskData['type_id'] ?? null,
-                    'priority_id' => $taskData['priority_id'] ?? null,
+            foreach ($validated['milestones'] ?? [] as $milestoneData) {
+                $milestone = $goal->milestones()->create([
+                    'title' => $milestoneData['title'] ?? 'Be pavadinimo',
+                    'deadline' => $milestoneData['deadline'] ?? null,
                 ]);
+
+                foreach ($milestoneData['tasks'] ?? [] as $taskData) {
+                    $milestone->tasks()->create([
+                        'title' => $taskData['title'] ?? '',
+                        'points' => $systemXp
+                            ? $taskXp->pointsForPriority((int) $taskData['priority_id'])
+                            : $taskData['points'],
+                        'manual_points' => $systemXp ? null : $taskData['points'],
+                        'category_id' => $goal->category_id,
+                        'status_id' => $taskData['status_id'] ?? null,
+                        'type_id' => $taskData['type_id'] ?? null,
+                        'priority_id' => $taskData['priority_id'] ?? null,
+                    ]);
+                }
             }
-        }
+        });
 
         return redirect()->route('goals.index', ['locale' => $locale])
             ->with('success', 'Tikslas sėkmingai sukurtas!');
@@ -201,7 +227,10 @@ class GoalController extends Controller
 
     public function edit($locale, $id)
     {
-        $goal = Goal::with('milestones.tasks')->findOrFail($id);
+        $user = auth()->user();
+        app(TaskXpService::class)->syncOpenTasks($user);
+        $goal = $user->goals()->with('milestones.tasks')->findOrFail($id);
+        $xpMode = app(TaskXpService::class)->mode($user);
         $statuses = GoalStatus::orderBy('order')->get();
         $priorities = GoalPriority::orderBy('order')->get();
         $types = GoalType::orderBy('order')->get();
@@ -214,7 +243,7 @@ class GoalController extends Controller
 
         return view('goals.edit', compact(
             'goal', 'priorities', 'statuses', 'types', 'categories',
-            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories'
+            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories', 'xpMode'
         ));
     }
 
@@ -222,8 +251,10 @@ class GoalController extends Controller
     {
         return DB::transaction(function () use ($request, $locale, $id) {
 
-            $goal = Goal::with('milestones.tasks')->findOrFail($id);
+            $goal = $request->user()->goals()->with('milestones.tasks')->findOrFail($id);
             $user = $goal->user;
+            $taskXp = app(TaskXpService::class);
+            $systemXp = $taskXp->mode($user) === UserPreference::XP_SYSTEM;
 
             $oldCategory = $goal->category_id;
 
@@ -244,21 +275,50 @@ class GoalController extends Controller
                 'type_id' => 'nullable|exists:goal_types,id',
 
                 'milestones' => 'array',
-                'milestones.*.id' => 'nullable|exists:milestones,id',
+                'milestones.*.id' => [
+                    'nullable', 'integer', 'distinct',
+                    Rule::exists('milestones', 'id')->where('goal_id', $goal->id),
+                ],
                 'milestones.*.title' => 'nullable|string|max:255',
                 'milestones.*.deadline' => 'nullable|date',
 
                 'milestones.*.tasks' => 'array',
-                'milestones.*.tasks.*.id' => 'nullable|exists:tasks,id',
+                'milestones.*.tasks.*.id' => [
+                    'nullable', 'integer', 'distinct',
+                    Rule::exists('tasks', 'id')
+                        ->whereIn('milestone_id', $goal->milestones->modelKeys()),
+                ],
                 'milestones.*.tasks.*.title' => 'nullable|string|max:255',
-                'milestones.*.tasks.*.points' => 'nullable|numeric',
+                'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'nullable', 'integer', 'min:0'],
                 'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
                 'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
-                'milestones.*.tasks.*.priority_id' => 'nullable|exists:task_priorities,id',
+                'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'nullable', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
                 'milestones.*.tasks.*.category_id' => 'nullable|exists:categories,id',
             ]);
 
-            $goal->update($validated);
+            // A task must also belong to its submitted milestone, not just this goal.
+            foreach (($validated['milestones'] ?? []) as $mIndex => $milestoneData) {
+                foreach (($milestoneData['tasks'] ?? []) as $tIndex => $taskData) {
+                    if ($systemXp && empty($taskData['id']) && empty($taskData['priority_id'])) {
+                        throw ValidationException::withMessages([
+                            "milestones.$mIndex.tasks.$tIndex.priority_id" => __('validation.required', ['attribute' => 'priority_id']),
+                        ]);
+                    }
+                    if (!$systemXp && empty($taskData['id']) && !array_key_exists('points', $taskData)) {
+                        throw ValidationException::withMessages([
+                            "milestones.$mIndex.tasks.$tIndex.points" => __('validation.required', ['attribute' => 'points']),
+                        ]);
+                    }
+                    if (!empty($taskData['id']) && !Task::whereKey($taskData['id'])
+                        ->where('milestone_id', $milestoneData['id'] ?? null)->exists()) {
+                        throw ValidationException::withMessages([
+                            "milestones.$mIndex.tasks.$tIndex.id" => __('validation.exists', ['attribute' => 'id']),
+                        ]);
+                    }
+                }
+            }
+
+            $goal->update(collect($validated)->except('milestones')->all());
 
             $newCategory = $goal->category_id;
             $categoryChanged = ($oldCategory != $newCategory);
@@ -266,7 +326,7 @@ class GoalController extends Controller
             $existingMilestones = $goal->milestones()->pluck('id')->toArray();
             $submittedMilestones = [];
 
-            foreach (($request->milestones ?? []) as $mData) {
+            foreach (($validated['milestones'] ?? []) as $mData) {
 
                 $milestone = $goal->milestones()->updateOrCreate(
                     ['id' => $mData['id'] ?? null],
@@ -283,25 +343,42 @@ class GoalController extends Controller
 
                 foreach (($mData['tasks'] ?? []) as $tData) {
 
+                    $previousTask = !empty($tData['id'])
+                        ? $milestone->tasks()->find($tData['id'])
+                        : null;
+
+                    $status = !empty($tData['status_id'])
+                        ? TaskStatus::find($tData['status_id'])
+                        : null;
+                    $newCompleted = $status && strtolower($status->name) === 'completed';
+
+                    $priorityId = $systemXp
+                        ? ($tData['priority_id'] ?? $previousTask?->priority_id
+                            ?? ($newCompleted && $previousTask?->completed_at ? null : TaskPriority::where('name', 'Medium')->value('id')))
+                        : $previousTask?->priority_id;
+                    $points = $systemXp
+                        ? ($previousTask?->completed_at && $newCompleted
+                            ? $previousTask->points
+                            : $taskXp->pointsForPriority((int) $priorityId))
+                        : ($tData['points'] ?? $previousTask?->points ?? 0);
+                    $manualPoints = $systemXp
+                        ? $previousTask?->manual_points
+                        : $points;
+
                     $task = $milestone->tasks()->updateOrCreate(
                         ['id' => $tData['id'] ?? null],
                         [
                             'title' => $tData['title'] ?? '',
-                            'points' => $tData['points'] ?? 0,
+                            'points' => $points,
+                            'manual_points' => $manualPoints,
                             'status_id' => $tData['status_id'] ?? null,
                             'type_id' => $tData['type_id'] ?? null,
-                            'priority_id' => $tData['priority_id'] ?? null,
+                            'priority_id' => $priorityId,
                             'category_id' => $tData['category_id'] ?? $goal->category_id,
                         ]
                     );
 
-                    $newCompleted = false;
-                    if (!empty($tData['status_id'])) {
-                        $status = TaskStatus::find($tData['status_id']);
-                        $newCompleted = $status && strtolower($status->name) === 'completed';
-                    }
-
-                    $task->completed_at = $newCompleted ? now() : null;
+                    $task->completed_at = $newCompleted ? ($previousTask?->completed_at ?? now()) : null;
                     $task->save();
 
                     $task->refresh();
@@ -360,6 +437,7 @@ class GoalController extends Controller
             $goal->load('milestones.tasks');
 
             GamificationService::recalcGoalAndMilestones($goal);
+            BadgeAwardingService::check($user, 'task');
 
             PointsService::syncUserGamification($user);
 
@@ -374,7 +452,7 @@ class GoalController extends Controller
 
         return DB::transaction(function () use ($locale, $id) {
 
-            $goal = Goal::with('milestones.tasks')->findOrFail($id);
+            $goal = auth()->user()->goals()->with('milestones.tasks')->findOrFail($id);
             $user = $goal->user;
 
             PointsLog::where('goal_id', $goal->id)

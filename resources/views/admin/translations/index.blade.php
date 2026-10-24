@@ -20,9 +20,12 @@
     </thead>
 
     <tbody>
-        @foreach($translations as $key => $rows)
+        @foreach($translations as $rows)
+            @php
+                $entry = $rows->first();
+            @endphp
             <tr>
-                <td class="fw-semibold">{{ $key }}</td>
+                <td class="fw-semibold">{{ $entry->group }}.{{ $entry->key }}</td>
 
                 @foreach($languages as $lang)
                     @php
@@ -42,7 +45,7 @@
                 <td class="d-flex align-items-center gap-3">
 
                     {{-- EDIT --}}
-                    <a href="{{ route('admin.translations.edit', ['locale' => app()->getLocale(), 'translationKey' => $key]) }}"
+                    <a href="{{ route('admin.translations.edit', ['locale' => app()->getLocale(), 'translationGroup' => $entry->group, 'translationKey' => $entry->key]) }}"
                     class="text-primary text-decoration-none me-3 hover-underline">
                         {{ t('button.edit') }}
                     </a>
@@ -50,12 +53,12 @@
                     {{-- DELETE --}}
                     <a href="#"
                     class="text-danger text-decoration-none hover-underline"
-                    onclick="event.preventDefault(); if(confirm('Delete this translation?')) document.getElementById('del-{{ $key }}').submit();">
+                    onclick="event.preventDefault(); if(confirm('Delete this translation?')) document.getElementById('del-{{ $entry->id }}').submit();">
                         {{ t('button.delete') }}
                     </a>
 
-                    <form id="del-{{ $key }}"
-                        action="{{ route('admin.translations.destroy', ['locale' => app()->getLocale(), 'translationKey' => $key]) }}"
+                    <form id="del-{{ $entry->id }}"
+                        action="{{ route('admin.translations.destroy', ['locale' => app()->getLocale(), 'translationGroup' => $entry->group, 'translationKey' => $entry->key]) }}"
                         method="POST"
                         class="d-none">
                         @csrf

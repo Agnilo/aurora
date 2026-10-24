@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
 use App\Models\UserDetails;
+use App\Services\Preferences\StreakVisibilityService;
 
 class ProfileController extends Controller
 {
@@ -242,7 +243,7 @@ class ProfileController extends Controller
         return back()->with('success', 'Viršelis atnaujintas!');
     }
 
-    public function badges($locale)
+    public function badges($locale, StreakVisibilityService $streakVisibility)
     {
         $user = auth()->user();
 
@@ -271,7 +272,10 @@ class ProfileController extends Controller
             'user' => $user,
             'game' => $game,
             'details' => $details,
-            'badges' => $user->badges()->with('category')->get(),
+            'badges' => $user->badges()->with('category')
+                ->when(!$streakVisibility->visible($user), fn ($query) =>
+                    $query->whereDoesntHave('category', fn ($category) => $category->where('key', 'streak'))
+                )->get(),
             'activeTab' => 'badges',
         ]);
     }

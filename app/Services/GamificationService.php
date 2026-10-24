@@ -234,7 +234,7 @@ class GamificationService
         $last = Carbon::parse($game->last_activity_date)->startOfDay();
         $today = Carbon::today();
 
-        if ($last->diffInDays($today) > 1) {
+        if ($game->streak_current > 0 && $last->lt($today->copy()->subDay())) {
             $game->streak_current = 0;
             $game->save();
         }

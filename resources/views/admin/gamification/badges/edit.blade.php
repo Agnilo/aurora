@@ -10,6 +10,7 @@
         <div class="card-body">
 
             <form method="POST"
+                  enctype="multipart/form-data"
                   action="{{ route('admin.gamification.badges.update', [
                         'locale' => app()->getLocale(),
                         'badge' => $badge->id
@@ -44,8 +45,7 @@
                     <label class="form-label">Aprašymas</label>
                     <textarea name="description"
                               class="form-control @error('description') is-invalid @enderror"
-                              rows="3"
-                              required>{{ old('description', $badge->description) }}</textarea>
+                              rows="3">{{ old('description', $badge->description) }}</textarea>
 
                     @error('description')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -54,28 +54,47 @@
 
                 {{-- ICON --}}
                 <div class="mb-3">
-                    <label class="form-label">Ikona</label>
-                    <input type="text"
+                    <label class="form-label">Ženklelio paveikslėlis</label>
+                    @if($badge->icon_path)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/'.$badge->icon_path) }}" alt="" width="64" height="64">
+                        </div>
+                    @endif
+                    <input type="file"
                            name="icon"
                            class="form-control @error('icon') is-invalid @enderror"
-                           value="{{ old('icon', $badge->icon) }}">
-
+                           accept="image/*">
                     @error('icon')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 {{-- CONDITION --}}
-                <div class="mb-4">
-                    <label class="form-label">Sąlyga (JSON)</label>
-                    <textarea name="condition"
-                              class="form-control font-monospace @error('condition') is-invalid @enderror"
-                              rows="4">{{ old('condition', json_encode($badge->condition, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) }}</textarea>
-
-                    @error('condition')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                @php
+                    [$conditionKey, $legacyKey, $conditionLabel] = match ($badge->category->key) {
+                        'task' => ['tasks_completed', 'task_completed', 'Užbaigtų užduočių skaičius'],
+                        'milestones' => ['milestones_completed', 'milestone_completed', 'Užbaigtų etapų skaičius'],
+                        'goals' => ['goals_completed', 'goal_completed', 'Užbaigtų tikslų skaičius'],
+                        'streak' => ['days', 'days', 'Dienų streak'],
+                        'level' => ['level', 'level', 'Pasiektas lygis'],
+                        default => [null, null, ''],
+                    };
+                @endphp
+                @if($conditionKey)
+                    <div class="mb-4">
+                        <label class="form-label" for="badge-condition">{{ $conditionLabel }}</label>
+                        <input id="badge-condition"
+                               type="number"
+                               name="condition[{{ $conditionKey }}]"
+                               value="{{ old('condition.'.$conditionKey, $badge->condition[$conditionKey] ?? $badge->condition[$legacyKey] ?? '') }}"
+                               class="form-control @error('condition.'.$conditionKey) is-invalid @enderror"
+                               min="1"
+                               required>
+                        @error('condition.'.$conditionKey)
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @endif
 
                 {{-- ACTIONS --}}
                 <div class="d-flex justify-content-between">

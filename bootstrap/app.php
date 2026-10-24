@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->redirectGuestsTo(function ($request) {
+            return route('login', [
+                'locale' => $request->route('locale') ?? app()->getLocale(),
+            ]);
+        });
+
         $middleware->redirectUsersTo(function ($request) {
             return route('dashboard', [
                 'locale' => app()->getLocale(),
@@ -24,7 +31,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append([
             SetAppLocale::class,
-            SyncStreak::class,
         ]);
 
         $middleware->alias([
@@ -33,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            SyncStreak::class,
             \App\Http\Middleware\EnsureOnboardingCompleted::class,
         ]);
     })

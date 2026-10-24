@@ -7,7 +7,8 @@ use App\Models\Localization\Translation;
 use App\Models\Localization\Language;
 use App\Models\Localization\TranslationGroup;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TranslationAdminController extends Controller
 {
@@ -28,21 +29,31 @@ class TranslationAdminController extends Controller
                 });
             });
 
-        // Paginate table rows (keys), keeping all languages together.
+        // A translation is identified by its group AND key, across all languages.
         $keyPage = (clone $query)
-            ->select('key')
-            ->groupBy('key')
+            ->select('group', 'key')
+            ->groupBy('group', 'key')
+            ->orderBy('group')
             ->orderBy('key')
             ->paginate(25)
             ->withQueryString();
 
-        // Search selects keys; load all their language variants for display.
-        $translations = Translation::query()
-            ->when($group, fn ($q) => $q->where('group', $group))
-            ->whereIn('key', $keyPage->getCollection()->pluck('key'))
-            ->orderBy('key')
-            ->get()
-            ->groupBy('key');
+        $pairs = $keyPage->getCollection();
+        $translations = collect();
+
+        if ($pairs->isNotEmpty()) {
+            $translations = Translation::query()
+                ->where(function ($query) use ($pairs) {
+                    foreach ($pairs as $pair) {
+                        $query->orWhere(function ($query) use ($pair) {
+                            $query->where('group', $pair->group)->where('key', $pair->key);
+                        });
+                    }
+                })
+                ->orderBy('group')->orderBy('key')->orderBy('language_code')
+                ->get()
+                ->groupBy(fn ($translation) => json_encode([$translation->group, $translation->key]));
+        }
 
         return view('admin.translations.index', compact(
             'translations', 'groups', 'group', 'languages', 'keyPage'
@@ -97,93 +108,80 @@ class TranslationAdminController extends Controller
             ->with('success', 'Translation created successfully.');
     }
 
-    public function edit($locale, $translationKey)
+    public function edit($locale, $translationGroup, $translationKey)
     {
-        $items = Translation::where('key', $translationKey)->get();
-
-        if ($items->isEmpty()) {
-            abort(404, "Translation key not found: $translationKey");
-        }
+        $items = Translation::where('group', $translationGroup)
+            ->where('key', $translationKey)->get();
+        abort_if($items->isEmpty(), 404);
 
         $languages = Language::where('is_active', true)->get();
         $groups = TranslationGroup::orderBy('name')->get();
-
-        $translations = [];
-        foreach ($items as $t) {
-            $translations[$t->language_code] = $t;
-        }
-
-        $group = $items->first()->group;
-
-        app('translation')->flushCache();
+        $translations = $items->keyBy('language_code');
+        $group = $translationGroup;
 
         return view('admin.translations.edit', compact(
-            'translationKey',
-            'translations',
-            'languages',
-            'groups',
-            'group'
+            'translationKey', 'translations', 'languages', 'groups', 'group'
         ));
     }
 
-    public function update(Request $request, $locale, $translationKey)
+    public function update(Request $request, $locale, $translationGroup, $translationKey)
     {
-        $request->validate([
-            'group' => 'required|string',
-            'key'   => 'required|string',
-            'value' => 'required|array'
+        $data = $request->validate([
+            'group' => 'required|string|exists:translation_groups,key',
+            'key' => 'required|string|max:255',
+            'value' => 'required|array',
+            'value.*' => 'nullable|string',
         ]);
 
-        $newKey = $request->key;
-        $newGroup = $request->group;
-
-        $rows = Translation::where('key', $translationKey)->get();
-
-        if ($rows->isEmpty()) {
-            abort(404, "Translation key not found: $translationKey");
+        if (array_diff(array_keys($data['value']), Language::pluck('code')->all())) {
+            throw ValidationException::withMessages(['value' => 'Unknown language.']);
         }
 
-        foreach ($rows as $row) {
-            $exists = Translation::where('group', $newGroup)
-                ->where('key', $newKey)
-                ->where('language_code', $row->language_code)
-                ->where('id', '!=', $row->id)
+        DB::transaction(function () use ($data, $translationGroup, $translationKey) {
+            $rows = Translation::where('group', $translationGroup)
+                ->where('key', $translationKey)->lockForUpdate()->get();
+            abort_if($rows->isEmpty(), 404);
+
+            $conflict = Translation::where('group', $data['group'])
+                ->where('key', $data['key'])
+                ->whereNotIn('id', $rows->modelKeys())
                 ->exists();
 
-            if ($exists) {
-                return back()->withErrors([
-                    'key' => "Vertimas su key '{$newKey}' ir group '{$newGroup}' jau egzistuoja kalbai {$row->language_code}."
+            if ($conflict) {
+                throw ValidationException::withMessages([
+                    'key' => "Vertimas su šia grupe ir raktu jau egzistuoja.",
                 ]);
             }
-        }
 
-        Translation::where('key', $translationKey)->update([
-            'key'   => $newKey,
-            'group' => $newGroup,
-        ]);
+            Translation::whereIn('id', $rows->modelKeys())->update([
+                'group' => $data['group'],
+                'key' => $data['key'],
+            ]);
 
-        foreach ($request->value as $lang => $val) {
-            Translation::where('key', $newKey)
-                ->where('group', $newGroup)
-                ->where('language_code', $lang)
-                ->update(['value' => $val]);
-        }
+            foreach ($data['value'] as $language => $value) {
+                Translation::updateOrCreate([
+                    'group' => $data['group'],
+                    'key' => $data['key'],
+                    'language_code' => $language,
+                ], ['value' => $value ?? '']);
+            }
+        });
 
         app('translation')->flushCache();
 
-        return redirect()
-            ->route('admin.translations.index', $locale)
+        return redirect()->route('admin.translations.index', ['locale' => $locale])
             ->with('success', 'Translation updated.');
     }
 
-
-    public function destroy($locale, $translationKey)
+    public function destroy($locale, $translationGroup, $translationKey)
     {
-        Translation::where('key', $translationKey)->delete();
+        $deleted = Translation::where('group', $translationGroup)
+            ->where('key', $translationKey)->delete();
+        abort_if($deleted === 0, 404);
 
         app('translation')->flushCache();
 
-        return redirect()->route('admin.translations.index', [$locale])
+        return redirect()->route('admin.translations.index', ['locale' => $locale])
             ->with('success', 'Translation deleted.');
     }
 

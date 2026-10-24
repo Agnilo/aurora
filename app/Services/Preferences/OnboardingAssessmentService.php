@@ -152,8 +152,8 @@ class OnboardingAssessmentService
                 default => throw new LogicException('Unsupported XP option.'),
             };
             $recommended['show_streak'] = match ($streak) {
-                'show' => true,
-                'hide', 'unsure' => false,
+                'show', 'unsure' => true,
+                'hide' => false,
                 default => throw new LogicException('Unsupported streak option.'),
             };
         }

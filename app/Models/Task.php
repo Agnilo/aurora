@@ -18,6 +18,7 @@ class Task extends Model
         'title',
         'description',
         'points',
+        'manual_points',
         'completed_at',
         'is_favorite',
         'is_important',

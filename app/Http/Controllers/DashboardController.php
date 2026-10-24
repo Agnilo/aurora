@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Services\Preferences\StreakVisibilityService;
+use App\Services\TaskXpService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, StreakVisibilityService $streakVisibility): View
     {
         $user = $request->user();
+        app(TaskXpService::class)->syncOpenTasks($user);
+        $showStreak = $streakVisibility->visible($user);
         $user->load('gameDetails');
         $filter = $request->query('tasks') === 'completed' ? 'completed' : 'active';
 
@@ -51,7 +55,7 @@ class DashboardController extends Controller
         $categoryLevels = $user->categoryLevels()->with('category')->get();
 
         return view('dashboard.index', compact(
-            'user', 'tasks', 'filter', 'completedToday', 'activeGoals', 'categoryLevels'
+            'user', 'tasks', 'filter', 'completedToday', 'activeGoals', 'categoryLevels', 'showStreak'
         ));
     }
 }

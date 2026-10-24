@@ -31,9 +31,9 @@ Route::group([
 
     Route::prefix('translations')->as('translations.')->group(function () {
 
-        Route::get('/{translationKey}/edit', [TranslationAdminController::class, 'edit'])
+        Route::get('/{translationGroup}/{translationKey}/edit', [TranslationAdminController::class, 'edit'])
             ->name('edit');
-        Route::put('/{translationKey}', [TranslationAdminController::class, 'update'])
+        Route::put('/{translationGroup}/{translationKey}', [TranslationAdminController::class, 'update'])
             ->name('update');
 
         Route::get('/', [TranslationAdminController::class, 'index'])
@@ -42,7 +42,7 @@ Route::group([
             ->name('create');
         Route::post('/', [TranslationAdminController::class, 'store'])
             ->name('store');
-        Route::delete('/{translationKey}', [TranslationAdminController::class, 'destroy'])
+        Route::delete('/{translationGroup}/{translationKey}',[TranslationAdminController::class, 'destroy'])
             ->name('destroy');
 
         Route::get('/export', [TranslationAdminController::class, 'export'])
@@ -64,6 +64,9 @@ Route::group([
 
         Route::put('/{user}', [UserAdminController::class, 'update'])
             ->name('update');
+
+        Route::put('/{user}/preferences', [UserAdminController::class, 'updatePreferences'])
+            ->name('preferences.update');
 
     });
 

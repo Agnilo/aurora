@@ -17,6 +17,12 @@ class CategoryLevel extends Model
         'xp_next',
     ];
 
+    protected $casts = [
+        'level' => 'integer',
+        'xp' => 'integer',
+        'xp_next' => 'integer',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -30,11 +36,11 @@ class CategoryLevel extends Model
     public function getProgressPercentAttribute(): float
     {
         $xp  = $this->xp ?? 0;
-        $max = $this->category->max_points ?? 100;
+        $max = $this->xp_next ?? 100;
 
         if ($max <= 0) return 0;
 
-        return min(100, ($xp / $max) * 100);
+        return max(0, min(100, ($xp / $max) * 100));
     }
 
     public function getFullSquaresAttribute(): int
@@ -44,15 +50,9 @@ class CategoryLevel extends Model
 
     public function getPartialFillAttribute(): int
     {
-        return (int) round(($this->progress_percent % 10) * 10);
+        return (int) round(fmod($this->progress_percent, 10) * 10);
     }
     
-    public function getLevelAttribute(): int
-    {
-        $xp = $this->xp ?? 0;
-        return max(1, (int) floor($xp / 100) + 1);
-    }
-
     public function getLevelNameAttribute(): string
     {
         return match (true) {

@@ -14,6 +14,7 @@ class UserGameDetail extends Model
     protected $fillable = [
         'user_id',
         'level',
+        'max_level',
         'xp',
         'xp_next',
         'coins',
@@ -23,6 +24,10 @@ class UserGameDetail extends Model
     ];
 
     protected $casts = [
+        'level' => 'integer',
+        'max_level' => 'integer',
+        'xp' => 'integer',
+        'xp_next' => 'integer',
         'last_activity_date' => 'date',
     ];
 

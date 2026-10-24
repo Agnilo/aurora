@@ -22,6 +22,8 @@
     $formMilestones = old('milestones', session()->hasOldInput() ? [] : $savedMilestones);
     $settingsFields = ['status_id', 'type_id', 'priority_id', 'color', 'progress', 'is_completed', 'is_favorite', 'is_important', 'start_date', 'end_date', 'reminder_date', 'tags'];
     $settingsHasErrors = collect($settingsFields)->contains(fn ($field) => $errors->has($field));
+    $systemXp = ($xpMode ?? \App\Models\Preferences\UserPreference::XP_MANUAL)
+        === \App\Models\Preferences\UserPreference::XP_SYSTEM;
 @endphp
 
 <form
@@ -235,10 +237,22 @@
         <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title">{{ t('goals.taskName') }}</label>
         <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title" type="text" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][title]" value="{{ $task['title'] ?? '' }}" placeholder="{{ t('goals.taskName') }}">
     </div>
-    <div class="gf-field gf-task-points">
-        <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points">{{ t('goals.form.points') }}</label>
-        <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][points]" value="{{ $task['points'] ?? 0 }}">
-    </div>
+    @if(!$systemXp)
+        <div class="gf-field gf-task-points">
+            <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points">{{ t('goals.form.points') }}</label>
+            <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0" step="1" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][points]" value="{{ $task['points'] ?? 0 }}" required>
+        </div>
+    @else
+        <div class="gf-field gf-task-points">
+            <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-priority">{{ t('goals.form.difficulty', 'Užduoties sunkumas') }}</label>
+            <select id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-priority" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][priority_id]" @if(empty($task['id']) || !empty($task['priority_id'])) required @endif>
+                <option value="">{{ t('goals.choose') }}</option>
+                @foreach($taskPriorities as $item)
+                    <option value="{{ $item->id }}" @selected(($task['priority_id'] ?? '') == $item->id)>{{ t('goals.form.difficulty.' . strtolower($item->name), $item->name) }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endif
     <div class="gf-field">
         <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-status">{{ t('goals.task.status') }}</label>
         <select id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-status" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][status_id]">
@@ -254,15 +268,6 @@
             <option value="">{{ t('goals.choose') }}</option>
             @foreach($taskTypes as $item)
                 <option value="{{ $item->id }}" @selected(($task['type_id'] ?? '') == $item->id)>{{ t('lookup.tasks.type.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="gf-field">
-        <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-priority">{{ t('goals.task.priority') }}</label>
-        <select id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-priority" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][priority_id]">
-            <option value="">{{ t('goals.choose') }}</option>
-            @foreach($taskPriorities as $item)
-                <option value="{{ $item->id }}" @selected(($task['priority_id'] ?? '') == $item->id)>{{ t('lookup.tasks.priority.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
             @endforeach
         </select>
     </div>
@@ -311,10 +316,22 @@
         <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-title">{{ t('goals.taskName') }}</label>
         <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-title" type="text" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][title]" value="" placeholder="{{ t('goals.taskName') }}">
     </div>
-    <div class="gf-field gf-task-points">
-        <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points">{{ t('goals.form.points') }}</label>
-        <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points" type="number" min="0" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][points]" value="0">
-    </div>
+    @if(!$systemXp)
+        <div class="gf-field gf-task-points">
+            <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points">{{ t('goals.form.points') }}</label>
+            <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points" type="number" min="0" step="1" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][points]" value="0" required>
+        </div>
+    @else
+        <div class="gf-field gf-task-points">
+            <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-priority">{{ t('goals.form.difficulty', 'Užduoties sunkumas') }}</label>
+            <select id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-priority" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][priority_id]" required>
+                <option value="">{{ t('goals.choose') }}</option>
+                @foreach($taskPriorities as $item)
+                    <option value="{{ $item->id }}">{{ t('goals.form.difficulty.' . strtolower($item->name), $item->name) }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endif
     <div class="gf-field">
         <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-status">{{ t('goals.task.status') }}</label>
         <select id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-status" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][status_id]">
@@ -330,15 +347,6 @@
             <option value="">{{ t('goals.choose') }}</option>
             @foreach($taskTypes as $item)
                 <option value="{{ $item->id }}">{{ t('lookup.tasks.type.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="gf-field">
-        <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-priority">{{ t('goals.task.priority') }}</label>
-        <select id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-priority" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][priority_id]">
-            <option value="">{{ t('goals.choose') }}</option>
-            @foreach($taskPriorities as $item)
-                <option value="{{ $item->id }}">{{ t('lookup.tasks.priority.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
             @endforeach
         </select>
     </div>

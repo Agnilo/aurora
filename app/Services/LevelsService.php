@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use LogicException;
 use App\Models\Level;
 use App\Models\UserGameDetail;
 
@@ -32,48 +32,61 @@ class LevelsService
 
     public static function applyXp(UserGameDetail $game, int $xp): void
     {
-        
-        $game->level ??= 1;
-        $game->xp ??= 0;
+        self::syncTotalXp($game, (int) $game->xp + $xp);
+    }
 
-        if ($game->xp_next === null) {
-            $game->xp_next = self::xpForNextLevel($game->level);
+    public static function syncTotalXp(UserGameDetail $game, int $totalXp): void
+    {
+        $totalXp = max(0, $totalXp);
+        $retainedLevel = max(1, (int) $game->level, (int) $game->max_level);
+        $level = 1;
+        $nextThreshold = self::xpForNextLevel(1);
+
+        if ($nextThreshold === null) {
+            throw new LogicException('XP calculation requires a configured level 1 range.');
         }
 
-        $game->xp = max(0, $game->xp + $xp);
+        // Move through the original level curve to either the earned level or
+        // a newly reached level. Removing XP must never lower the earned level.
+        while ($level < $retainedLevel || $totalXp >= $nextThreshold) {
+            $nextLevelCost = self::xpForNextLevel($level + 1);
 
-        $leveledUp = false;
-
-        while ($game->xp >= $game->xp_next) {
-            $game->level++;
-            $leveledUp = true;
-
-            $nextXp = self::xpForNextLevel($game->level);
-            if ($nextXp === null) {
+            if ($nextLevelCost === null) {
+                // The last configured level has been reached; do not throw a 404.
                 break;
             }
 
-            $game->xp_next += $nextXp;
+            $level++;
+            $nextThreshold += $nextLevelCost;
         }
 
+        if ($level < $retainedLevel) {
+            // Admin changes to level ranges must not remove earned levels either.
+            $level = $retainedLevel;
+            $nextThreshold = max($nextThreshold, (int) $game->xp_next);
+        }
+
+        $game->xp = $totalXp;
+        $game->level = $level;
+        $game->max_level = $level;
+        $game->xp_next = $nextThreshold;
         $game->save();
 
-        if ($leveledUp) {
-            BadgeAwardingService::check($game->user, 'level');
+        if ($level > $retainedLevel) {
+            $user = $game->user;
+            $user->setRelation('gameDetails', $game);
+            BadgeAwardingService::check($user, 'level');
         }
     }
 
-    public static function xpForNextLevel(int $currentLevel): int
+    public static function xpForNextLevel(int $currentLevel): ?int
     {
         $range = Level::where('level_from', '<=', $currentLevel)
             ->where('level_to', '>=', $currentLevel)
-            ->firstOrFail();
+            ->orderBy('level_from')
+            ->first();
 
         if (! $range) {
-            logger()->warning('Missing level range', [
-                'level' => $currentLevel,
-            ]);
-
             return null;
         }
 
@@ -85,6 +98,6 @@ class LevelsService
         $modifiers = self::modifiersForRange($levelsInRange);
         $modifier = $modifiers[$index] ?? 0;
 
-        return (int) round($baseXp * (1 + $modifier));
+        return max(1, (int) round($baseXp * (1 + $modifier)));
     }
 }

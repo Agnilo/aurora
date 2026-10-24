@@ -8,6 +8,8 @@ use App\Services\GamificationService;
 use App\Services\PointsService;
 use App\Services\LevelsService;
 use App\Services\BadgeAwardingService;
+use App\Services\TaskXpService;
+use App\Models\Preferences\UserPreference;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -50,6 +52,10 @@ class TaskController extends Controller
 
             $task->save();
 
+            if ($isCompleted && app(TaskXpService::class)->mode($user) === UserPreference::XP_SYSTEM) {
+                app(TaskXpService::class)->syncOpenTask($task);
+            }
+
             if (!$wasCompletedBefore && !is_null($task->completed_at)) {
                 $streakDay = GamificationService::registerStreak($user);
 
@@ -60,6 +66,7 @@ class TaskController extends Controller
             }
 
             PointsService::syncTaskCompletion($task);
+            BadgeAwardingService::check($user, 'task');
 
             $goal->refresh();
             $goal->load('milestones.tasks');

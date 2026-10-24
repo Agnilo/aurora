@@ -119,10 +119,12 @@
                     <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-coin"/></svg>{{ $dashboardText('dashboard_home.coins') }}</dt>
                     <dd>{{ $details->coins }}</dd>
                 </dl>
-                <dl class="dh-floating-stat dh-floating-streak">
-                    <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-flame"/></svg>{{ $dashboardText('dashboard_home.streak') }}</dt>
-                    <dd>{{ $details->streak_current ?? 0 }}</dd>
-                </dl>
+                @if($showStreak)
+                    <dl class="dh-floating-stat dh-floating-streak">
+                        <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-flame"/></svg>{{ $dashboardText('dashboard_home.streak') }}</dt>
+                        <dd>{{ $details->streak_current ?? 0 }}</dd>
+                    </dl>
+                @endif
             @endif
         </div>
         @if ($details)

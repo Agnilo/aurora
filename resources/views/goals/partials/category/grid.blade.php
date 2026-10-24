@@ -18,7 +18,7 @@
 
             $level = $categoryLevels[$category->id] ?? null;
             $xp = $level?->xp ?? 0;
-            $max = $category->max_points ?? 100;
+            $max = $level?->xp_next ?? 100;
             $percent = $max > 0
                 ? max(0, min(100, ($xp / $max) * 100))
                 : 0;
