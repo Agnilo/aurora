@@ -4,7 +4,7 @@
 
 <div class="container py-4">
 
-    <h1 class="fw-bold mb-4">Lygiai (Level tiers)</h1>
+    <h1 class="fw-bold mb-4">{{ t('gamification.levels') }}</h1>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -14,7 +14,7 @@
 
     <a href="{{ route('admin.gamification.levels.create', app()->getLocale()) }}"
     class="btn btn-primary mb-3">
-        + Pridėti lygį
+        + {{ t('button.add_new')}}
     </a>
 
     <div class="card shadow-sm">
@@ -23,11 +23,11 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 140px">Lygiai</th>
-                        <th>Pavadinimas</th>
-                        <th>XP reikalinga</th>
-                        <th>Monetų atlygis</th>
-                        <th class="text-end">Veiksmai</th>
+                        <th style="width: 140px">{{ t('gamification.levels') }}</th>
+                        <th>{{ t('lookup.name')}}</th>
+                        <th>{{ t('gamification.xp_needed') }}</th>
+                        <th>{{ t('gamification.monetery_award') }}</th>
+                        <th class="text-end">{{ t('preferences.admin.actions')}}</th>
                     </tr>
                 </thead>
 
@@ -55,37 +55,60 @@
                             </td>
 
                             <td class="text-end">
+                                @php
+                                    $cannotDelete = $level->hasUsers();
+                                @endphp
 
-                                <a href="{{ route('admin.gamification.levels.edit', [
-                                    'locale' => app()->getLocale(),
-                                    'level' => $level->id
-                                ]) }}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    {{ t('button.edit') }}
-                                </a>
+                                <div class="d-flex align-items-center justify-content-end gap-2 flex-nowrap">
+                                    <a href="{{ route('admin.gamification.levels.edit', [
+                                        'locale' => app()->getLocale(),
+                                        'level' => $level->id
+                                    ]) }}"
+                                       class="btn btn-sm btn-outline-primary text-nowrap">
+                                        {{ t('button.edit') }}
+                                    </a>
 
-                                 @if(!$level->hasUsers())
-                                    <form method="POST"
-                                        action="{{ route('admin.gamification.levels.destroy', [
-                                            'locale' => app()->getLocale(),
-                                            'level' => $level->id
-                                        ]) }}"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Ar tikrai norite ištrinti šį lygio intervalą?')">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            Ištrinti
+                                    @if($cannotDelete)
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary text-nowrap"
+                                                disabled>
+                                            {{ t('button.delete') }}
                                         </button>
-                                    </form>
-                                @else
-                                    <span class="text-muted small">
-                                        Negalima trinti (yra naudotojų)
-                                    </span>
-                                @endif
-                                
+                                    @else
+                                        <form method="POST"
+                                              action="{{ route('admin.gamification.levels.destroy', [
+                                                  'locale' => app()->getLocale(),
+                                                  'level' => $level->id
+                                              ]) }}"
+                                              class="m-0"
+                                              onsubmit="return confirm('Ar tikrai norite ištrinti šį lygio intervalą?')">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger text-nowrap">
+                                                {{ t('button.delete') }}
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    @if($cannotDelete)
+                                        <button type="button"
+                                                class="btn btn-sm border-0 bg-transparent text-muted p-1 d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                                data-level-delete-info
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ t('errors.cannot_delete') }}"
+                                                aria-label="{{ t('errors.cannot_delete') }}">
+                                            <x-lucide-info width="12" height="12" aria-hidden="true" />
+                                        </button>
+                                    @else
+                                        {{-- Reserve the same space so every row's buttons align. --}}
+                                        <span class="btn btn-sm border-0 p-1 d-inline-flex align-items-center justify-content-center flex-shrink-0 invisible"
+                                              aria-hidden="true">
+                                            <x-lucide-info width="12" height="12" aria-hidden="true" />
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -103,4 +126,17 @@
 
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+    document.querySelectorAll('[data-level-delete-info]').forEach((element) => {
+        if (window.bootstrap?.Tooltip) {
+            bootstrap.Tooltip.getOrCreateInstance(element, {
+                container: 'body',
+                trigger: 'hover focus',
+            });
+        }
+    });
+</script>
 @endsection
