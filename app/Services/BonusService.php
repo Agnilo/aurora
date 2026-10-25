@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Bonus;
 use App\Models\Task;
+use App\Models\Habit;
 use App\Models\User;
 
 class BonusService
@@ -44,7 +45,7 @@ class BonusService
             return true;
         }
 
-        if (! $subject instanceof Task) {
+        if (! ($subject instanceof Task) && ! ($subject instanceof Habit)) {
             return false;
         }
 

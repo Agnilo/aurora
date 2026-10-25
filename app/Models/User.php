@@ -147,6 +147,7 @@ class User extends Authenticatable
         return $this->pointsLog()
             ->whereIn('type', [
                 'task_completed',
+                'habit_completed',
                 'milestone_completed',
                 'goal_completed',
                 'streak',

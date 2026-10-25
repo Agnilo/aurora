@@ -1,17 +1,19 @@
 @extends('layouts.app')
 
-@section('title', t('goals.title').' · Aurora')
+@section('title', t('plans.title').' · Aurora')
 
 @section('content')
 <div class="container goals-page">
     <header class="gp-heading">
         <div>
             <p class="gp-eyebrow">{{ t('goals.eyebrow') }}</p>
-            <h1>{{ t('goals.title') }}</h1>
+            <h1>{{ t('plans.title') }}</h1>
             <p class="gp-description">{{ t('goals.description') }}</p>
         </div>
-        <a class="gp-primary" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}">+ {{ t('goals.new') }}</a>
+        <button class="pl-primary" data-plan-create>+ {{ t('plans.create') }}</button>
     </header>
+
+    @include('plans.tabs', ['tab' => 'goals'])
 
     @if (session('success'))
         <p class="gp-notice" role="status">{{ session('success') }}</p>

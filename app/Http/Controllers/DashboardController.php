@@ -18,26 +18,21 @@ class DashboardController extends Controller
         $user->load('gameDetails');
         $filter = $request->query('tasks') === 'completed' ? 'completed' : 'active';
 
-        $tasks = Task::query()
-            ->whereHas('milestone.goal', function ($query) use ($user, $filter) {
-                $query->where('user_id', $user->id);
-                if ($filter === 'active') {
-                    $query->where('is_completed', false);
-                }
-            })
-            ->with(['milestone.goal.category', 'category'])
+        $tasks = Task::ownedBy($user)
+            ->whereNull('archived_at')->with(['goal.category', 'category'])
             ->when($filter === 'completed',
                 fn ($query) => $query->whereNotNull('completed_at')->orderByDesc('completed_at'),
-                fn ($query) => $query->whereNull('completed_at')->orderByDesc('is_important')->orderBy('created_at')
-            )
-            ->orderBy('id')
-            ->paginate(6)
-            ->withQueryString();
+                fn ($query) => $query->whereNull('completed_at')
+                    ->where(fn($q) => $q->whereNull('scheduled_on')->orWhereDate('scheduled_on', '<=', today('Europe/Vilnius')))
+                    ->orderByDesc('is_important')->orderBy('scheduled_on')
+            )->orderBy('id')->paginate(6)->withQueryString();
 
-        $completedToday = Task::query()
-            ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
-            ->whereDate('completed_at', today())
-            ->count();
+        $completedToday = Task::ownedBy($user)->whereDate('completed_at', today())->count();
+        $todayHabits = \App\Models\Habit::where('user_id', $user->id)->with('category')->whereNull('archived_at')->get()
+            ->filter(fn($habit) => $habit->dueToday());
+        foreach ($todayHabits as $habit) {
+            $habit->setRelation('currentCompletion', $habit->completions()->where('period_start', $habit->period())->first());
+        }
 
         $activeGoals = $user->goals()
             ->where('is_completed', false)
@@ -55,7 +50,7 @@ class DashboardController extends Controller
         $categoryLevels = $user->categoryLevels()->with('category')->get();
 
         return view('dashboard.index', compact(
-            'user', 'tasks', 'filter', 'completedToday', 'activeGoals', 'categoryLevels', 'showStreak'
+            'user', 'tasks', 'filter', 'completedToday', 'activeGoals', 'categoryLevels', 'showStreak', 'todayHabits'
         ));
     }
 }

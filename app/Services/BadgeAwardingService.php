@@ -53,7 +53,7 @@ class BadgeAwardingService
         $actual = match ($key) {
             // Count completed task records, not XP entries or completion clicks.
             'task' => Task::whereNotNull('completed_at')
-                ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
+                ->ownedBy($user)
                 ->count(),
             'milestones' => $user->pointsLog()->where('type', 'milestone_completed')->count(),
             'goals' => $user->pointsLog()->where('type', 'goal_completed')->count(),

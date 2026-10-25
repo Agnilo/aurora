@@ -34,8 +34,8 @@ class GamificationService
         $goalDoneTasks  = 0;
 
         foreach ($goal->milestones as $milestone) {
-            $total = $milestone->tasks->count();
-            $done = $milestone->tasks->whereNotNull('completed_at')->count();
+            $total = $milestone->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)->count();
+            $done = $milestone->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)->whereNotNull('completed_at')->count();
 
             $milestone->progress = $total > 0 ? (int) floor(($done / $total) * 100) : 0;
             $milestone->is_completed = ($milestone->progress >= 100);
@@ -44,6 +44,10 @@ class GamificationService
             $goalTotalTasks += $total;
             $goalDoneTasks  += $done;
         }
+
+        $direct = $goal->directTasks()->forGoalProgress()->get();
+        $goalTotalTasks += $direct->count();
+        $goalDoneTasks += $direct->whereNotNull('completed_at')->count();
 
         //$mTotal = $goal->milestones->count();
         //$mDone = $goal->milestones->where('is_completed', true)->count();
@@ -80,8 +84,6 @@ class GamificationService
 
                     } else {
                         $log->category_id = $goal->category_id;
-                        $log->points = $xp;
-                        $log->amount = $xp;
                         $log->save();
                     }
 
@@ -133,8 +135,6 @@ class GamificationService
 
             } else {
                 $log->category_id = $goal->category_id;
-                $log->points = $xp;
-                $log->amount = $xp;
                 $log->save();
             }
         } else {
@@ -146,9 +146,9 @@ class GamificationService
     {
         $milestone->loadMissing('tasks.priority');
 
-        if ($milestone->tasks->count() === 0) return 0;
+        if ($milestone->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)->count() === 0) return 0;
 
-        $avg = $milestone->tasks
+        $avg = $milestone->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)
             ->map(fn($t) => PointsService::calculateXp($t))
             ->avg();
 
@@ -164,11 +164,13 @@ class GamificationService
     {
         $goal->loadMissing('milestones.tasks.priority');
 
-        if ($goal->milestones->count() === 0) return 0;
-
-        $avg = $goal->milestones
-            ->map(fn($m) => self::calculateMilestoneXp($m))
-            ->avg();
+        $parts = $goal->milestones->map(fn($m) => self::calculateMilestoneXp($m));
+        $direct = $goal->directTasks()->forGoalProgress()->get();
+        if ($direct->isNotEmpty()) {
+            $parts->push($direct->avg(fn($task) => PointsService::calculateXp($task)));
+        }
+        if ($parts->isEmpty()) return 0;
+        $avg = $parts->avg();
 
         return BonusService::applyForContext(
             $goal->user,

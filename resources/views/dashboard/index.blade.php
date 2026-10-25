@@ -49,7 +49,7 @@
         <p>{{ $dashboardText('dashboard_home.subtitle') }}</p>
     </header>
 
-    <a class="dh-new-goal" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}">+ {{ $dashboardText('dashboard_home.new_goal') }}</a>
+    <button class="dh-new-goal pl-primary" data-plan-create>+ {{ t('plans.create') }}</button>
 
     <section class="dh-panel dh-tasks" aria-labelledby="dh-tasks-title" data-dashboard-tasks>
         <div class="dh-section-heading">
@@ -70,17 +70,18 @@
                 <div class="dh-task {{ $done ? 'is-completed' : '' }}" style="--area-accent: {{ $colorFor($category) }}">
                     <form method="POST" action="{{ route('tasks.toggle-complete', ['locale' => app()->getLocale(), 'task' => $task->id]) }}" data-task-toggle>
                         @csrf
+                        <input type="hidden" name="completed" value="{{ $done ? 0 : 1 }}">
                         <button class="dh-check" type="submit" aria-pressed="{{ $done ? 'true' : 'false' }}" aria-label="{{ $dashboardText($done ? 'dashboard_v2.undo' : 'dashboard_v2.complete') }}: {{ $task->title }}">{{ $done ? '✓' : '' }}</button>
                     </form>
                     <svg class="dh-icon dh-task-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($category) }}"/></svg>
-                    <a class="dh-task-copy" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
+                    <a class="dh-task-copy" href="{{ ($goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task])) }}">
                         <span class="dh-task-title">{{ $task->title }}</span>
-                        <span class="dh-task-goal">{{ $goal->title }}</span>
+                        <span class="dh-task-goal">{{ $goal?->title ?? t('plans.standalone') }}</span>
                     </a>
                     @if ($category)
                         <span class="dh-task-category"><span></span>{{ $category->translated_name }}</span>
                     @endif
-                    <a class="dh-task-open" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}" aria-label="{{ $dashboardText('dashboard_v2.open_goal') }}: {{ $goal->title }}">↗</a>
+                    <a class="dh-task-open" href="{{ ($goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task])) }}" aria-label="{{ $dashboardText('dashboard_v2.open_goal') }}: {{ $goal?->title ?? t('plans.standalone') }}">↗</a>
                 </div>
             @empty
                 <div class="dh-empty">
@@ -147,18 +148,24 @@
         <div class="dh-goals">
             @forelse ($activeGoals as $goal)
                 @php($progress = max(0, min(100, (float) $goal->progress)))
-                <a class="dh-goal" style="--area-accent: {{ $colorFor($goal->category) }}" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
+                <a class="dh-goal" style="--area-accent: {{ $colorFor($goal->category) }}" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal?->id]) }}">
                     <span class="dh-icon-badge"><svg class="dh-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($goal->category) }}"/></svg></span>
                     <span class="dh-goal-content">
                         <span class="dh-goal-top"><strong>{{ $goal->title }}</strong><span aria-hidden="true">→</span></span>
                         <span class="dh-progress-row"><span class="dh-progress" role="progressbar" aria-label="{{ $goal->title }}" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $progress }}%"></span></span><span class="dh-number">{{ round($progress) }}%</span></span>
-                        <span class="dh-task-goal">{{ $dashboardText('dashboard_v2.milestones') }}: {{ $goal->completed_milestones_count }} / {{ $goal->milestones_count }}</span>
+                        <span class="dh-task-goal">{{ t('plans.tasks') }}: {{ $goal->tasks()->whereNotNull('completed_at')->count() }} / {{ $goal->tasks()->forGoalProgress()->count() }}</span>
                     </span>
                 </a>
             @empty
                 <div class="dh-empty"><h3>{{ $dashboardText('dashboard_home.goals_empty') }}</h3><p>{{ $dashboardText('dashboard_home.goals_empty_description') }}</p></div>
             @endforelse
         </div>
+    </section>
+
+    <section class="pl-panel pl-today-habits" aria-labelledby="today-habits">
+        <header class="pl-heading"><h2 id="today-habits">{{ t('plans.today_habits') }}</h2><a href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">{{ t('plans.habits') }} →</a></header>
+        @forelse($todayHabits as $habit) @include('plans.habit-row')
+        @empty <p class="pl-hint">{{ t('plans.no_habits_today') }}</p> @endforelse
     </section>
 
     <section class="dh-panel dh-areas" aria-labelledby="dh-areas-title">
@@ -198,6 +205,7 @@
                 });
                 if (!response.ok) throw new Error('Task save failed');
                 const result = await response.json();
+                form.querySelector('[name=completed]').value = result.completed_at ? '0' : '1';
                 if (!result.success) throw new Error('Task save failed');
                 window.location.reload();
             } catch (failure) {

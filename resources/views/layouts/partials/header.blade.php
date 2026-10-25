@@ -15,9 +15,9 @@
                @if (request()->routeIs('dashboard')) aria-current="page" @endif>
                 {{ t('app_shell.today') }}
             </a>
-            <a href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}"
-               @if (request()->routeIs('goals.*', 'category.show')) aria-current="page" @endif>
-                {{ t('app_shell.goals') }}
+            <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"
+               @if (request()->routeIs('plans.*', 'goals.*', 'tasks.*', 'habits.*', 'category.show')) aria-current="page" @endif>
+                {{ t('plans.title') }}
             </a>
             <a href="{{ route('leaderboard.index', ['locale' => app()->getLocale()]) }}"
                @if (request()->routeIs('leaderboard.*')) aria-current="page" @endif>
@@ -74,3 +74,5 @@
         </div>
     </div>
 </header>
+
+@include('plans.chooser')

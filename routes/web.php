@@ -51,6 +51,15 @@ Route::group([
         return view('welcome');
     })->name('home');
 
+    Route::middleware('auth')->group(function () {
+        Route::get('/plans', [\App\Http\Controllers\PlansController::class, 'index'])->name('plans.index');
+        Route::resource('tasks', TaskController::class)->only(['create', 'store', 'edit', 'update']);
+        Route::post('/tasks/{task}/archive', [TaskController::class, 'archive'])->name('tasks.archive');
+        Route::resource('habits', \App\Http\Controllers\HabitController::class)->only(['create', 'store', 'edit', 'update']);
+        Route::post('/habits/{habit}/complete', [\App\Http\Controllers\HabitController::class, 'complete'])->name('habits.complete');
+        Route::post('/habits/{habit}/archive', [\App\Http\Controllers\HabitController::class, 'archive'])->name('habits.archive');
+    });
+
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware(['auth', 'verified'])
         ->name('dashboard');
@@ -64,9 +73,11 @@ Route::group([
         ->name('tasks.toggle-complete');
 
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])
+        ->middleware('auth')
         ->name('leaderboard.index');
 
     Route::get('/public/{user}', [PublicProfileController::class, 'show'])
+        ->middleware('auth')
         ->name('public.show');
 
     Route::middleware('auth')->group(function () {
@@ -94,7 +105,6 @@ Route::group([
 
     Route::resource('users', UserController::class)
         ->middleware(['auth', 'role:admin']);
-
     Route::resource('goals', GoalController::class)
         ->middleware('auth');
 

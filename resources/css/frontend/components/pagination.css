@@ -82,3 +82,88 @@
         transition: none;
     }
 }
+/* Shared pagination for tasks, habits and habit history. */
+.aurora-app .pl-pager {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.pl-pager-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dcd9d4;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 55%);
+    overflow: hidden;
+}
+
+.pl-pager .pl-pager-arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 42px;
+    flex-shrink: 0;
+    color: #49534c;
+    font: 22px/1 Arial, sans-serif;
+    text-decoration: none;
+}
+
+.pl-pager a.pl-pager-arrow:hover {
+    background: #e6ece2;
+}
+
+.pl-pager .is-disabled {
+    color: #aeb3af;
+}
+
+.pl-pager .pl-pager-jump {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0 10px;
+    height: 42px;
+    border-inline: 1px solid #dcd9d4;
+}
+
+.pl-pager .pl-pager-page-input {
+    width: 48px;
+    min-height: 30px;
+    padding: 3px;
+    border: 1px solid #dcd9d4;
+    border-radius: 4px;
+    background: rgb(255 255 255 / 70%);
+    color: #10151e;
+    text-align: center;
+    font: 12px 'JetBrains Mono', monospace;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.pl-pager-page-input::-webkit-inner-spin-button,
+.pl-pager-page-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.pl-pager-total {
+    white-space: nowrap;
+    font-size: 12px;
+    color: #676c74;
+}
+
+.pl-pager :focus-visible {
+    outline: 2px solid #566a5b;
+    outline-offset: -2px;
+}
+
+@media (max-width: 480px) {
+    .aurora-app .pl-pager {
+        justify-content: center;
+    }
+
+    .pl-pager .pl-pager-arrow {
+        width: 34px;
+    }
+}

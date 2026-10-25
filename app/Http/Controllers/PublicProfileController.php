@@ -38,14 +38,10 @@ class PublicProfileController extends Controller
             'milestones_total' => $user->milestones()->count(),
 
             'tasks_completed' => Task::whereNotNull('completed_at')
-                ->whereHas('milestone.goal', function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })
+                ->ownedBy($user)
                 ->count(),
 
-            'tasks_total' => Task::whereHas('milestone.goal', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-                })
+            'tasks_total' => Task::ownedBy($user)
                 ->count(),
         ];
 

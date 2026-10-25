@@ -112,6 +112,13 @@
 
             <hr>
 
+            <div class="pl-secondary-actions">
+                <a class="pl-secondary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">+ {{ t('plans.new_task') }}</a>
+                <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.open_goal') }}</a>
+            </div>
+            @foreach($goal->directTasks->whereNull('archived_at') as $task)
+                @include('plans.task-row')
+            @endforeach
             {{-- MILESTONES --}}
             @foreach($goal->milestones as $milestone)
                 <div class="milestone-item border-start border-4 milestone-side-border ps-3 mb-3">
@@ -142,7 +149,7 @@
                     </div>
 
                     {{-- TASKS --}}
-                    @foreach($milestone->tasks as $task)
+                    @foreach($milestone->tasks->whereNull('archived_at') as $task)
                         <div class="list-group-item px-2 py-1 mb-1 border rounded">
 
                             <div class="d-flex justify-content-between">

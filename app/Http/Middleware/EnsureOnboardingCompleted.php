@@ -13,7 +13,7 @@ class EnsureOnboardingCompleted
     {
         $user = $request->user();
         // Auth, verification, onboarding, and admin routes remain reachable.
-        $protected = $request->routeIs('dashboard', 'goals.*', 'tasks.*', 'category.*',
+        $protected = $request->routeIs('dashboard', 'plans.*', 'habits.*', 'goals.*', 'tasks.*', 'category.*',
             'leaderboard.*', 'public.*', 'profile.*', 'users.*');
 
         if ($user && $protected && ! $user->assessments()

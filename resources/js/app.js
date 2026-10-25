@@ -78,16 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function buildUrl(categoryId) {
             const url = new URL(window.location.href);
-
             url.searchParams.delete('page');
             url.searchParams.set('ajax', '1');
-
-            if (categoryId) {
-                url.searchParams.set('category', categoryId);
-            } else {
-                url.searchParams.delete('category');
-            }
-
+            if (categoryId) url.searchParams.set('category', categoryId);
+            else url.searchParams.delete('category');
             return url.toString();
         }
 
@@ -244,3 +238,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
+
+import './plans.js';

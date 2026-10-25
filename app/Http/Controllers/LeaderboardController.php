@@ -16,6 +16,7 @@ class LeaderboardController extends Controller
                     ->whereColumn('points_log.user_id', 'users.id')
                     ->whereIn('type', [
                         'task_completed',
+                        'habit_completed',
                         'milestone_completed',
                         'goal_completed',
                         'streak',

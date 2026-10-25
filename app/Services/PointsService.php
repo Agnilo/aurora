@@ -15,10 +15,10 @@ class PointsService
     
     public static function calculateXp(Task $task): int
     {
-        $task->loadMissing(['priority', 'milestone.goal.user']);
+        $task->loadMissing(['priority', 'user']);
 
         return BonusService::applyForContext(
-            $task->milestone->goal->user,
+            $task->user,
             'task_multiplication',
             (int) $task->points,
             $task
@@ -41,7 +41,7 @@ class PointsService
 
         if (!$log) {
             PointsLog::create([
-                'user_id' => $task->milestone->goal->user_id,
+                'user_id' => $task->user_id,
                 'task_id' => $task->id,
                 'category_id' => $task->category_id,
                 'points' => $xp,
@@ -52,8 +52,6 @@ class PointsService
         }
 
         $log->category_id = $task->category_id;
-        $log->points = $xp;
-        $log->amount = $xp;
         $log->save();
     }
 

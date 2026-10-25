@@ -33,6 +33,7 @@
     method="POST"
 >
     @csrf
+    @if(!isset($goal)) <input type="hidden" name="open_goal" value="1"> @endif
     @if(isset($goal))
         @method('PUT')
     @endif
@@ -113,20 +114,7 @@
         <p class="gf-error">{{ $message }}</p>
     @enderror
 </div>
-<div class="gf-field">
-    <label for="gf-type_id">{{ t('goals.type') }}</label>
-    <select id="gf-type_id" name="type_id" >
-        <option value="">{{ t('goals.choose') }}</option>
-        @foreach($types as $item)
-            <option value="{{ $item->id }}" @selected(old('type_id', $goal->type_id ?? '') == $item->id)>
-                {{ t('lookup.goals.type.' . \Illuminate\Support\Str::slug($item->name, '_')) }}
-            </option>
-        @endforeach
-    </select>
-    @error('type_id')
-        <p class="gf-error">{{ $message }}</p>
-    @enderror
-</div>
+<input type="hidden" name="type_id" value="{{ old('type_id', $goal->type_id ?? '') }}">
 <div class="gf-field">
     <label for="gf-priority_id">{{ t('goals.priority') }}</label>
     <select id="gf-priority_id" name="priority_id" >
@@ -207,6 +195,7 @@
             <span class="gf-number" aria-hidden="true">03</span>
             <h2 id="gf-stages-heading">{{ t('goals.form.stagesAndTasks') }}</h2>
         </div>
+        <p class="pl-hint">{{ t('plans.goal_setup_hint') }}</p>
         <div id="milestones-wrapper">
             @foreach($formMilestones as $milestoneIndex => $milestone)
 <div class="milestone-block gf-milestone" data-index="{{ $milestoneIndex }}">
@@ -262,15 +251,7 @@
             @endforeach
         </select>
     </div>
-    <div class="gf-field">
-        <label for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-type">{{ t('goals.task.type') }}</label>
-        <select id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-type" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][type_id]">
-            <option value="">{{ t('goals.choose') }}</option>
-            @foreach($taskTypes as $item)
-                <option value="{{ $item->id }}" @selected(($task['type_id'] ?? '') == $item->id)>{{ t('lookup.tasks.type.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
-            @endforeach
-        </select>
-    </div>
+    <input type="hidden" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][type_id]" value="{{ $task['type_id'] ?? '' }}">
     <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}">×</button>
 </div>
     @endforeach
@@ -341,15 +322,7 @@
             @endforeach
         </select>
     </div>
-    <div class="gf-field">
-        <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-type">{{ t('goals.task.type') }}</label>
-        <select id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-type" name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][type_id]">
-            <option value="">{{ t('goals.choose') }}</option>
-            @foreach($taskTypes as $item)
-                <option value="{{ $item->id }}">{{ t('lookup.tasks.type.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
-            @endforeach
-        </select>
-    </div>
+    
     <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}">×</button>
 </div>
 </template>

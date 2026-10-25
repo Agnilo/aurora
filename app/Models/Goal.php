@@ -66,6 +66,15 @@ class Goal extends Model
         return $this->belongsTo(GoalType::class, 'type_id');
     }
 
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+    public function directTasks()
+    {
+        return $this->hasMany(Task::class)->whereNull('milestone_id');
+    }
+
     public function milestones()
     {
         return $this->hasMany(Milestone::class);
@@ -73,15 +82,7 @@ class Goal extends Model
 
     public function recalculateProgress()
     {
-        $totalPoints = $this->milestones->flatMap->tasks->sum('points');
-        $donePoints = $this->milestones->flatMap->tasks->whereNotNull('completed_at')->sum('points');
-
-        $progress = $totalPoints ? round(($donePoints / $totalPoints) * 100) : 0;
-
-        $this->progress = $progress;
-        $this->is_completed = ($progress >= 100);
-        $this->save();
-
-        return $progress;
+        \App\Services\GamificationService::recalcGoalProgress($this);
+        return $this->progress;
     }
 }

@@ -18,8 +18,13 @@ class TaskXpService
             return;
         }
 
+        foreach (\App\Models\Habit::where('user_id', $user->id)->get() as $habit) {
+            $habit->priority_id ??= TaskPriority::where('name', 'Medium')->value('id');
+            $habit->points = $this->pointsForPriority((int) $habit->priority_id);
+            if ($habit->isDirty()) $habit->save();
+        }
         Task::query()
-            ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
+            ->ownedBy($user)
             ->whereNull('completed_at')
             ->chunkById(100, function ($tasks) {
                 foreach ($tasks as $task) {
@@ -31,8 +36,9 @@ class TaskXpService
     /** Remember the current manual values before changing to system mode. */
     public function rememberManualPoints(User $user): void
     {
+        \App\Models\Habit::where('user_id', $user->id)->update(['manual_points' => \Illuminate\Support\Facades\DB::raw('points')]);
         Task::query()
-            ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
+            ->ownedBy($user)
             ->whereNull('completed_at')
             ->update(['manual_points' => \Illuminate\Support\Facades\DB::raw('points')]);
     }
@@ -40,8 +46,13 @@ class TaskXpService
     /** Restore the user's chosen XP when leaving system mode. */
     public function restoreManualPoints(User $user): void
     {
+        foreach (\App\Models\Habit::where('user_id', $user->id)->get() as $habit) {
+            $habit->points = $habit->manual_points ?? $habit->points;
+            $habit->manual_points = $habit->points;
+            $habit->save();
+        }
         Task::query()
-            ->whereHas('milestone.goal', fn ($query) => $query->where('user_id', $user->id))
+            ->ownedBy($user)
             ->whereNull('completed_at')
             ->chunkById(100, function ($tasks) {
                 foreach ($tasks as $task) {

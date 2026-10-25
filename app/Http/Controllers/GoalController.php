@@ -47,7 +47,7 @@ class GoalController extends Controller
             $statusFilter = 'active';
         }
 
-        $baseGoalsQuery = Goal::with(['milestones.tasks', 'status', 'priority', 'type'])
+        $baseGoalsQuery = Goal::with(['milestones.tasks', 'directTasks.category', 'status', 'priority', 'type'])
             ->where('user_id', Auth::id());
 
         if ($request->has('category') && $request->category !== null) {
@@ -157,7 +157,7 @@ class GoalController extends Controller
 
         $validated['user_id'] = Auth::id();
 
-        DB::transaction(function () use ($validated, $systemXp, $taskXp) {
+        $createdGoal = DB::transaction(function () use ($validated, $systemXp, $taskXp) {
             $goal = Goal::create(collect($validated)->except('milestones')->all());
 
             foreach ($validated['milestones'] ?? [] as $milestoneData) {
@@ -180,8 +180,10 @@ class GoalController extends Controller
                     ]);
                 }
             }
+            return $goal;
         });
 
+        if ($request->boolean('open_goal')) return redirect()->route('goals.show', ['locale' => $locale, 'goal' => $createdGoal]);
         return redirect()->route('goals.index', ['locale' => $locale])
             ->with('success', 'Tikslas sėkmingai sukurtas!');
     }
@@ -199,18 +201,13 @@ class GoalController extends Controller
             'milestones.tasks.status',
         ]);
 
-        $tasks = $goal->milestones->flatMap->tasks;
+        $tasks = $goal->tasks;
 
         $milestonesCount = $goal->milestones->count();
 
-        $tasksCount = $goal->milestones->flatMap->tasks->count();
+        $tasksCount = $goal->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)->count();
 
-        $doneTasksCount = $goal->milestones
-            ->flatMap->tasks
-            ->filter(fn ($task) =>
-                $task->pointsLog()->exists()
-            )
-            ->count();
+        $doneTasksCount = $goal->tasks->filter(fn($task) => !$task->archived_at || $task->completed_at)->whereNotNull('completed_at')->count();
 
         $progressPercent = $tasksCount > 0
             ? round(($doneTasksCount / $tasksCount) * 100)
@@ -361,6 +358,7 @@ class GoalController extends Controller
                             ? $previousTask->points
                             : $taskXp->pointsForPriority((int) $priorityId))
                         : ($tData['points'] ?? $previousTask?->points ?? 0);
+                    if ($previousTask?->completed_at && $newCompleted) $points = $previousTask->points;
                     $manualPoints = $systemXp
                         ? $previousTask?->manual_points
                         : $points;
@@ -415,6 +413,7 @@ class GoalController extends Controller
             }
 
             if ($categoryChanged) {
+                $goal->directTasks()->update(['category_id' => $goal->category_id]);
                 $goal->load('milestones.tasks');
                 foreach ($goal->milestones as $m) {
                     foreach ($m->tasks as $t) {
@@ -423,7 +422,7 @@ class GoalController extends Controller
                     }
                 }
 
-                $taskIds = $goal->milestones->flatMap->tasks->pluck('id');
+                $taskIds = $goal->tasks()->pluck('id');
 
                 PointsLog::whereIn('task_id', $taskIds)
                     ->update(['category_id' => $goal->category_id]);
@@ -457,7 +456,7 @@ class GoalController extends Controller
 
             PointsLog::where('goal_id', $goal->id)
                 ->orWhereIn('milestone_id', $goal->milestones->pluck('id'))
-                ->orWhereIn('task_id', $goal->milestones->flatMap->tasks->pluck('id'))
+                ->orWhereIn('task_id', $goal->tasks()->pluck('id'))
                 ->delete();
 
             $goal->delete();

@@ -11,6 +11,10 @@ class Task extends Model
 
     protected $fillable = [
         'milestone_id',
+        'goal_id',
+        'user_id',
+        'scheduled_on',
+        'archived_at',
         'category_id',
         'status_id',
         'type_id',
@@ -23,6 +27,39 @@ class Task extends Model
         'is_favorite',
         'is_important',
     ];
+
+    protected $casts = ['completed_at' => 'datetime', 'scheduled_on' => 'date', 'archived_at' => 'datetime'];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Task $task) {
+            if ($task->milestone_id) {
+                $task->goal_id = Milestone::findOrFail($task->milestone_id)->goal_id;
+            }
+            if ($task->goal_id) {
+                $task->user_id = Goal::findOrFail($task->goal_id)->user_id;
+            }
+        });
+    }
+
+    public function scopeForGoalProgress($query)
+    {
+        return $query->where(fn($q) => $q->whereNull('archived_at')->orWhereNotNull('completed_at'));
+    }
+
+    public function scopeOwnedBy($query, $user)
+    {
+        return $query->where('user_id', $user->id);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function goal()
+    {
+        return $this->belongsTo(Goal::class);
+    }
 
     public function milestone()
     {
