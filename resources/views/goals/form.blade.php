@@ -96,7 +96,7 @@
         <summary class="gf-section-heading">
             <span class="gf-number" aria-hidden="true">02</span>
             <h2>{{ t('goals.additionalSettings') }}</h2>
-            <span class="gf-chevron" aria-hidden="true">⌄</span>
+            <span class="gf-chevron" aria-hidden="true"><x-lucide-chevron-down class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
         </summary>
         <div class="gf-settings-body">
             <div class="gf-grid gf-grid-four">
@@ -201,7 +201,7 @@
 <div class="milestone-block gf-milestone" data-index="{{ $milestoneIndex }}">
     <div class="gf-milestone-heading">
         <h3>{{ t('goals.milestone') }}</h3>
-        <button type="button" class="gf-remove remove-milestone" aria-label="{{ t('goals.form.removeMilestone') }}">×</button>
+        <button type="button" class="gf-remove remove-milestone" aria-label="{{ t('goals.form.removeMilestone') }}"><x-lucide-x class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
     </div>
     @if(!empty($milestone['id']))
         <input type="hidden" name="milestones[{{ $milestoneIndex }}][id]" value="{{ $milestone['id'] }}">
@@ -252,15 +252,15 @@
         </select>
     </div>
     <input type="hidden" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][type_id]" value="{{ $task['type_id'] ?? '' }}">
-    <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}">×</button>
+    <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}"><x-lucide-x class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
 </div>
     @endforeach
     </div>
-    <button type="button" class="gf-button gf-button-soft add-task">+ {{ t('button.task.add_new_task') }}</button>
+    <button type="button" class="gf-button gf-button-soft add-task"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.task.add_new_task') }}</button>
 </div>
             @endforeach
         </div>
-        <button type="button" class="gf-button gf-add-milestone" id="add-milestone">+ {{ t('button.milestone.add_new_milestone') }}</button>
+        <button type="button" class="gf-button gf-add-milestone" id="add-milestone"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.milestone.add_new_milestone') }}</button>
     </section>
 
     <div class="gf-actions">
@@ -273,7 +273,7 @@
 <div class="milestone-block gf-milestone" data-index="__MILESTONE_INDEX__">
     <div class="gf-milestone-heading">
         <h3>{{ t('goals.milestone') }}</h3>
-        <button type="button" class="gf-remove remove-milestone" aria-label="{{ t('goals.form.removeMilestone') }}">×</button>
+        <button type="button" class="gf-remove remove-milestone" aria-label="{{ t('goals.form.removeMilestone') }}"><x-lucide-x class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
     </div>
     <div class="gf-grid gf-milestone-fields">
         <div class="gf-field">
@@ -287,7 +287,7 @@
     </div>
     <div class="tasks-wrapper">
     </div>
-    <button type="button" class="gf-button gf-button-soft add-task">+ {{ t('button.task.add_new_task') }}</button>
+    <button type="button" class="gf-button gf-button-soft add-task"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.task.add_new_task') }}</button>
 </div>
 </template>
 
@@ -323,7 +323,7 @@
         </select>
     </div>
     
-    <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}">×</button>
+    <button type="button" class="gf-remove remove-task" aria-label="{{ t('goals.form.removeTask') }}"><x-lucide-x class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
 </div>
 </template>
 

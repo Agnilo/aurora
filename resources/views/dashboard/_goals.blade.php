@@ -12,7 +12,7 @@
 
     <div class="featured-carousel" data-count="{{ $featuredGoals->count() }}">
 
-        <button class="carousel-btn prev">‹</button>
+        <button class="carousel-btn prev"><x-lucide-chevron-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
 
         <div class="carousel-track">
             @foreach($featuredGoals as $goal)
@@ -38,7 +38,7 @@
             @endforeach
         </div>
 
-        <button class="carousel-btn next">›</button>
+        <button class="carousel-btn next"><x-lucide-chevron-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
 
     </div>
     @endif

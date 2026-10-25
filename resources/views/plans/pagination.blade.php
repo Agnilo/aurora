@@ -2,13 +2,13 @@
     <nav class="pl-pager" aria-label="{{ t('pagination.page') }}">
         <div class="pl-pager-control">
             @foreach ([
-                ['url' => $paginator->url(1), 'disabled' => $paginator->onFirstPage(), 'label' => 'first', 'symbol' => '«'],
-                ['url' => $paginator->previousPageUrl(), 'disabled' => $paginator->onFirstPage(), 'label' => 'previous', 'symbol' => '‹'],
+                ['url' => $paginator->url(1), 'disabled' => $paginator->onFirstPage(), 'label' => 'first', 'symbol' => 'chevrons-left'],
+                ['url' => $paginator->previousPageUrl(), 'disabled' => $paginator->onFirstPage(), 'label' => 'previous', 'symbol' => 'chevron-left'],
             ] as $item)
                 @if ($item['disabled'])
-                    <span class="pl-pager-arrow is-disabled" aria-disabled="true" aria-label="{{ t('pagination.'.$item['label']) }}">{{ $item['symbol'] }}</span>
+                    <span class="pl-pager-arrow is-disabled" aria-disabled="true" aria-label="{{ t('pagination.'.$item['label']) }}"><x-dynamic-component :component="'lucide-'.($item['symbol'])"  class="aurora-icon" width="18" height="18" aria-hidden="true" focusable="false" /></span>
                 @else
-                    <a class="pl-pager-arrow" href="{{ $item['url'] }}" aria-label="{{ t('pagination.'.$item['label']) }}">{{ $item['symbol'] }}</a>
+                    <a class="pl-pager-arrow" href="{{ $item['url'] }}" aria-label="{{ t('pagination.'.$item['label']) }}"><x-dynamic-component :component="'lucide-'.($item['symbol'])"  class="aurora-icon" width="18" height="18" aria-hidden="true" focusable="false" /></a>
                 @endif
             @endforeach
 
@@ -26,13 +26,13 @@
             </form>
 
             @foreach ([
-                ['url' => $paginator->nextPageUrl(), 'disabled' => !$paginator->hasMorePages(), 'label' => 'next', 'symbol' => '›'],
-                ['url' => $paginator->url($paginator->lastPage()), 'disabled' => !$paginator->hasMorePages(), 'label' => 'last', 'symbol' => '»'],
+                ['url' => $paginator->nextPageUrl(), 'disabled' => !$paginator->hasMorePages(), 'label' => 'next', 'symbol' => 'chevron-right'],
+                ['url' => $paginator->url($paginator->lastPage()), 'disabled' => !$paginator->hasMorePages(), 'label' => 'last', 'symbol' => 'chevrons-right'],
             ] as $item)
                 @if ($item['disabled'])
-                    <span class="pl-pager-arrow is-disabled" aria-disabled="true" aria-label="{{ t('pagination.'.$item['label']) }}">{{ $item['symbol'] }}</span>
+                    <span class="pl-pager-arrow is-disabled" aria-disabled="true" aria-label="{{ t('pagination.'.$item['label']) }}"><x-dynamic-component :component="'lucide-'.($item['symbol'])"  class="aurora-icon" width="18" height="18" aria-hidden="true" focusable="false" /></span>
                 @else
-                    <a class="pl-pager-arrow" href="{{ $item['url'] }}" aria-label="{{ t('pagination.'.$item['label']) }}">{{ $item['symbol'] }}</a>
+                    <a class="pl-pager-arrow" href="{{ $item['url'] }}" aria-label="{{ t('pagination.'.$item['label']) }}"><x-dynamic-component :component="'lucide-'.($item['symbol'])"  class="aurora-icon" width="18" height="18" aria-hidden="true" focusable="false" /></a>
                 @endif
             @endforeach
         </div>

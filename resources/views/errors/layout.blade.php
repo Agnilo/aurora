@@ -212,7 +212,7 @@
                 <p class="error-description">{{ $description }}</p>
                 <a class="error-button" href="{{ $home }}">
                     {{ $homeLabel }}
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                 </a>
             </section>
         </main>

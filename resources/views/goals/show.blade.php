@@ -2,14 +2,14 @@
 @section('title', $goal->title.' · Aurora')
 @section('content')
 <div class="container pl-page">
-    <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}">← {{ t('plans.goals') }}</a>
+    <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"><x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('plans.goals') }}</a>
     <header class="pl-heading mt-4"><div><p class="pl-eyebrow">{{ $goal->category?->translated_name }}</p><h1>{{ $goal->title }}</h1></div>
         <a class="pl-secondary" href="{{ route('goals.edit', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.edit_goal') }}</a>
     </header>
     @if($goal->description)<p>{{ $goal->description }}</p>@endif
     <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} · {{ $goal->progress }}%</p>
     <section class="pl-panel mb-4">
-        <header class="pl-heading"><h2>{{ t('plans.tasks') }}</h2><a class="pl-primary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">+ {{ t('plans.new_task') }}</a></header>
+        <header class="pl-heading"><h2>{{ t('plans.tasks') }}</h2><a class="pl-primary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.new_task') }}</a></header>
         @forelse($goal->directTasks->whereNull('archived_at') as $task) @include('plans.task-row')
         @empty<p class="pl-hint">{{ t('plans.direct_hint') }}</p>@endforelse
     </section>

@@ -5,7 +5,7 @@
 @section('content')
 <div class="container pl-page pl-form-page">
     <a class="pl-back" href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">
-        ← {{ t('plans.habits') }}
+        <x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('plans.habits') }}
     </a>
 
     <h1>{{ t($habit->exists ? 'plans.edit_habit' : 'plans.new_habit') }}</h1>

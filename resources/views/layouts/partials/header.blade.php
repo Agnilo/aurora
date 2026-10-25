@@ -51,7 +51,7 @@
                             <span class="app-avatar app-avatar-initial" aria-hidden="true">{{ mb_substr(Auth::user()->name, 0, 1) }}</span>
                         @endif
                         <span class="app-user-name">{{ Auth::user()->name }}</span>
-                        <span aria-hidden="true">⌄</span>
+                        <span aria-hidden="true"><x-lucide-chevron-down class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end app-user-menu" aria-labelledby="app-user-menu">
                         @role('admin')

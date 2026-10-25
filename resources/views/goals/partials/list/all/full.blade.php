@@ -1,6 +1,6 @@
 @if($goals->isEmpty())
     <div class="alert alert-light border shadow-sm">
-        🎯 Dar neturi tikslų!
+        <x-lucide-target class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> Dar neturi tikslų!
         <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}" 
            class="fw-semibold text-warning">Sukurk pirmąjį</a>.
     </div>
@@ -17,8 +17,8 @@
                 aria-expanded="false" aria-controls="collapse-{{ $goal->id }}">
             
             {{-- ICONS --}}
-            @if($goal->is_favorite) ⭐ @endif
-            @if($goal->is_important) ❗ @endif
+            @if($goal->is_favorite) <x-lucide-star class="text-warning aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
+            @if($goal->is_important) <x-lucide-circle-alert class="text-danger aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
 
             <span class="ms-1">{{ $goal->title }}</span>
 
@@ -113,7 +113,7 @@
             <hr>
 
             <div class="pl-secondary-actions">
-                <a class="pl-secondary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">+ {{ t('plans.new_task') }}</a>
+                <a class="pl-secondary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.new_task') }}</a>
                 <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.open_goal') }}</a>
             </div>
             @foreach($goal->directTasks->whereNull('archived_at') as $task)
@@ -161,8 +161,8 @@
                                         data-task-id="{{ $task->id }}"
                                         {{ $task->completed_at ? 'checked' : '' }}>
 
-                                    @if($task->is_favorite) ⭐ @endif
-                                    @if($task->is_important) ❗ @endif
+                                    @if($task->is_favorite) <x-lucide-star class="text-warning aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
+                                    @if($task->is_important) <x-lucide-circle-alert class="text-danger aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
 
                                     {{ $task->title }}
 

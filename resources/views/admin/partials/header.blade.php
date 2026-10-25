@@ -23,7 +23,7 @@
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
                         <a class="dropdown-item" href="{{ route('dashboard', app()->getLocale()) }}">
-                            ← Atgal į vartotojo režimą
+                            <x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> Atgal į vartotojo režimą
                         </a>
                     </li>
 

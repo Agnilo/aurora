@@ -6,14 +6,14 @@
         <!-- LEFT TEXT -->
         <div class="hero-left">
             <h2>{{ t('dashboard.you_can') }}</h2>
-            <p>Šiandien puiki diena judėti pirmyn ✨</p>
+            <p>Šiandien puiki diena judėti pirmyn <x-lucide-sparkles class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></p>
         </div>
 
         <!-- RIGHT UI (CHARACTER CARD) -->
         <div class="hero-right">
 
             <div class="hero-coins">
-                {{ $user->gameDetails->coins }} 🪙
+                {{ $user->gameDetails->coins }} <x-lucide-coins class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
             </div>
 
             <div class="hero-xp">
@@ -41,7 +41,7 @@
     <!-- STREAK -->
     <div class="hero-streak">
         <span class="line"></span>
-        <span class="value">{{ $user->gameDetails->streak_current ?? 0 }} 🔥</span>
+        <span class="value">{{ $user->gameDetails->streak_current ?? 0 }} <x-lucide-flame class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
         <span class="line"></span>
     </div>
 

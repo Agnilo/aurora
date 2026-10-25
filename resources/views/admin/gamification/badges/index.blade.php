@@ -43,7 +43,7 @@
                                          class="rounded"
                                          style="width: 40px; height: 40px; object-fit: cover;">
                                 @else
-                                    <div class="text-muted fs-4">🏅</div>
+                                    <div class="text-muted fs-4"><x-lucide-medal class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></div>
                                 @endif
                             </td>
 

@@ -1,3 +1,5 @@
+@import "../../components/lucide.css";
+
 .welcome-page {
     --welcome-ink: #10151e;
     --welcome-rule: rgb(25 30 40 / 18%);

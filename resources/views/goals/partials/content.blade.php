@@ -21,10 +21,10 @@
             @include('goals.partials.list.all.full', ['goals' => $goals])
         @elseif ($importantGoals->isEmpty())
             <div class="gp-empty">
-                <span class="gp-empty-mark" aria-hidden="true">↗</span>
+                <span class="gp-empty-mark" aria-hidden="true"><x-lucide-arrow-up-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                 <h3>{{ t('goals.empty_title') }}</h3>
                 <p>{{ t('goals.empty_description') }}</p>
-                <a class="gp-primary" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}">+ {{ t('goals.new') }}</a>
+                <a class="gp-primary" href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('goals.new') }}</a>
             </div>
         @endif
     </section>

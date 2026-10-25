@@ -34,7 +34,7 @@
         {{-- Empty state --}}
         <div class="col-12">
             <div class="dashboard-card p-4 text-center text-muted">
-                Dar nepridėjai jokių įgūdžių 🌱
+                Dar nepridėjai jokių įgūdžių <x-lucide-sprout class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
             </div>
         </div>
     @endif

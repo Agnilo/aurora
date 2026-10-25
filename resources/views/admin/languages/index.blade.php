@@ -27,8 +27,8 @@
                     <td>{{ $lang->code }}</td>
                     <td>{{ $lang->name }}</td>
 
-                    <td><span class="check-icon">{{ $lang->is_active ? '✔' : '—' }}</span></td>
-                    <td><span class="check-icon">{{ $lang->is_default ? '✔' : '—' }}</span></td>
+                    <td><span class="check-icon"><x-dynamic-component :component="'lucide-'.($lang->is_active ? 'check' : 'minus')"  class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></td>
+                    <td><span class="check-icon"><x-dynamic-component :component="'lucide-'.($lang->is_default ? 'check' : 'minus')"  class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></td>
 
                     <td class="text-end">
                         <a href="{{ route('admin.languages.edit', [app()->getLocale(), $lang]) }}">

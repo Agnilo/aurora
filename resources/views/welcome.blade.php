@@ -12,11 +12,11 @@
             <div class="welcome-hero-actions">
                 @auth
                     <a class="welcome-button welcome-button-primary" href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
-                        {{ t('welcome.continue') }} <span aria-hidden="true">→</span>
+                        {{ t('welcome.continue') }} <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                     </a>
                 @else
                     <a class="welcome-button welcome-button-primary" href="{{ route('register', ['locale' => app()->getLocale()]) }}">
-                        {{ t('welcome.start') }} <span aria-hidden="true">→</span>
+                        {{ t('welcome.start') }} <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                     </a>
                 @endauth
                 <a class="welcome-how-link" href="#how-it-works">{{ t('welcome.how') }}</a>
@@ -40,21 +40,15 @@
             @endif
             <ol class="welcome-glass">
                 <li class="welcome-step">
-                    <svg class="welcome-step-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="5" y="7" width="22" height="22" rx="2"/><path d="M10 4v6m12-6v6M5 13h22m-16 8 3 3 7-7"/>
-                    </svg>
+                    <x-lucide-calendar-check class="welcome-step-icon aurora-icon" width="32" height="32" aria-hidden="true" focusable="false" />
                     <h3>{{ t('welcome.plan') }}</h3><p>{{ t('welcome.plan_description') }}</p>
                 </li>
                 <li class="welcome-step">
-                    <svg class="welcome-step-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <ellipse cx="16" cy="7" rx="10" ry="4"/><path d="M6 7v18c0 2.2 4.5 4 10 4s10-1.8 10-4V7M6 13c0 2.2 4.5 4 10 4s10-1.8 10-4M6 19c0 2.2 4.5 4 10 4s10-1.8 10-4"/>
-                    </svg>
+                    <x-lucide-coins class="welcome-step-icon aurora-icon" width="32" height="32" aria-hidden="true" focusable="false" />
                     <h3>{{ t('welcome.complete') }}</h3><p>{{ t('welcome.complete_description') }}</p>
                 </li>
                 <li class="welcome-step">
-                    <svg class="welcome-step-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M13 8a3 3 0 1 1 3 3v4L3 24a2 2 0 0 0 1 4h24a2 2 0 0 0 1-4l-13-9"/>
-                    </svg>
+                    <x-lucide-shirt class="welcome-step-icon aurora-icon" width="32" height="32" aria-hidden="true" focusable="false" />
                     <h3>{{ t('welcome.choose') }}</h3><p>{{ t('welcome.choose_description') }}</p>
                 </li>
             </ol>

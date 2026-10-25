@@ -18,30 +18,11 @@
 
 @section('content')
 @php
-    $iconFor = function ($category) {
-        $name = mb_strtolower($category?->name ?? '');
-        return match (true) {
-            str_contains($name, 'emotion'), str_contains($name, 'emoc') => 'heart',
-            str_contains($name, 'relation'), str_contains($name, 'santyk') => 'people',
-            str_contains($name, 'career'), str_contains($name, 'karjer') => 'case',
-            str_contains($name, 'life'), str_contains($name, 'gyven'), str_contains($name, 'health') => 'leaf',
-            default => 'book',
-        };
-    };
     $colorFor = function ($category) {
         $color = $category?->color ?? '';
         return preg_match('/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/', $color) ? $color : '#D9909C';
     };
 @endphp
-<svg class="dh-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <symbol id="dh-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
-    <symbol id="dh-people" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v3"/></symbol>
-    <symbol id="dh-case" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3"/></symbol>
-    <symbol id="dh-leaf" viewBox="0 0 24 24"><path d="M20 3C8 2 2 7 4 15c2 7 15 6 16-12ZM5 20 16 8M10 15v-5M10 15h5"/></symbol>
-    <symbol id="dh-book" viewBox="0 0 24 24"><path d="M12 5c-3-2-6-2-10-1v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-4-1-7-1-10 1ZM12 5v15"/></symbol>
-    <symbol id="dh-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 8h-4a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4H9M12 6v12"/></symbol>
-    <symbol id="dh-flame" viewBox="0 0 24 24"><path d="M13 2c2 7-3 8-2 12 2-1 3-3 4-5 5 5 6 12-3 13-9 0-11-9-5-14 0 4 2 4 2 4 0-5 4-6 4-10Z"/></symbol>
-</svg>
 <div class="container dashboard-home">
     <header class="dh-heading">
         <p class="dh-eyebrow">{{ now()->locale(app()->getLocale())->isoFormat('LL') }}</p>
@@ -49,7 +30,7 @@
         <p>{{ $dashboardText('dashboard_home.subtitle') }}</p>
     </header>
 
-    <button class="dh-new-goal pl-primary" data-plan-create>+ {{ t('plans.create') }}</button>
+    <button class="dh-new-goal pl-primary" data-plan-create><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.create') }}</button>
 
     <section class="dh-panel dh-tasks" aria-labelledby="dh-tasks-title" data-dashboard-tasks>
         <div class="dh-section-heading">
@@ -71,9 +52,9 @@
                     <form method="POST" action="{{ route('tasks.toggle-complete', ['locale' => app()->getLocale(), 'task' => $task->id]) }}" data-task-toggle>
                         @csrf
                         <input type="hidden" name="completed" value="{{ $done ? 0 : 1 }}">
-                        <button class="dh-check" type="submit" aria-pressed="{{ $done ? 'true' : 'false' }}" aria-label="{{ $dashboardText($done ? 'dashboard_v2.undo' : 'dashboard_v2.complete') }}: {{ $task->title }}">{{ $done ? '✓' : '' }}</button>
+                        <button class="dh-check" type="submit" aria-pressed="{{ $done ? 'true' : 'false' }}" aria-label="{{ $dashboardText($done ? 'dashboard_v2.undo' : 'dashboard_v2.complete') }}: {{ $task->title }}">@if ($done)<x-lucide-check class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />@endif</button>
                     </form>
-                    <svg class="dh-icon dh-task-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($category) }}"/></svg>
+                    <x-category-lucide class="dh-icon dh-task-icon aurora-icon" :category="$category" width="20" height="20" aria-hidden="true" focusable="false" />
                     <a class="dh-task-copy" href="{{ ($goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task])) }}">
                         <span class="dh-task-title">{{ $task->title }}</span>
                         <span class="dh-task-goal">{{ $goal?->title ?? t('plans.standalone') }}</span>
@@ -81,7 +62,7 @@
                     @if ($category)
                         <span class="dh-task-category"><span></span>{{ $category->translated_name }}</span>
                     @endif
-                    <a class="dh-task-open" href="{{ ($goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task])) }}" aria-label="{{ $dashboardText('dashboard_v2.open_goal') }}: {{ $goal?->title ?? t('plans.standalone') }}">↗</a>
+                    <a class="dh-task-open" href="{{ ($goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task])) }}" aria-label="{{ $dashboardText('dashboard_v2.open_goal') }}: {{ $goal?->title ?? t('plans.standalone') }}"><x-lucide-arrow-up-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></a>
                 </div>
             @empty
                 <div class="dh-empty">
@@ -92,13 +73,13 @@
         </div>
         <div class="dh-task-footer">
             <span>{{ $dashboardText('dashboard_v2.completed_today') }} · <strong>{{ $completedToday }}</strong></span>
-            <a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} →</a>
+            <a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></a>
         </div>
         @if ($tasks->hasPages())
             <nav class="dh-pagination" aria-label="{{ $dashboardText('dashboard_v2.pages') }}">
-                @if ($tasks->previousPageUrl())<a href="{{ $tasks->previousPageUrl() }}">← {{ $dashboardText('dashboard_v2.previous') }}</a>@endif
+                @if ($tasks->previousPageUrl())<a href="{{ $tasks->previousPageUrl() }}"><x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ $dashboardText('dashboard_v2.previous') }}</a>@endif
                 <span>{{ $tasks->currentPage() }} / {{ $tasks->lastPage() }}</span>
-                @if ($tasks->nextPageUrl())<a href="{{ $tasks->nextPageUrl() }}">{{ $dashboardText('dashboard_v2.next') }} →</a>@endif
+                @if ($tasks->nextPageUrl())<a href="{{ $tasks->nextPageUrl() }}">{{ $dashboardText('dashboard_v2.next') }} <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></a>@endif
             </nav>
         @endif
     </section>
@@ -117,12 +98,12 @@
             @endif
             @if ($details)
                 <dl class="dh-floating-stat dh-floating-coins">
-                    <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-coin"/></svg>{{ $dashboardText('dashboard_home.coins') }}</dt>
+                    <dt><x-lucide-coins class="dh-icon aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />{{ $dashboardText('dashboard_home.coins') }}</dt>
                     <dd>{{ $details->coins }}</dd>
                 </dl>
                 @if($showStreak)
                     <dl class="dh-floating-stat dh-floating-streak">
-                        <dt><svg class="dh-icon" aria-hidden="true"><use href="#dh-flame"/></svg>{{ $dashboardText('dashboard_home.streak') }}</dt>
+                        <dt><x-lucide-flame class="dh-icon aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />{{ $dashboardText('dashboard_home.streak') }}</dt>
                         <dd>{{ $details->streak_current ?? 0 }}</dd>
                     </dl>
                 @endif
@@ -144,14 +125,14 @@
     </aside>
 
     <section class="dh-panel dh-goals-panel" aria-labelledby="dh-goals-title">
-        <div class="dh-section-heading"><h2 id="dh-goals-title">{{ $dashboardText('dashboard_home.continue') }}</h2><a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} →</a></div>
+        <div class="dh-section-heading"><h2 id="dh-goals-title">{{ $dashboardText('dashboard_home.continue') }}</h2><a class="dh-text-link" href="{{ route('goals.index', ['locale' => app()->getLocale()]) }}">{{ $dashboardText('dashboard_home.all_goals') }} <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></a></div>
         <div class="dh-goals">
             @forelse ($activeGoals as $goal)
                 @php($progress = max(0, min(100, (float) $goal->progress)))
                 <a class="dh-goal" style="--area-accent: {{ $colorFor($goal->category) }}" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal?->id]) }}">
-                    <span class="dh-icon-badge"><svg class="dh-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($goal->category) }}"/></svg></span>
+                    <span class="dh-icon-badge"><x-category-lucide class="dh-icon aurora-icon" :category="$goal->category" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                     <span class="dh-goal-content">
-                        <span class="dh-goal-top"><strong>{{ $goal->title }}</strong><span aria-hidden="true">→</span></span>
+                        <span class="dh-goal-top"><strong>{{ $goal->title }}</strong><span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></span>
                         <span class="dh-progress-row"><span class="dh-progress" role="progressbar" aria-label="{{ $goal->title }}" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $progress }}%"></span></span><span class="dh-number">{{ round($progress) }}%</span></span>
                         <span class="dh-task-goal">{{ t('plans.tasks') }}: {{ $goal->tasks()->whereNotNull('completed_at')->count() }} / {{ $goal->tasks()->forGoalProgress()->count() }}</span>
                     </span>
@@ -163,7 +144,7 @@
     </section>
 
     <section class="pl-panel pl-today-habits" aria-labelledby="today-habits">
-        <header class="pl-heading"><h2 id="today-habits">{{ t('plans.today_habits') }}</h2><a href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">{{ t('plans.habits') }} →</a></header>
+        <header class="pl-heading"><h2 id="today-habits">{{ t('plans.today_habits') }}</h2><a href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">{{ t('plans.habits') }} <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></a></header>
         @forelse($todayHabits as $habit) @include('plans.habit-row')
         @empty <p class="pl-hint">{{ t('plans.no_habits_today') }}</p> @endforelse
     </section>
@@ -175,7 +156,7 @@
                 @if ($level->category)
                     @php($areaProgress = max(0, min(100, (float) $level->progress_percent)))
                     <a class="dh-area" style="--area-accent: {{ $colorFor($level->category) }}" href="{{ route('category.show', ['locale' => app()->getLocale(), 'category' => $level->category_id]) }}">
-                        <span class="dh-icon-badge"><svg class="dh-icon" aria-hidden="true"><use href="#dh-{{ $iconFor($level->category) }}"/></svg></span>
+                        <span class="dh-icon-badge"><x-category-lucide class="dh-icon aurora-icon" :category="$level->category" width="20" height="20" aria-hidden="true" focusable="false" /></span>
                         <span class="dh-area-content"><strong>{{ $level->category->translated_name }}</strong><span class="dh-progress-row"><span class="dh-progress" role="progressbar" aria-label="{{ $level->category->translated_name }}" aria-valuenow="{{ $areaProgress }}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{ $areaProgress }}%"></span></span><span class="dh-number">{{ round($areaProgress) }}%</span></span></span>
                     </a>
                 @endif

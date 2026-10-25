@@ -81,7 +81,7 @@ class LookupAdminController extends Controller
                     'order_by' => 'order',
                     'has_color' => true,
                     'has_icon' => true,
-                    'has_image' => true,
+                    'has_image' => false,
                 ],
             ],
         ],

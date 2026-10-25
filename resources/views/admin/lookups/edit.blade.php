@@ -12,10 +12,20 @@
         'type'    => $type,
         'id'      => $item->id,
     ]) }}"
-    method="POST" enctype="multipart/form-data" class="w-100">
+    method="POST" class="w-100">
 
     @csrf
     @method('PUT')
+
+    @if ($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     {{-- Techninis key --}}
     <div class="mb-3">
@@ -30,7 +40,7 @@
 
     {{-- APPEARANCE --}}
     @if(($blockDefinition['has_color'] ?? false) || ($blockDefinition['has_icon'] ?? false))
-        <div class="row mb-4">
+        <div class="row g-3 mb-4">
 
             {{-- COLOR --}}
             @if($blockDefinition['has_color'] ?? false)
@@ -42,66 +52,30 @@
                             name="color"
                             id="colorPicker"
                             class="form-control form-control-color"
-                            value="{{ $item->color ?? '#cccccc' }}">
+                            value="{{ old('color', $item->color ?? '#cccccc') }}">
 
                         <input type="text"
                             name="color_hex"
                             id="colorHex"
                             class="form-control text-muted"
-                            value="{{ $item->color ?? '' }}"
+                            value="{{ old('color_hex', $item->color ?? '') }}"
                             placeholder="#FFAABB">
                     </div>
 
                 </div>
             @endif
 
-            {{-- ICON (EMOJI PICKER) --}}
-            @if($blockDefinition['has_icon'] ?? false)
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">{{ t('lookup.icon') }}</label>
-
-                        <div class="input-group">
-                            <input type="text"
-                                name="icon"
-                                id="iconInput"
-                                class="form-control"
-                                value="{{ $item->icon ?? '' }}"
-                                placeholder="😀">
-
-                            <button type="button" class="btn btn-outline-secondary" id="emojiBtn">
-                                +
-                            </button>
-                        </div>
-
-                        <div id="emojiPicker"
-                            style="display:none; position:absolute; z-index:9999; background:white; border:1px solid #ddd; border-radius:8px;">
-                        </div>
+            @if ($blockDefinition['has_icon'] ?? false)
+                <div class="col-md-6">
+                    <x-icon-picker
+                        name="icon"
+                        id="lookup-icon"
+                        :value="old('icon', $item->icon ?? '')"
+                        :button="t('lookup.icon')"
+                    />
                 </div>
             @endif
 
-            @if($blockDefinition['has_image'] ?? false)
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">
-                        {{ t('lookup.image') ?? 'Background image' }}
-                    </label>
-
-                    <input type="file"
-                        name="image"
-                        class="form-control"
-                        accept="image/*">
-
-                    @if(!empty($item->image))
-                        <div class="mt-2">
-                            <img src="{{ asset('storage/categories/'.$item->image) }}"
-                                style="max-width: 100%; border-radius: 8px;">
-                        </div>
-                    @endif
-
-                    <div class="form-text">
-                        JPG / PNG · bus naudojama kategorijos fone
-                    </div>
-                </div>
-            @endif
 
         </div>
     @endif
@@ -134,41 +108,10 @@
 
 
 
-{{-- EMOJI PICKER SCRIPTS --}}
+{{-- Color picker --}}
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-    const emojiBtn   = document.getElementById("emojiBtn");
-    const iconInput  = document.getElementById("iconInput");
-    const emojiBox   = document.getElementById("emojiPicker");
-
-    if (emojiBtn && iconInput && emojiBox) {
-        let open = false;
-
-        emojiBtn.addEventListener("click", () => {
-            open = !open;
-
-            if (!open) {
-                emojiBox.style.display = "none";
-                return;
-            }
-
-            emojiBox.style.display = "block";
-            emojiBox.innerHTML = "";
-
-            const picker = new EmojiMart.Picker({
-                theme: "light",
-                onEmojiSelect: (emoji) => {
-                    iconInput.value = emoji.native;
-                    emojiBox.style.display = "none";
-                    open = false;
-                }
-            });
-
-            emojiBox.appendChild(picker);
-        });
-    }
 
     const colorPicker = document.getElementById("colorPicker");
     const colorHex    = document.getElementById("colorHex");
@@ -193,6 +136,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
-
-
-

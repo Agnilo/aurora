@@ -11,7 +11,7 @@
             <div>
                 <h2 class="fw-bold text-white mb-1">{{ t('dashboard.you_can') }}</h2>
                 <p class="text-white-50 small mb-0">
-                    Šiandien puiki diena judėti pirmyn ✨
+                    Šiandien puiki diena judėti pirmyn <x-lucide-sparkles class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
                 </p>
             </div>
 

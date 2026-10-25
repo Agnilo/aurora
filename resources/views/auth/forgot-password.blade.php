@@ -56,7 +56,7 @@
 
         <button class="auth-submit" type="submit">
             {{ t('auth.reset_submit') }}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
         </button>
     </form>
 

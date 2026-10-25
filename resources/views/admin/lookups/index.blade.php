@@ -13,7 +13,7 @@
                 'section' => $section,
                 'type' => $block['type']
         ]) }}" class="btn btn-primary btn-sm">
-            + {{ t('button.add_new') }}
+            <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.add_new') }}
         </a>
     </div>
 
@@ -53,7 +53,7 @@
 
                         @if(($block['has_icon'] ?? false) && !empty($item['row']->icon))
                             <span style="font-size: 1.2rem;">
-                                {!! $item['row']->icon !!}
+                                <x-stored-lucide :name="$item['row']->icon"  class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
                             </span>
                         @endif
                     </div>

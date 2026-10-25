@@ -102,7 +102,7 @@
                 <div class="col-md-4">
                     <div class="card p-3">
                         <h5 class="fw-bold">Coins</h5>
-                        <div class="display-6 text-warning fw-bold">💰 {{ $game->coins }}</div>
+                        <div class="display-6 text-warning fw-bold"><x-lucide-coins class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ $game->coins }}</div>
                     </div>
                 </div>
 

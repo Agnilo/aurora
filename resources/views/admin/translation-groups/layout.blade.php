@@ -13,7 +13,7 @@
 
             <a href="{{ route('admin.translation-groups.create', app()->getLocale()) }}"
             class="btn btn-primary mb-3">
-                + {{ t('button.add_new') }}
+                <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.add_new') }}
             </a>
 
         </div>

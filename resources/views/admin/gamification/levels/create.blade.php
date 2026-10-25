@@ -86,7 +86,7 @@
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('admin.gamification.levels.index', app()->getLocale()) }}"
                        class="btn btn-outline-secondary">
-                        ← Atgal
+                        <x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> Atgal
                     </a>
 
                     <button class="btn btn-primary">

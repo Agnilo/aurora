@@ -11,7 +11,7 @@
             <p class="gp-description">{{ t('goals.description') }}</p>
         </div>
         <button class="pl-primary" type="button" data-plan-create>
-            + {{ t('plans.create') }}
+            <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.create') }}
         </button>
     </header>
 

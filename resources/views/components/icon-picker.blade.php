@@ -1,120 +1,123 @@
-<div class="icon-picker">
+@props([
+    'name' => 'icon',
+    'id' => 'icon-picker',
+    'value' => null,
+    'button' => null,
+    'icons' => null,
+])
 
-    {{-- Hidden input storing selected icon name --}}
-    <input type="hidden" name="{{ $name }}" id="icon-picker-input-{{ $id }}" value="{{ $value }}">
+@php
+    // Read the installed package, so updates automatically add new icons.
+    $provider = new \ReflectionClass(\MallardDuck\LucideIcons\BladeLucideIconsServiceProvider::class);
+    $packageRoot = dirname($provider->getFileName(), 2);
+    $iconDirectory = $packageRoot.'/resources/svg/icons';
+    if (! is_dir($iconDirectory)) {
+        $iconDirectory = $packageRoot.'/resources/svg';
+    }
+    $availableIcons = array_map(
+        fn ($file) => pathinfo($file, PATHINFO_FILENAME),
+        glob($iconDirectory.'/*.svg') ?: []
+    );
+    sort($availableIcons, SORT_NATURAL);
+    $selectedIcon = (string) ($value ?? '');
+@endphp
 
-    {{-- Button --}}
-    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
-            data-bs-toggle="modal"
-            data-bs-target="#iconPickerModal-{{ $id }}">
-        @if($value)
-            <i data-lucide="{{ $value }}"></i>
-        @else
-            <i data-lucide="circle"></i>
-        @endif
-
-        <span>{{ $button ?? 'Choose icon' }}</span>
-    </button>
-
-
-    {{-- Modal --}}
-    <div class="modal fade" id="iconPickerModal-{{ $id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $title ?? 'Choose an Icon' }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    {{-- Search --}}
-                    <input type="text"
-                           class="form-control mb-3"
-                           placeholder="Search..."
-                           oninput="iconPickerSearch('{{ $id }}', this.value)">
-
-                    {{-- Icons --}}
-                    <div class="icon-picker-grid" id="icon-picker-grid-{{ $id }}">
-                        @foreach($icons as $icon)
-                            <button type="button"
-                                    class="icon-item"
-                                    onclick="iconPickerSelect('{{ $id }}', '{{ $icon }}')">
-                                <i data-lucide="{{ $icon }}"></i>
-                                <span>{{ $icon }}</span>
-                            </button>
-                        @endforeach
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">{{ t('button.cancel') }}</button>
-                </div>
-
-            </div>
-        </div>
+<div class="aurora-icon-picker">
+    <div class="form-label fw-semibold" id="{{ $id }}-label">
+        {{ $button ?? t('lookup.icon') }}
     </div>
+    <details class="aurora-icon-dropdown" id="{{ $id }}" data-icon-dropdown>
+        <summary class="aurora-icon-trigger" aria-labelledby="{{ $id }}-label">
+            <span data-icon-preview>
+                <x-stored-lucide :name="$selectedIcon ?: 'minus'" />
+            </span>
+            <x-lucide-chevron-down class="aurora-icon aurora-icon-trigger-arrow"
+                width="16" height="16" aria-hidden="true" />
+        </summary>
+        <input type="hidden" name="{{ $name }}" value="{{ $selectedIcon }}" data-icon-value>
+
+        <div class="aurora-icon-panel">
+            <input type="search" class="aurora-icon-search" data-icon-search
+                placeholder="{{ t('lookup.icon_search') }}"
+                aria-label="{{ t('lookup.icon_search') }}" autocomplete="off">
+            <div class="aurora-icon-options" role="group" aria-labelledby="{{ $id }}-label">
+                <button type="button" class="aurora-icon-choice" data-icon-choice=""
+                    aria-label="{{ t('lookup.icon_none') }}"
+                    aria-pressed="{{ $selectedIcon === '' ? 'true' : 'false' }}">
+                    <x-lucide-minus class="aurora-icon" width="22" height="22" aria-hidden="true" />
+                </button>
+                @foreach ($availableIcons as $iconName)
+                    <button type="button" class="aurora-icon-choice" data-icon-choice="{{ $iconName }}"
+                        aria-label="{{ str_replace('-', ' ', $iconName) }}"
+                        aria-pressed="{{ $selectedIcon === $iconName ? 'true' : 'false' }}">
+                        @svg('lucide-'.$iconName, 'aurora-icon', ['width' => 22, 'height' => 22, 'aria-hidden' => 'true'])
+                    </button>
+                @endforeach
+            </div>
+            <p class="aurora-icon-empty" data-icon-empty hidden>{{ t('lookup.icon_no_results') }}</p>
+        </div>
+    </details>
 </div>
 
+@once
 <script>
-    lucide.createIcons();
+(() => {
+    if (window.auroraIconDropdownBound) return;
+    window.auroraIconDropdownBound = true;
 
-    function iconPickerSelect(id, icon) {
-        document.getElementById("icon-picker-input-" + id).value = icon;
-
-        // update button icon
-        const btn = document.querySelector(`#iconPickerModal-${id}`)
-            .closest('.icon-picker')
-            .querySelector('button i');
-
-        btn.setAttribute('data-lucide', icon);
-
-        lucide.createIcons();
-        bootstrap.Modal.getInstance(document.getElementById('iconPickerModal-' + id)).hide();
-    }
-
-    function iconPickerSearch(id, text) {
-        text = text.toLowerCase();
-        const items = document.querySelectorAll(`#icon-picker-grid-${id} .icon-item`);
-
-        items.forEach(btn => {
-            const name = btn.querySelector('span').innerText.toLowerCase();
-            btn.style.display = name.includes(text) ? 'flex' : 'none';
+    const filter = dropdown => {
+        const query = dropdown.querySelector('[data-icon-search]').value.trim().toLowerCase();
+        let visible = 0;
+        dropdown.querySelectorAll('[data-icon-choice]').forEach(option => {
+            const name = option.dataset.iconChoice;
+            const match = !query || name.includes(query) || name.replaceAll('-', ' ').includes(query);
+            option.hidden = !match;
+            if (match) visible++;
         });
-    }
+        dropdown.querySelector('[data-icon-empty]').hidden = visible !== 0;
+    };
+
+    document.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        document.querySelectorAll('[data-icon-dropdown][open]').forEach(dropdown => {
+            if (!dropdown.contains(event.target)) dropdown.open = false;
+        });
+
+        const option = event.target.closest('[data-icon-choice]');
+        if (!option) return;
+        const dropdown = option.closest('[data-icon-dropdown]');
+        if (!dropdown) return;
+        const input = dropdown.querySelector('[data-icon-value]');
+        input.value = option.dataset.iconChoice;
+        dropdown.querySelector('[data-icon-preview]').replaceChildren(option.querySelector('svg').cloneNode(true));
+        dropdown.querySelectorAll('[data-icon-choice]').forEach(item => {
+            item.setAttribute('aria-pressed', String(item === option));
+        });
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        dropdown.querySelector('[data-icon-search]').value = '';
+        filter(dropdown);
+        dropdown.open = false;
+        dropdown.querySelector('summary').focus();
+    });
+
+    document.addEventListener('input', event => {
+        if (event.target.matches('[data-icon-search]')) {
+            filter(event.target.closest('[data-icon-dropdown]'));
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        const dropdown = event.target.closest('[data-icon-dropdown]');
+        if (!dropdown) return;
+        if (event.key === 'Escape') {
+            dropdown.open = false;
+            dropdown.querySelector('summary').focus();
+            event.preventDefault();
+        }
+        if (event.key === 'Enter' && event.target.matches('[data-icon-search]')) {
+            event.preventDefault();
+        }
+    });
+})();
 </script>
-
-<style>
-.icon-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-}
-
-.icon-item {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 10px 6px;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: center;
-    cursor: pointer;
-    transition: 0.15s;
-}
-.icon-item:hover {
-    background: #f3f2ec;
-    border-color: #b8b29e;
-}
-.icon-item i {
-    width: 24px;
-    height: 24px;
-}
-.icon-item span {
-    font-size: 11px;
-    color: #666;
-}
-</style>
+@endonce

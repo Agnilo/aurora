@@ -20,7 +20,7 @@
 
             {{-- TITLE --}}
             <div class="life-area-title">
-                {{ $level->category->icon }} {{ $level->category->translated_name }}
+                <x-category-lucide :category="$level->category"  class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ $level->category->translated_name }}
             </div>
 
             {{-- PURPOSE --}}

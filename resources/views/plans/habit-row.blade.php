@@ -3,7 +3,7 @@
     @if($habit->dueToday())
         <form method="POST" action="{{ route('habits.complete', ['locale' => app()->getLocale(), 'habit' => $habit]) }}" data-plan-submit>
             @csrf<input type="hidden" name="completed" value="{{ $done ? 0 : 1 }}">
-            <button class="pl-check" aria-label="{{ t($done ? 'plans.undo' : 'plans.complete') }}: {{ $habit->title }}" aria-pressed="{{ $done ? 'true' : 'false' }}">{{ $done ? '✓' : '○' }}</button>
+            <button class="pl-check" aria-label="{{ t($done ? 'plans.undo' : 'plans.complete') }}: {{ $habit->title }}" aria-pressed="{{ $done ? 'true' : 'false' }}">@if ($done)<x-lucide-check class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />@endif</button>
         </form>
     @else <span class="pl-check" aria-hidden="true">—</span> @endif
     <div class="pl-row-copy">

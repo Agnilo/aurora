@@ -1,4 +1,5 @@
 @import "./components/pagination.css";
+@import "../components/lucide.css";
 
 .admin-navbar {
     background: #ffffff;

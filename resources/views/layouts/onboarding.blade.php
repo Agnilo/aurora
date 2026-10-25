@@ -47,7 +47,7 @@
                                     <div class="pref-preview-input"></div>
                                 </div>
                             @endforeach
-                            <div class="auth-submit">{{ t('auth.register_submit') }}<span>→</span></div>
+                            <div class="auth-submit">{{ t('auth.register_submit') }}<span><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></div>
                         </div>
                         <p class="auth-switch">{{ t('auth.register_switch') }} {{ t('auth.login') }}</p>
                     </section>

@@ -36,7 +36,7 @@
                 <a href="{{ route('password.request', ['locale' => app()->getLocale()]) }}">{{ t('auth.forgot') }}</a>
             @endif
         </div>
-        <button class="auth-submit" type="submit">{{ t('auth.login_submit') }}<span aria-hidden="true">→</span></button>
+        <button class="auth-submit" type="submit">{{ t('auth.login_submit') }}<span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></button>
     </form>
     <p class="auth-switch">
         {{ t('auth.login_switch') }}
