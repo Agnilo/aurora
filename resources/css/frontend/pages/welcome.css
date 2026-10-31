@@ -17,7 +17,6 @@
 .welcome-page *::after {
     box-sizing: border-box;
 }
-
 .welcome-page::before,
 .welcome-page::after,
 .welcome-background {
@@ -39,14 +38,12 @@
         rgba(250, 247, 243, 0.25) 100%
     );
 }
-
 .welcome-background {
     z-index: -2;
     object-fit: cover;
     object-position: center;
     filter: saturate(0.85);
 }
-
 .welcome-page::after {
     content: "";
     z-index: -1;
@@ -58,7 +55,6 @@
     width: min(100% - 112px, 1370px);
     margin-inline: auto;
 }
-
 .welcome-header {
     min-height: 104px;
     display: flex;
@@ -75,17 +71,19 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--welcome-ink);
-
-    background: rgba(255, 255, 255, 0.14);
+    /* More readable on the pale parts of the background image. */
+    background: rgba(255, 255, 255, 0.27);
     backdrop-filter: blur(20px) saturate(125%);
-    border: none;
+    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    border: 1px solid rgba(34, 39, 54, 0.23);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -1px 0 rgba(255, 255, 255, 0.12), 0 12px 32px rgba(30, 26, 29, 0.08);
 
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .welcome-header .welcome-button-outline:hover {
-    background: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.45);
+    border-color: rgba(34, 39, 54, 0.38);
 }
 
 .welcome-wordmark {
@@ -93,7 +91,6 @@
     align-items: center;
     flex-shrink: 0;
 }
-
 .welcome-logo {
     display: block;
     width: 160px;
@@ -123,7 +120,6 @@
     text-decoration: none;
     color: inherit;
 }
-
 .welcome-nav {
     margin-left: auto;
     margin-right: auto;
@@ -151,7 +147,6 @@
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-size: 13px;
 }
-
 .welcome-languages a {
     color: inherit;
     text-decoration: none;
@@ -175,7 +170,6 @@
     font-size: 16px;
     color: inherit;
     border: 1px solid currentColor;
-
     transition:
         background-color .2s,
         transform .2s;
@@ -203,7 +197,6 @@
     position: relative;
     z-index: 2;
 }
-
 .welcome-eyebrow {
     margin: 0 0 26px;
     font-family: 'JetBrains Mono', 'Courier New', monospace;
@@ -221,7 +214,6 @@
     font-weight: 600;
     margin: 0;
 }
-
 .welcome-description {
     margin: 28px 0 0;
     font-size: clamp(17px, 1.7vw, 24px);
@@ -247,7 +239,6 @@
     background: #303136;
     transform: translateY(-2px);
 }
-
 .welcome-how-link {
     color: inherit;
     font-size: 17px;
@@ -269,8 +260,8 @@
 
 .welcome-mascot-star {
     position: absolute;
-    width: min(65%, 300px);
-    top: 60px;
+    width: min(65%, 200px);
+    top: 80px;
     right: -20px;
 }
 
@@ -279,30 +270,34 @@
     padding-top: 32px;
     scroll-margin-top: 40px;
 }
-
 .welcome-glass-wrap {
     width: 70%;
     position: relative;
     margin-left: auto;
+    isolation: isolate;
 }
-
 .welcome-glass {
     position: relative;
     z-index: 1;
     margin: 0;
     padding: 5px 28px;
     list-style: none;
-    background: rgba(255, 255, 255, 0.14);
-    -webkit-backdrop-filter: blur(20px) saturate(125%);
-    backdrop-filter: blur(20px) saturate(125%);
-    border: none;
+    /* Preserve the background's blue-to-pink feeling with a subtle glass tint. */
+    background: linear-gradient(
+        110deg,
+        rgba(224, 230, 247, 0.38) 0%,
+        rgba(235, 225, 241, 0.40) 52%,
+        rgba(248, 220, 219, 0.43) 100%
+    );
+    -webkit-backdrop-filter: blur(18px) saturate(115%);
+    backdrop-filter: blur(18px) saturate(115%);
+    border: 1px solid rgba(255, 255, 255, 0.40);
     border-radius: 16px;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.65),
         inset 0 -1px 0 rgba(255, 255, 255, 0.12),
         0 12px 32px rgba(30, 26, 29, 0.08);
 }
-
 .welcome-step {
     display: grid;
     grid-template-columns: 34px 125px minmax(0, 1fr);
@@ -327,7 +322,6 @@
     font-weight: 600;
     letter-spacing: -.04em;
 }
-
 .welcome-step p {
     margin: 0;
     font-size: 16px;
@@ -338,10 +332,11 @@
 .welcome-mascot-sitting {
     position: absolute;
     z-index: 2;
-    width: clamp(185px, 19vw, 280px);
-    right: 14%;
+    /* Keep her near the panel's right edge, away from the description text. */
+    width: clamp(170px, 16vw, 210px);
+    right: 0;
     bottom: 100%;
-    transform: translateY(27%);
+    transform: translateY(18%);
 }
 
 .welcome-mascot-peeking {
@@ -350,9 +345,8 @@
     width: clamp(130px, 15vw, 210px);
     right: 100%;
     bottom: 0;
-    transform: translateX(26%);
+    transform: translateX(23%);
 }
-
 .welcome-footer {
     margin-top: 44px;
     padding: 24px 0 32px;
@@ -377,7 +371,6 @@
 .welcome-footer form {
     margin-left: auto;
 }
-
 .welcome-text-button {
     border: 0;
     background: none;
@@ -394,7 +387,6 @@
     outline: 2px solid #323a52;
     outline-offset: 6px;
 }
-
 .welcome-visually-hidden {
     position: absolute;
     width: 1px;
@@ -421,7 +413,6 @@
 .welcome-skip:focus {
     transform: none;
 }
-
 .welcome-wordmark,
 .welcome-footer-wordmark {
     font-family: Georgia, 'Times New Roman', serif;
@@ -445,7 +436,6 @@
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
 }
-
 .welcome-eyebrow,
 .welcome-languages,
 .welcome-footer p {
@@ -468,7 +458,6 @@
     .welcome-footer {
         flex-shrink: 0;
     }
-
     .welcome-main {
         flex: 1;
         display: flex;
@@ -490,7 +479,6 @@
     .welcome-copy {
         padding-top: clamp(24px, 4svh, 48px);
     }
-
     .welcome-description {
         margin-top: clamp(12px, 2svh, 24px);
         font-size: clamp(17px, 2.5svh, 22px);
@@ -513,7 +501,6 @@
         margin-top: 0;
         padding-top: 0;
     }
-
     .welcome-step {
         min-height: clamp(52px, 7svh, 72px);
         padding-block: 10px;
@@ -541,7 +528,6 @@
     .welcome-description {
         font-size: 19px;
     }
-
     .welcome-desktop-break {
         display: none;
     }
@@ -562,13 +548,18 @@
     .welcome-step p {
         font-size: 15px;
     }
+
+    .welcome-mascot-sitting {
+        width: clamp(145px, 18vw, 185px);
+        right: 0;
+        transform: translateY(12%);
+    }
 }
 
 @media (max-width: 700px) {
     .welcome-shell {
         width: calc(100% - 40px);
     }
-
     .welcome-header {
         min-height: 86px;
         gap: 16px;
@@ -599,7 +590,6 @@
         font-size: 12px;
         gap: 7px;
     }
-
     .welcome-main {
         padding-top: 48px;
     }
@@ -627,7 +617,6 @@
     .welcome-hero-actions {
         gap: 24px;
     }
-
     .welcome-button-primary {
         min-height: 54px;
         padding-inline: 24px;
@@ -649,7 +638,8 @@
 
     .welcome-process {
         margin-top: 0;
-        padding-top: 54px;
+        /* Make room for the sitting mascot on smaller screens. */
+        padding-top: 100px;
     }
 
     .welcome-glass-wrap {
@@ -658,8 +648,12 @@
 
     .welcome-glass {
         padding: 8px 18px;
+        background: linear-gradient(
+            140deg,
+            rgba(226, 232, 247, 0.55),
+            rgba(248, 221, 218, 0.56)
+        );
     }
-
     .welcome-step {
         grid-template-columns: 28px minmax(0, 1fr);
         gap: 7px 14px;
@@ -682,11 +676,12 @@
     }
 
     .welcome-mascot-sitting {
-        width: 160px;
-        right: auto;
-        left: 3%;
+        width: 140px;
+        right: 8px;
+        left: auto;
+        bottom: 100%;
+        transform: translateY(10%);
     }
-
     .welcome-mascot-peeking {
         display: none;
     }

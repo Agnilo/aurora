@@ -13,8 +13,8 @@ rel="stylesheet">
 @vite('resources/css/frontend/pages/welcome.css')
 </head>
 <body class="welcome-page">
-@if (file_exists(public_path('images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg')))
-<img class="welcome-background" src="{{ asset('images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg') }}" alt="" fetchpriority="high">
+@if (file_exists(public_path('images/welcome/prokhor-minin-ncNrNYOOxsg-unsplash.jpg')))
+<img class="welcome-background" src="{{ asset('images/welcome/prokhor-minin-ncNrNYOOxsg-unsplash.jpg') }}" alt="" fetchpriority="high">
 @endif
 <a class="welcome-skip" href="#main">{{ t('welcome.skip') }}</a>
 <div class="welcome-shell">

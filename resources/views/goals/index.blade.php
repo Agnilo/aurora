@@ -6,7 +6,6 @@
 <div class="container goals-page">
     <header class="gp-heading">
         <div>
-            <p class="gp-eyebrow">{{ t('goals.eyebrow') }}</p>
             <h1>{{ t('plans.title') }}</h1>
             <p class="gp-description">{{ t('goals.description') }}</p>
         </div>

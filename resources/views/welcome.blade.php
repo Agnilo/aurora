@@ -23,8 +23,8 @@
             </div>
         </div>
         <div class="welcome-visual" aria-hidden="true">
-            @if (file_exists(public_path('images/welcome/mascot-star.png')))
-                <img class="welcome-mascot welcome-mascot-star" src="{{ asset('images/welcome/mascot-star.png') }}" alt="" width="600" height="600">
+            @if (file_exists(public_path('images/welcome/mascot-star2.png')))
+                <img class="welcome-mascot welcome-mascot-star" src="{{ asset('images/welcome/mascot-star2.png') }}" alt="" width="600" height="600">
             @endif
         </div>
     </section>
@@ -32,11 +32,11 @@
     <section id="how-it-works" class="welcome-process" aria-labelledby="welcome-process-heading">
         <h2 id="welcome-process-heading" class="welcome-visually-hidden">{{ t('welcome.how') }}</h2>
         <div class="welcome-glass-wrap">
-            @if (file_exists(public_path('images/welcome/mascot-sitting.png')))
-                <img class="welcome-mascot welcome-mascot-sitting" src="{{ asset('images/welcome/mascot-sitting.png') }}" alt="" width="600" height="600">
+            @if (file_exists(public_path('images/welcome/mascot-sitting2.png')))
+                <img class="welcome-mascot welcome-mascot-sitting" src="{{ asset('images/welcome/mascot-sitting2.png') }}" alt="" width="600" height="600">
             @endif
-            @if (file_exists(public_path('images/welcome/mascot-peeking.png')))
-                <img class="welcome-mascot welcome-mascot-peeking" src="{{ asset('images/welcome/mascot-peeking.png') }}" alt="" width="600" height="600">
+            @if (file_exists(public_path('images/welcome/mascot-peeking2.png')))
+                <img class="welcome-mascot welcome-mascot-peeking" src="{{ asset('images/welcome/mascot-peeking2.png') }}" alt="" width="600" height="600">
             @endif
             <ol class="welcome-glass">
                 <li class="welcome-step">
