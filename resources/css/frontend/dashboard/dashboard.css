@@ -1,6 +1,6 @@
 .aurora-hero {
     padding: 30px 36px;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     background:
         radial-gradient(
             120% 120% at 0% 0%,
@@ -56,8 +56,8 @@
 
 .xp-profile-card {
     position: relative;
-    background: #ffe49a;
-    border-radius: 20px;
+    background: var(--color-yellow);
+    border-radius: var(--radius-xl);
     padding: 16px 16px 12px;
     width: 160px;
     box-shadow: var(--shadow-medium);

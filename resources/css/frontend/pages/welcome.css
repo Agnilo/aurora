@@ -1,20 +1,21 @@
+@import "../../theme.css";
 @import "../../components/lucide.css";
 
 .welcome-page {
-    --welcome-ink: #28222c;
-    --welcome-muted: #66606b;
-    --welcome-rule: rgba(40, 34, 44, 0.19);
-    --welcome-background: #f8f7f2;
-    --welcome-pink: #f5c6cd;
-    --welcome-blue: #cfe3f5;
-    --welcome-mint: #cceada;
-    --welcome-yellow: #ffdb86;
+    --welcome-ink: var(--color-ink);
+    --welcome-muted: var(--color-text-muted);
+    --welcome-rule: var(--color-rule);
+    --welcome-background: var(--color-bg-page);
+    --welcome-pink: var(--color-pink);
+    --welcome-blue: var(--color-blue);
+    --welcome-mint: var(--color-mint);
+    --welcome-yellow: var(--color-yellow);
 
     margin: 0;
     min-height: 100svh;
     background: var(--welcome-background);
     color: var(--welcome-ink);
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -146,7 +147,7 @@
     align-items: center;
     justify-content: center;
     gap: 25px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-ui);
     font-weight: 700;
     transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
 }
@@ -229,7 +230,7 @@
 
 .welcome-copy h1 {
     margin: 0 0 18px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-ui);
     font-size: clamp(64px, 6.6vw, 102px);
     font-weight: 800;
     letter-spacing: -.075em;
@@ -347,7 +348,7 @@
 
 .welcome-features-header h2 {
     margin: 0;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: .065em;
@@ -448,7 +449,7 @@
 .welcome-footer p {
     margin: 0;
     color: #847c85;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     text-align: center;
 }

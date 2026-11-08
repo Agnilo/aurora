@@ -1,37 +1,23 @@
 @extends('layouts.admin')
 
 @section('content')
-
-<div class="w-100 px-4">
-
-    <h1 class="admin-title mb-4">
-        {{ t('dashboard.lookup_tables') }}
-    </h1>
-
-    {{-- Sekcijų switcher’is --}}
-    @php
-        $current = $section ?? 'goals';
-        $sections = [
-            'goals'      => t('lookup.menu.goals'),
-            'tasks'      => t('lookup.menu.tasks'),
-            'categories' => t('lookup.menu.categories'),
-        ];
-    @endphp
-
-    <div class="d-flex flex-wrap gap-3 mb-4 pt-1"
-         style="border-bottom: 1px solid #e6d9b8; padding-bottom: 12px;">
-
-        @foreach($sections as $code => $label)
-            <a href="{{ route('admin.lookups.index', ['locale' => app()->getLocale(), 'section' => $code]) }}"
-               class="{{ $current === $code ? 'fw-bold text-primary' : 'text-muted' }}">
-                {{ $label }}
-            </a>
-        @endforeach
-    </div>
-
-    {{-- Turinys iš child view --}}
-    @yield('lookups-content')
-
-</div>
-
+    <section aria-labelledby="admin-lookups-title">
+        <h1 class="admin-title mb-4" id="admin-lookups-title">{{ t('dashboard.lookup_tables') }}</h1>
+        @php
+            $current = $section ?? 'goals';
+            $sections = [
+                'goals' => t('lookup.menu.goals'),
+                'tasks' => t('lookup.menu.tasks'),
+                'categories' => t('lookup.menu.categories'),
+            ];
+        @endphp
+        <nav class="admin-tabs" aria-label="{{ t('dashboard.lookup_tables') }}">
+            @foreach($sections as $code => $label)
+                <a href="{{ route('admin.lookups.index', ['locale' => app()->getLocale(), 'section' => $code]) }}"
+                    class="admin-tab {{ $current === $code ? 'is-active' : '' }}" @if($current === $code) aria-current="page"
+                    @endif>{{ $label }}</a>
+            @endforeach
+        </nav>
+        @yield('lookups-content')
+    </section>
 @endsection

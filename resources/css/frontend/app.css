@@ -2,6 +2,7 @@
 
 @import "./dashboard/dashboard.css";
 @import "./dashboard/dashboard-home.css";
+@import "./dashboard/dashboard-theme.css";
 
 @import "./goals/goals.css";
 @import "./goals/goal-items.css";
@@ -15,6 +16,7 @@
 @import "./components/skeleton.css";
 @import "../components/lucide.css";
 @import "./components/preferences-onboarding.css";
+@import "./components/aurora-design-system.css";
 
 @import "./pages/profile.css";
 @import "./pages/public.css";

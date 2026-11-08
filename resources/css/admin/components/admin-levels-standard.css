@@ -1,0 +1,421 @@
+.admin-body {
+    --admin-list-border: var(--color-border-soft);
+    --admin-list-rule: var(--color-border-muted);
+    --admin-list-head: var(--color-bg-muted);
+    --admin-list-surface: var(--color-bg-card);
+    --admin-list-radius: var(--radius-lg);
+    --admin-row-padding-y: 13px;
+    --admin-row-padding-x: 16px;
+}
+
+/* The Levels page is the common layout reference. */
+.admin-body .admin-container :is(.container, .container-fluid, .w-100.px-4, .px-4) {
+    max-width: none;
+}
+
+.admin-body .admin-container>.container,
+.admin-body .admin-container>.container-fluid,
+.admin-body .admin-container>.w-100.px-4,
+.admin-body .admin-container>.px-4 {
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.admin-body .admin-container>.container.py-4 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.admin-body .admin-container h1:not(.modal-title) {
+    margin-bottom: 22px;
+}
+
+.admin-body .admin-container h2:not(.modal-title) {
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--color-ink);
+}
+
+.admin-body .admin-page-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.admin-body .admin-page-heading h1 {
+    margin: 0 0 3px !important;
+}
+
+.admin-body .admin-page-heading .admin-subtitle {
+    margin: 3px 0 0;
+}
+
+.admin-body .admin-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-body .admin-page-heading+.admin-page-actions {
+    margin-bottom: 16px;
+}
+
+.admin-body .admin-section-heading {
+    padding: 16px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.admin-body .admin-section-heading> :is(h2, h3) {
+    margin: 0;
+}
+
+/* Level-style single framed table. Bare Bootstrap tables inherit the same frame. */
+.admin-body .admin-panel,
+.admin-body .admin-table-card {
+    background: var(--admin-list-surface);
+    border: 1px solid var(--admin-list-border);
+    border-radius: var(--admin-list-radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    min-width: 0;
+}
+
+.admin-body .admin-panel .table-responsive,
+.admin-body .admin-table-card .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-body .admin-container table.table {
+    --bs-table-striped-bg: transparent;
+    --bs-table-accent-bg: transparent;
+    --bs-table-hover-bg: var(--color-blue-soft);
+    --bs-table-hover-color: var(--color-ink);
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--color-text-main);
+    background: var(--admin-list-surface);
+}
+
+.admin-body .admin-container table.table {
+    border: 1px solid var(--admin-list-border);
+    border-radius: var(--admin-list-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
+
+.admin-body :is(.admin-panel, .admin-table-card, .card, .lookup-card) table.table {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.admin-body .admin-container table.table thead th {
+    background: var(--admin-list-head) !important;
+    color: var(--color-text-muted) !important;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 13px var(--admin-row-padding-x) !important;
+    border-bottom: 1px solid var(--admin-list-border);
+    text-align: left;
+}
+
+.admin-body .admin-container table.table thead th.text-end {
+    text-align: right;
+}
+
+.admin-body .admin-container table.table tbody td {
+    padding: var(--admin-row-padding-y) var(--admin-row-padding-x) !important;
+    background: var(--admin-list-surface);
+    border-bottom: 1px solid var(--admin-list-rule);
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.admin-body .admin-container table.table tbody tr:last-child>td {
+    border-bottom: 0;
+}
+
+.admin-body .admin-container table.table.table-hover tbody tr:hover>td {
+    background: var(--color-blue-soft);
+}
+
+.admin-body .admin-container table.table.table-striped tbody tr:nth-of-type(odd)>td {
+    background: var(--admin-list-surface);
+}
+
+.admin-body .admin-container table.table tbody td.text-end {
+    text-align: right;
+}
+
+.admin-body .admin-container table.table td code {
+    overflow-wrap: anywhere;
+}
+
+.admin-body .admin-container table.table td .btn+.btn {
+    margin-left: 0;
+}
+
+.admin-body .admin-table-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    flex-wrap: nowrap;
+}
+
+.admin-body .admin-table-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.admin-body .admin-table-actions .btn {
+    margin: 0 !important;
+    white-space: nowrap;
+}
+
+.admin-body .admin-container table.table tbody tr>td:first-child {
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-body .admin-container .table-responsive {
+    border-radius: inherit;
+}
+
+/* Lookups: heading belongs to the card but tables should never have extra padding. */
+.admin-body .admin-lookup-panel+.admin-lookup-panel {
+    margin-top: 20px;
+}
+
+.admin-body .admin-lookup-panel .table {
+    margin-bottom: 0 !important;
+}
+
+.admin-body .admin-lookup-panel .drag-handle {
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.admin-body .admin-lookup-panel .drag-handle:active {
+    cursor: grabbing;
+}
+
+.admin-body .admin-lookup-panel .color-dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-rule-soft);
+    border-radius: 50%;
+}
+
+/* Align create/edit forms with the same outlined panel, left aligned. */
+.admin-body .admin-form-card {
+    padding: clamp(18px, 2.4vw, 28px);
+    max-width: 920px;
+    border: 1px solid var(--admin-list-border);
+    border-radius: var(--admin-list-radius);
+    background: var(--admin-list-surface);
+    box-shadow: var(--shadow-soft);
+}
+
+.admin-body .admin-form-card :is(.form-control, .form-select) {
+    max-width: 100%;
+}
+
+.admin-body .admin-form-card .form-check {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.admin-body .admin-form-card .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    align-items: center;
+    justify-content: flex-end;
+    border-top: 1px solid var(--admin-list-rule);
+    padding-top: 20px;
+    margin-top: 22px;
+}
+
+.admin-body .admin-form-card .form-actions .btn-secondary-action {
+    margin-right: auto;
+}
+
+.admin-body .admin-form-card .form-control-color {
+    max-width: 70px;
+    padding: 5px;
+}
+
+.admin-body .admin-form-card :is(input[type=file], input[type=color]) {
+    cursor: pointer;
+}
+
+/* Old unframed edit forms also get a consistent surface until individually migrated. */
+.admin-body .admin-container>form[method="POST"]:not(.d-inline):not(.admin-no-surface):not(:has(> .lookup-card)),
+.admin-body .admin-container>.px-4>form[method="POST"]:not(.d-inline),
+.admin-body .admin-container>.container>form[method="POST"]:not(.d-inline) {
+    padding: clamp(18px, 2.4vw, 28px);
+    max-width: 920px;
+    border: 1px solid var(--admin-list-border);
+    border-radius: var(--admin-list-radius);
+    background: var(--admin-list-surface);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Existing Bootstrap cards containing edit forms keep their original functional DOM. */
+.admin-body .admin-container .card .card-body:has(> form[method="POST"]) {
+    padding: clamp(18px, 2.4vw, 28px);
+}
+
+.admin-body .admin-container .card:has(.card-body > form[method="POST"]) {
+    max-width: 920px;
+}
+
+/* One hierarchy of buttons, fields, filters and statuses.
+   Older pages use .btn-warning for SAVE; treat it as primary, not yellow. */
+.admin-body .admin-container .btn-warning {
+    color: var(--color-ink-inverse);
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+}
+
+.admin-body .admin-container .btn-warning:hover {
+    color: var(--color-ink-inverse);
+    background: var(--color-ink-hover);
+    border-color: var(--color-ink-hover);
+}
+
+.admin-body .admin-container .btn-outline-warning {
+    color: var(--color-ink);
+    background: var(--color-bg-card);
+    border-color: var(--color-border-soft);
+}
+
+.admin-body .admin-container .btn-outline-warning:hover {
+    color: var(--color-ink);
+    background: var(--color-blue-soft);
+    border-color: var(--color-card-outline);
+}
+
+.admin-body .admin-container table.table .btn-link {
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+    color: var(--color-ink);
+    text-decoration: none;
+}
+
+.admin-body .admin-container table.table .btn-link:hover {
+    background: var(--color-blue-soft);
+    border-color: var(--color-card-outline);
+}
+
+.admin-body .admin-container table.table .btn-link.text-danger {
+    color: var(--color-danger) !important;
+}
+
+.admin-body .admin-container .admin-page-actions .btn-primary,
+.admin-body .admin-container .admin-section-heading .btn-primary {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-ink-inverse);
+}
+
+.admin-body .admin-container .btn-sm {
+    font-size: 12px;
+}
+
+.admin-body .admin-container .btn-outline-danger {
+    color: var(--color-danger);
+}
+
+.admin-body .admin-container .badge.bg-success {
+    color: var(--color-ink) !important;
+    background: var(--color-mint) !important;
+}
+
+.admin-body .admin-container .badge.bg-secondary {
+    color: var(--color-text-muted) !important;
+    background: var(--color-bg-muted) !important;
+}
+
+.admin-body .admin-filter-card {
+    padding: 18px;
+    background: var(--admin-list-surface);
+    border: 1px solid var(--admin-list-border);
+    border-radius: var(--admin-list-radius);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 20px;
+}
+
+.admin-body .admin-filter-card .form-label {
+    margin-bottom: 6px;
+}
+
+.admin-body .admin-filter-card .btn {
+    min-height: var(--admin-control-height);
+}
+
+.admin-body .admin-status {
+    display: inline-flex;
+    border-radius: var(--radius-xs);
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.admin-body .admin-status.is-active {
+    background: var(--color-mint);
+    color: var(--color-ink);
+}
+
+.admin-body .admin-status.is-inactive {
+    background: var(--color-bg-muted);
+    color: var(--color-text-muted);
+}
+
+.admin-body .admin-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+@media(max-width: 780px) {
+    .admin-body .admin-container :is(.admin-page-heading, .admin-section-heading) {
+        align-items: flex-start;
+    }
+
+    .admin-body .admin-container table.table {
+        min-width: 650px;
+    }
+
+    .admin-body .admin-container .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .admin-body .admin-form-card {
+        padding: 18px;
+    }
+
+    .admin-body .admin-page-actions {
+        width: 100%;
+    }
+}

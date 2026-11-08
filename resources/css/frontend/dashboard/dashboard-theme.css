@@ -1,0 +1,110 @@
+.aurora-app .dashboard-home {
+    color: var(--color-text-main);
+}
+
+.aurora-app .dashboard-home .dh-heading h1 {
+    color: var(--color-ink);
+    letter-spacing: var(--tracking-heading);
+}
+
+.aurora-app .dashboard-home .dh-eyebrow,
+.aurora-app .dashboard-home .dh-companion>h2,
+.aurora-app .dashboard-home .dh-number,
+.aurora-app .dashboard-home .dh-floating-stat dd {
+    font-family: var(--font-mono);
+}
+
+.aurora-app .dashboard-home .dh-panel {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.aurora-app .dashboard-home .dh-task,
+.aurora-app .dashboard-home .dh-goal,
+.aurora-app .dashboard-home .dh-task-footer,
+.aurora-app .dashboard-home .dh-pagination {
+    border-color: var(--color-rule-soft);
+}
+
+.aurora-app .dashboard-home .dh-filters a {
+    border-radius: var(--radius-sm);
+}
+
+.aurora-app .dashboard-home .dh-filters a:is(:hover, [aria-current]) {
+    background: var(--color-pink-soft);
+}
+
+.aurora-app .dashboard-home .dh-check {
+    border-color: var(--color-text-soft);
+    color: var(--color-ink-inverse);
+}
+
+.aurora-app .dashboard-home .dh-check[aria-pressed="true"] {
+    background: var(--color-pink-deep);
+    border-color: var(--color-pink-deep);
+}
+
+.aurora-app .dashboard-home .dh-check:hover {
+    border-color: var(--color-pink-deep);
+    box-shadow: 0 0 0 4px var(--color-pink-soft);
+}
+
+.aurora-app .dashboard-home .dh-progress {
+    background: var(--color-progress-track);
+}
+
+.aurora-app .dashboard-home .dh-progress>span {
+    background: var(--area-accent, var(--color-progress-fill));
+}
+
+.aurora-app .dashboard-home .dh-icon-badge {
+    background: color-mix(in srgb, var(--area-accent, var(--color-pink)) 20%, transparent);
+}
+
+.aurora-app .dashboard-home .dh-companion-base,
+.aurora-app .dashboard-home .dh-floating-stat {
+    background: var(--color-bg-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.aurora-app .dashboard-home .dh-companion-base {
+    border-top: 1px solid var(--color-rule-soft);
+}
+
+.aurora-app .dashboard-home .dh-floating-streak {
+    border-left: 1px solid var(--color-rule-soft);
+}
+
+.aurora-app .dashboard-home .dh-new-goal {
+    background: var(--color-primary);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-primary-text);
+    box-shadow: var(--shadow-retro);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.aurora-app .dashboard-home .dh-new-goal:hover {
+    background: var(--color-primary-hover);
+    transform: translate(1px, 1px);
+}
+
+.aurora-app .dashboard-home :is(.dh-goal, .dh-area):hover {
+    background: var(--color-pink-soft);
+}
+
+.aurora-app .dashboard-home .dh-task-title {
+    color: var(--color-text-main);
+}
+
+.aurora-app .dashboard-home .dh-task-goal,
+.aurora-app .dashboard-home .dh-task-category {
+    color: var(--color-text-muted);
+}

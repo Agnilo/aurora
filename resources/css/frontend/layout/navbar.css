@@ -50,5 +50,5 @@
 }
 .aurora-user-btn:hover {
     background: var(--color-bg-soft);
-    border-color: #ffcc8a;
+    border-color: var(--color-border-soft);
 }

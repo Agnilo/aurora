@@ -1,16 +1,16 @@
 /* Shared application shell. Loaded after existing page styles. */
 body.aurora-app {
-    --app-ink: #10151e;
-    --app-muted: #686571;
-    --app-rose: #d9909c;
-    --app-rose-deep: #9b4f61;
-    --app-rule: rgba(25, 30, 40, 0.12);
+    --app-ink: var(--color-ink);
+    --app-muted: var(--color-text-muted);
+    --app-rose: var(--color-pink-deep);
+    --app-rose-deep: var(--color-pink-deep);
+    --app-rule: var(--color-rule-soft);
     margin: 0;
     min-height: 100svh;
     isolation: isolate;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-ui);
     color: var(--app-ink);
-    background: #f3f2ef;;
+    background: var(--color-bg-page);
 }
 
 .aurora-app .app-background {
@@ -23,7 +23,7 @@ body.aurora-app {
 
 .aurora-app .app-header {
     border-bottom: 1px solid var(--app-rule);
-    background: rgba(250, 247, 243, 0.72);
+    background: var(--color-surface-header);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     position: relative;
@@ -88,7 +88,7 @@ body.aurora-app {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 12px;
 }
 
@@ -144,7 +144,7 @@ body.aurora-app {
     padding: 8px;
     border: 1px solid var(--app-rule);
     border-radius: 10px;
-    background: #faf7f3;
+    background: var(--color-bg-card);
     box-shadow: 0 12px 32px rgba(30, 26, 29, 0.08);
 }
 
@@ -181,7 +181,7 @@ body.aurora-app {
 .aurora-app h4,
 .aurora-app h5,
 .aurora-app h6 {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-ui);
     font-weight: 600;
 }
 
