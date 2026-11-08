@@ -118,4 +118,20 @@
     --welcome-blue: var(--color-blue);
     --welcome-mint: var(--color-mint);
     --welcome-yellow: var(--color-yellow);
+
+    --color-dot: rgba(70, 65, 75, 0.35);
+    --dot-size: 0.7px;
+    --dot-spacing: 17px;
+
+    --aurora-dots: radial-gradient(circle,
+            var(--color-dot) var(--dot-size),
+            transparent 0.9px);
+}
+
+body {
+    background-color: var(--color-bg-page);
+    background-image: radial-gradient(circle,
+            var(--color-dot) var(--dot-size),
+            transparent 0.9px);
+    background-size: var(--dot-spacing) var(--dot-spacing);
 }

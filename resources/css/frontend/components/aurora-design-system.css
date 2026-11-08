@@ -1,6 +1,6 @@
 body.aurora-app {
     font-family: var(--font-ui);
-    background: var(--color-bg-page);
+    background-color: var(--color-bg-page);
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
 }

@@ -1,7 +1,10 @@
-@import "./components/pagination.css";
 @import "../components/lucide.css";
-@import "./aurora-admin-theme.css";
+@import "./components/pagination.css";
+@import "./components/gamification-overview.css";
 @import "./components/admin-levels-standard.css";
+
+@import "./aurora-admin-theme.css";
+
 
 .admin-body .hover-underline:hover {
     text-decoration: underline;

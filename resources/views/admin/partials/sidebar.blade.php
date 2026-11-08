@@ -1,6 +1,6 @@
 <aside class="admin-sidebar">
     <nav class="sidebar-nav" aria-label="{{ t('admin.ui.navigation') }}">
-        <span class="sidebar-header">{{ t('admin.ui.workspace') }}</span>
+
         <a href="{{ route('admin.dashboard', ['locale' => app()->getLocale()]) }}"
             class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
             @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>

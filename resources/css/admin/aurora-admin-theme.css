@@ -239,7 +239,7 @@
 .admin-body button.sidebar-link.sidebar-toggle {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
     width: 100%;
     min-height: 41px;
@@ -268,17 +268,29 @@
     border-color: var(--color-border-muted);
     color: var(--color-ink);
     font-weight: 700;
+    padding: 10px 20px;
+}
+
+.admin-body button.sidebar-link.sidebar-toggle {
+    justify-content: space-between;
+}
+
+.admin-body :is(.sidebar-link, .sidebar-sublink) {
+    position: relative;
 }
 
 .admin-body .sidebar-link.active::before,
 .admin-body .sidebar-sublink.active::before {
     content: "";
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 4px;
     height: 18px;
     background: var(--color-pink-deep);
     border-radius: var(--radius-pill);
-    margin-left: -7px;
-    flex: none;
+    pointer-events: none;
 }
 
 .admin-body .sidebar-nav-group-label {
@@ -1029,4 +1041,20 @@
 
 .admin-body .admin-skip-link:focus {
     top: 12px;
+}
+
+.admin-body {
+    background-color: var(--color-bg-page);
+    background-image: radial-gradient(
+        circle,
+        rgba(70, 65, 75, 0.35) 0.7px,
+        transparent 0.9px
+    );
+    background-size: 17px 17px;
+}
+
+body.admin-body {
+    background-color: var(--color-bg-page);
+    background-image: var(--aurora-dots);
+    background-size: var(--dot-spacing) var(--dot-spacing);
 }
