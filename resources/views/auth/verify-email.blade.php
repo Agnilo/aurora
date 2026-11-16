@@ -3,9 +3,6 @@
 @section('title', t('auth.verify_label'))
 
 @section('content')
-    <p class="auth-eyebrow">
-        {{ t('auth.verify_label') }}
-    </p>
 
     <h1 id="auth-title">
         {{ t('auth.verify_title') }}

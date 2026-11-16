@@ -3,7 +3,6 @@
 @section('title', t('auth.login'))
 
 @section('content')
-    <p class="auth-eyebrow">{{ t('auth.login') }}</p>
     <h1 id="auth-title">{{ t('auth.login_title') }}</h1>
     <p class="auth-description">{{ t('auth.login_description') }}</p>
     @if (session('status'))

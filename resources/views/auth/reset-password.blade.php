@@ -3,9 +3,6 @@
 @section('title', t('auth.new_password_title'))
 
 @section('content')
-    <p class="auth-eyebrow">
-        {{ t('auth.reset_label') }}
-    </p>
 
     <h1 id="auth-title">
         {{ t('auth.new_password_title') }}

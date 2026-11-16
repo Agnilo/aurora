@@ -12,22 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (grid && goalsContent && loader) {
 
-        // Tiles are only in the category grid (never replaced by AJAX)
         const tiles = grid.querySelectorAll('.category-link');
         if (!tiles.length) return;
 
-        // JS is the single source of truth after initial render
         let currentCategoryId = grid.classList.contains('has-active')
             ? (grid.querySelector('.category-link.active')?.dataset.categoryId ?? null)
             : null;
 
         let lastCategoryId = currentCategoryId; // for slideDirection
-
-        //
-        // ===========================================================
-        // FLIP HELPERS — HORIZONTAL ONLY
-        // ===========================================================
-        //
 
         function getBoxes(elements) {
             return [...elements].map(el => {
@@ -58,12 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        //
-        // ===========================================================
-        // UI STATE
-        // ===========================================================
-        //
-
         function setActive(categoryId) {
             tiles.forEach(t => t.classList.remove('active'));
 
@@ -85,12 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return url.toString();
         }
 
-        //
-        // ===========================================================
-        // MAIN CLICK HANDLER — FLIP + AJAX
-        // ===========================================================
-        //
-
         tiles.forEach(tile => {
             tile.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -101,19 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nextCategoryId = isReset ? null : clickedId;
                 const url = buildUrl(nextCategoryId);
 
-                // 1) FIRST
                 const first = getBoxes(tiles);
 
-                // Apply UI state
                 setActive(nextCategoryId);
 
-                // 2) LAST + FLIP
                 requestAnimationFrame(() => {
                     const last = getBoxes(tiles);
                     animateFLIP(first, last);
                 });
 
-                // Slide direction
                 window.slideDirection =
                     lastCategoryId === null || isReset
                         ? "left"
@@ -135,12 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         });
-
-        //
-        // ===========================================================
-        // EFFECT HELPERS — kept as you had
-        // ===========================================================
-        //
 
         function fadeOutAndHide(element, callback) {
             element.style.transition = "opacity 0.45s ease, filter 0.45s ease";
@@ -240,3 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 import './plans.js';
+
+import './portal-sidebar.js';
+
+import './dashboard-calendar.js';

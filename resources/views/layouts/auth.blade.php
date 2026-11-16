@@ -6,19 +6,10 @@
 <title>@yield('title') · Aurora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 @vite('resources/css/frontend/pages/auth.css')
 </head>
 <body class="auth-page">
-@php
-    $background = 'images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg';
-    if (!file_exists(public_path($background))) {
-        $background = 'images/welcome/background.webp';
-    }
-@endphp
-@if (file_exists(public_path($background)))
-    <img class="auth-background" src="{{ asset($background) }}" alt="" fetchpriority="high">
-@endif
 <a class="auth-skip" href="#main">{{ t('auth.skip') }}</a>
 <div class="auth-shell">
     <header class="auth-header">
@@ -48,7 +39,6 @@
                 >
                     {{ strtoupper($language) }}
                 </a>
-                @if ($loop->first)<span aria-hidden="true">/</span>@endif
             @endforeach
         </nav>
     </header>
@@ -67,13 +57,14 @@
             @endif
         </div>
     </main>
-    <footer class="auth-footer">{{ t('auth.tagline') }}
+    <footer class="auth-footer">
+        <span>{{ t('auth.tagline') }}</span>
         <span class="auth-footer-wordmark" aria-hidden="true">
-            <img
-            class="auth-footer-logo"
-            src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}"
-            alt=""
-            >
+            @if (file_exists(public_path('images/welcome/wordmark-1024-cropped.png')))
+                <img class="auth-footer-logo" src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="">
+            @else
+                AURORA
+            @endif
         </span> 
     </footer>
 </div>
