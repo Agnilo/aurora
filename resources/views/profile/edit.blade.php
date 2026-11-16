@@ -73,7 +73,7 @@
     </div>
 
     <div class="pr-field">
-        <label for="pr-handle">{{ t('profile.hashtags') }}</label>
+        <label for="pr-handle">{{ t('profile.ui.handle', [], app()->getLocale() === 'lt' ? 'Naudotojo vardas' : 'Username') }}</label>
         <div class="pr-input-prefix">
             <span aria-hidden="true">@</span>
             <input id="pr-handle" type="text" name="handle" value="{{ old('handle', $details?->handle) }}" @error('handle') aria-invalid="true" aria-describedby="pr-handle-error" @enderror>
@@ -84,7 +84,7 @@
     </div>
 
     <div class="pr-actions">
-        <button type="submit" class="pr-button">{{ t('button.save') }}</button>
+        <button type="submit" class="pr-button">{{ t('button.save') }} <x-lucide-check class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /></button>
     </div>
 </form>
 @endsection

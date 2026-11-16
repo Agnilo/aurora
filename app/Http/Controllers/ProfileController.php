@@ -199,25 +199,43 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request, $locale)
     {
         $request->validate([
-            'avatar' => 'nullable|image|max:2048'
+            'avatar' => ['nullable', 'image', 'max:2048', 'prohibited_if:remove_avatar,1'],
+            'remove_avatar' => ['sometimes', 'boolean'],
         ]);
 
-        $user = auth()->user();
+        $user = $request->user();
         $details = $user->details;
+        $oldAvatar = $details->avatar;
 
-        if ($request->hasFile('avatar')) {
+        if ($request->boolean('remove_avatar')) {
+            $details->avatar = null;
+            $details->save();
 
-            if ($details->avatar && \Storage::disk('public')->exists($details->avatar)) {
-                \Storage::disk('public')->delete($details->avatar);
+            if ($oldAvatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldAvatar);
             }
 
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $details->avatar = $path;
+            return back()->with('success', t('profile.ui.photo_removed', [], app()->getLocale() === 'lt' ? 'Profilio nuotrauka pašalinta.' : 'Profile photo removed.'));
         }
 
-        $details->save();
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            abort_if($path === false, 500);
 
-        return back()->with('success', 'Avataras atnaujintas!');
+            try {
+                $details->avatar = $path;
+                $details->save();
+            } catch (\Throwable $exception) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+                throw $exception;
+            }
+
+            if ($oldAvatar && $oldAvatar !== $path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldAvatar);
+            }
+        }
+
+        return back()->with('success', t('profile.ui.photo_updated', [], app()->getLocale() === 'lt' ? 'Profilio nuotrauka atnaujinta.' : 'Profile photo updated.'));
     }
 
     public function updateCover(Request $request)

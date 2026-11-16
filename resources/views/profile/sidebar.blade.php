@@ -2,6 +2,7 @@
     $xp = $game->xp ?? 0;
     $xpNext = $game->xp_next ?? 100;
     $xpPercent = max(0, min(100, round($xp / max($xpNext, 1) * 100)));
+    $xpRemaining = max(0, $xpNext - $xp);
     $streak = $game->streak_current ?? 0;
     $showStreak = app(App\Services\Preferences\StreakVisibilityService::class)->visible($user);
     $next = $showStreak ? App\Services\GamificationService::nextStreakReward($streak) : null;
@@ -12,32 +13,38 @@
         <h2 id="pr-stats-title" class="pr-section-title">{{ t('profile.stats_title') }}</h2>
 
         <div class="pr-level">
-            <span>{{ t('profile.level') }}</span>
-            <strong>{{ $game->level ?? 1 }}</strong>
+            <span class="pr-level-icon"><x-lucide-star class="aurora-icon" width="23" height="23" aria-hidden="true" focusable="false" /></span>
+            <div class="pr-level-copy">
+                <span>{{ t('profile.ui.current_level', [], app()->getLocale() === 'lt' ? 'Dabartinis lygis' : 'Current level') }}</span>
+                <strong>{{ t('profile.ui.level_value', ['level' => $game->level ?? 1], app()->getLocale() === 'lt' ? ($game->level ?? 1).' lygis' : 'Level '.($game->level ?? 1)) }}</strong>
+            </div>
         </div>
         <div class="pr-xp-track" role="progressbar" aria-label="XP" aria-valuenow="{{ $xpPercent }}" aria-valuemin="0" aria-valuemax="100">
             <span style="width: {{ $xpPercent }}%"></span>
         </div>
-        <p class="pr-xp-label">{{ $xp }} / {{ $xpNext }} XP</p>
+        <p class="pr-xp-label">
+            <span>{{ $xp }} / {{ $xpNext }} XP</span>
+            <span>{{ t('profile.ui.xp_remaining', ['xp' => $xpRemaining], app()->getLocale() === 'lt' ? 'Iki kito: '.$xpRemaining.' XP' : 'Next level: '.$xpRemaining.' XP') }}</span>
+        </p>
 
         <dl class="pr-stat-list">
             <div>
-                <dt>{{ t('profile.coins') }}</dt>
+                <dt><span class="pr-stat-icon pr-stat-icon--coins"><x-lucide-coins class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /></span>{{ t('profile.coins') }}</dt>
                 <dd>{{ $game->coins ?? 0 }}</dd>
             </div>
             @if($showStreak)
                 <div>
-                    <dt>{{ t('profile.streak_current') }}</dt>
+                    <dt><span class="pr-stat-icon pr-stat-icon--streak"><x-lucide-flame class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /></span>{{ t('profile.ui.streak_current', [], app()->getLocale() === 'lt' ? 'Dienų serija' : 'Current streak') }}</dt>
                     <dd>{{ $streak }}</dd>
                 </div>
                 <div>
-                    <dt>{{ t('profile.streak_best') }}</dt>
+                    <dt><span class="pr-stat-icon pr-stat-icon--best"><x-lucide-trophy class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /></span>{{ t('profile.ui.streak_best', [], app()->getLocale() === 'lt' ? 'Ilgiausia serija' : 'Longest streak') }}</dt>
                     <dd>{{ $game->streak_best ?? 0 }}</dd>
                 </div>
             @endif
             @isset($totalPoints)
                 <div>
-                    <dt>{{ t('profile.total_points') }}</dt>
+                    <dt><span class="pr-stat-icon pr-stat-icon--points"><x-lucide-sparkles class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /></span>{{ t('profile.total_points') }}</dt>
                     <dd>{{ $totalPoints }}</dd>
                 </div>
             @endisset
@@ -45,14 +52,14 @@
 
         @if($next)
             <div class="pr-reward">
-                <span>{{ t('profile.next_streak_reward') }}</span>
-                <p>{{ t('profile.next_streak_reward_hint', ['days' => $next['day'] - $streak, 'coins' => $next['coins']]) }}</p>
+                <span>{{ t('profile.ui.next_reward', [], app()->getLocale() === 'lt' ? 'Kitas serijos atlygis' : 'Next streak reward') }}</span>
+                <p>{{ t('profile.ui.reward_hint', ['days' => $next['day'] - $streak, 'coins' => $next['coins']], app()->getLocale() === 'lt' ? 'Po '.($next['day'] - $streak).' d. (+'.$next['coins'].' monetų)' : 'In '.($next['day'] - $streak).' days (+'.$next['coins'].' coins)') }}</p>
             </div>
         @endif
 
-        <div class="pr-last-activity">
+    </div>
+    <div class="pr-last-activity">
             <span>{{ t('profile.last_activity') }}</span>
             <p>{{ !empty($game->last_activity_date) ? $game->last_activity_date->format('Y-m-d') : t('profile.last_activity_none') }}</p>
-        </div>
     </div>
 </aside>
