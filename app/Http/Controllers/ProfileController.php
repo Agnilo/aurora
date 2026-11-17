@@ -22,7 +22,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $game = $user->gameDetails;
-        
+
         $totalPoints = $user->pointsLog()
             ->where(function ($q) {
                 $q->where('type', 'task_completed');
@@ -132,8 +132,8 @@ class ProfileController extends Controller
         $totalPoints = $user->pointsLog()
             ->where(function ($q) {
                 $q->where('type', 'task_completed')
-                ->orWhere('type', 'milestone_completed')
-                ->orWhere('type', 'goal_completed');
+                    ->orWhere('type', 'milestone_completed')
+                    ->orWhere('type', 'goal_completed');
             })
             ->sum('amount');
 
@@ -148,17 +148,49 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request, $locale): RedirectResponse
     {
-        $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $isLt = app()->getLocale() === 'lt';
 
-        $user = auth()->user();
-        $user->password = bcrypt($request->password);
+        $validated = $request->validate(
+            [
+                'current_password' => ['required', 'string', 'current_password'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ],
+            [
+                'current_password.required' => t(
+                    'profile.ui.current_password_required',
+                    [],
+                    $isLt
+                    ? 'Įvesk esamą slaptažodį.'
+                    : 'Enter your current password.'
+                ),
+                'current_password.current_password' => t(
+                    'profile.ui.current_password_invalid',
+                    [],
+                    $isLt
+                    ? 'Esamas slaptažodis neteisingas.'
+                    : 'The current password is incorrect.'
+                ),
+            ]
+        );
+
+        $user = $request->user();
+        $user->password = \Illuminate\Support\Facades\Hash::make(
+            $validated['password']
+        );
         $user->save();
 
         return redirect()
-            ->route('profile.password.form', $locale)
-            ->with('success', 'Slaptažodis pakeistas.');
+            ->route('profile.password.form', ['locale' => $locale])
+            ->with(
+                'success',
+                t(
+                    'profile.ui.password_updated',
+                    [],
+                    $isLt
+                    ? 'Slaptažodis pakeistas.'
+                    : 'Password updated.'
+                )
+            );
     }
 
     public function avatar()
@@ -182,12 +214,12 @@ class ProfileController extends Controller
         $totalPoints = $user->pointsLog()
             ->where(function ($q) {
                 $q->where('type', 'task_completed')
-                ->orWhere('type', 'milestone_completed')
-                ->orWhere('type', 'goal_completed');
+                    ->orWhere('type', 'milestone_completed')
+                    ->orWhere('type', 'goal_completed');
             })
             ->sum('amount');
 
-        return view('profile.avatar',[
+        return view('profile.avatar', [
             'user' => $user,
             'game' => $game,
             'totalPoints' => $totalPoints,
@@ -199,25 +231,71 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request, $locale)
     {
         $request->validate([
-            'avatar' => 'nullable|image|max:2048'
+            'avatar' => [
+                'nullable',
+                'image',
+                'max:2048',
+                'prohibited_if:remove_avatar,1',
+            ],
+            'remove_avatar' => ['sometimes', 'boolean'],
         ]);
 
-        $user = auth()->user();
+        $user = $request->user();
         $details = $user->details;
+        $oldAvatar = $details->avatar;
 
-        if ($request->hasFile('avatar')) {
+        if ($request->boolean('remove_avatar')) {
+            $details->avatar = null;
+            $details->save();
 
-            if ($details->avatar && \Storage::disk('public')->exists($details->avatar)) {
-                \Storage::disk('public')->delete($details->avatar);
+            if ($oldAvatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')
+                    ->delete($oldAvatar);
             }
 
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $details->avatar = $path;
+            return back()->with(
+                'success',
+                t(
+                    'profile.ui.photo_removed',
+                    [],
+                    app()->getLocale() === 'lt'
+                    ? 'Profilio nuotrauka pašalinta.'
+                    : 'Profile photo removed.'
+                )
+            );
         }
 
-        $details->save();
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
 
-        return back()->with('success', 'Avataras atnaujintas!');
+            abort_if($path === false, 500);
+
+            try {
+                $details->avatar = $path;
+                $details->save();
+            } catch (\Throwable $exception) {
+                \Illuminate\Support\Facades\Storage::disk('public')
+                    ->delete($path);
+
+                throw $exception;
+            }
+
+            if ($oldAvatar && $oldAvatar !== $path) {
+                \Illuminate\Support\Facades\Storage::disk('public')
+                    ->delete($oldAvatar);
+            }
+        }
+
+        return back()->with(
+            'success',
+            t(
+                'profile.ui.photo_updated',
+                [],
+                app()->getLocale() === 'lt'
+                ? 'Profilio nuotrauka atnaujinta.'
+                : 'Profile photo updated.'
+            )
+        );
     }
 
     public function updateCover(Request $request)
@@ -273,8 +351,10 @@ class ProfileController extends Controller
             'game' => $game,
             'details' => $details,
             'badges' => $user->badges()->with('category')
-                ->when(!$streakVisibility->visible($user), fn ($query) =>
-                    $query->whereDoesntHave('category', fn ($category) => $category->where('key', 'streak'))
+                ->when(
+                    !$streakVisibility->visible($user),
+                    fn($query) =>
+                        $query->whereDoesntHave('category', fn($category) => $category->where('key', 'streak'))
                 )->get(),
             'activeTab' => 'badges',
         ]);
