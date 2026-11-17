@@ -17,7 +17,7 @@
     <header class="onb-topbar">
         <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" aria-label="Aurora"><img
                 src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="Aurora"></a>
-        <nav aria-label="{{ t('app_shell.language', [], app()->getLocale() === 'lt' ? 'Kalba' : 'Language') }}">
+        <nav aria-label="{{ t('app_shell.language') }}">
             @foreach (['lt', 'en'] as $language)
                 <a href="{{ route('lang.switch', ['locale' => $language]) }}" lang="{{ $language }}"
                     @if(app()->getLocale() === $language) aria-current="page"

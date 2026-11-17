@@ -68,7 +68,7 @@
                 @if($activeTab === $tab) aria-current="page" @endif
             >{{ t($item['label']) }}</a>
         @endforeach
-        <a href="{{ route('preferences.motivation.create', ['locale' => app()->getLocale()]) }}" class="pr-tab">{{ t('preferences.redesign.profile_link', [], app()->getLocale() === 'lt' ? 'Motyvacijos apklausa' : 'Motivation questionnaire') }}</a>
+        <a href="{{ route('preferences.motivation.create', ['locale' => app()->getLocale()]) }}" class="pr-tab">{{ t('preferences.onboarding.ui.profile_link') }}</a>
     </nav>
 
     @if(session('success'))

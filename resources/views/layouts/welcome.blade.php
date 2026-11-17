@@ -49,12 +49,12 @@
         <main id="main" class="welcome-main">@yield('content')</main>
 
         <footer class="welcome-footer">
-            <span class="welcome-footer-wordmark" aria-hidden="true">
-                <img class="welcome-footer-logo" src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="">
-            </span>
             <p>{{ t('welcome.tagline') }}</p>
+            <span class="welcome-footer-year">© {{ now()->year }}</span>
             <div class="welcome-footer-actions">
-                <span>© {{ now()->year }}</span>
+                <span class="welcome-footer-wordmark" aria-hidden="true">
+                    <img class="welcome-footer-logo" src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="">
+                </span>
                 @auth
                     <form method="POST" action="{{ route('logout', ['locale' => app()->getLocale()]) }}">
                         @csrf
@@ -66,3 +66,4 @@
     </div>
 </body>
 </html>
+

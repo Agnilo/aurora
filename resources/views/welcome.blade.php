@@ -18,12 +18,14 @@
 
             <div class="welcome-hero-actions">
                 @auth
-                    <a class="welcome-button welcome-button-primary" href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
+                    <a class="welcome-button welcome-button-primary"
+                        href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
                         {{ t('welcome.continue') }}
                         <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
                     </a>
                 @else
-                    <a class="welcome-button welcome-button-primary" href="{{ route('register', ['locale' => app()->getLocale()]) }}">
+                    <a class="welcome-button welcome-button-primary"
+                        href="{{ route('preferences.onboarding.create', ['locale' => app()->getLocale()]) }}">
                         {{ t('welcome.start') }}
                         <x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
                     </a>
@@ -60,7 +62,8 @@
             <li class="welcome-feature-card welcome-feature-habits">
                 <span class="welcome-feature-number" aria-hidden="true">02</span>
                 <div class="welcome-feature-icon" aria-hidden="true">
-                    <x-lucide-calendar-check class="aurora-icon" width="25" height="25" aria-hidden="true" focusable="false" />
+                    <x-lucide-calendar-check class="aurora-icon" width="25" height="25" aria-hidden="true"
+                        focusable="false" />
                 </div>
                 <div>
                     <h3>{{ t('welcome.habits') }}</h3>

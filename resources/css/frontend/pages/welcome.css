@@ -450,7 +450,13 @@
     margin: 0;
     color: #847c85;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
+    text-align: left;
+}
+
+.welcome-footer-year {
+    color: #847c85;
+    font: 400 11px/1.7 var(--font-mono);
     text-align: center;
 }
 
@@ -654,6 +660,12 @@
     .welcome-footer p {
         grid-column: 1 / -1;
         grid-row: 2;
+        text-align: left;
+    }
+
+    .welcome-footer-year {
+        grid-column: 1;
+        grid-row: 1;
         text-align: left;
     }
 
