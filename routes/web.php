@@ -24,7 +24,7 @@ Route::get('{locale}/lang', function ($locale) {
     Session::put('locale', $locale);
 
     $previous = url()->previous();
-    $parsed   = parse_url($previous);
+    $parsed = parse_url($previous);
     $segments = collect(explode('/', $parsed['path']))->filter()->values();
 
     if ($segments->count() && in_array($segments[0], $available)) {
@@ -40,7 +40,7 @@ Route::get('/', function () {
     return redirect('/' . config('app.locale'));
 });
 
-require __DIR__.'/admin.php';
+require __DIR__ . '/admin.php';
 
 Route::group([
     'prefix' => '{locale}',
@@ -103,6 +103,12 @@ Route::group([
         });
     });
 
+    Route::middleware('auth')->prefix('motivation')->name('preferences.motivation.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Preferences\MotivationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Preferences\MotivationController::class, 'store'])->name('store');
+        Route::post('/later', [\App\Http\Controllers\Preferences\MotivationController::class, 'later'])->name('later');
+    });
+
     Route::resource('users', UserController::class)
         ->middleware(['auth', 'role:admin']);
     Route::resource('goals', GoalController::class)
@@ -121,5 +127,6 @@ Route::group([
             ->name('result');
     });
 
-    require __DIR__.'/auth.php';
+    require __DIR__ . '/auth.php';
 });
+

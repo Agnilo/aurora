@@ -25,6 +25,7 @@ class OnboardingController extends Controller
         return view('preferences.onboarding', [
             'settingsQuestions' => $questions->whereNull('profile_dimension'),
             'profileQuestions' => $questions->whereNotNull('profile_dimension'),
+            'categoryNames' => \App\Models\Category::query()->get()->mapWithKeys(fn($category) => [$category->id => $category->translatedName()]),
         ]);
     }
 
@@ -32,9 +33,8 @@ class OnboardingController extends Controller
     {
         $validated = $request->validate([
             'answers' => ['required', 'array'],
-            'include_profile' => ['required', 'accepted'],
         ]);
-        $service->validateAnswers($validated['answers']);
+        $service->validateAnswers($validated['answers'], false);
 
         if (!$request->user()) {
             $request->session()->put('onboarding.pending', [
@@ -56,7 +56,7 @@ class OnboardingController extends Controller
                 ->where('type', UserAssessment::TYPE_ONBOARDING)
                 ->where('questionnaire_version', OnboardingAssessmentService::QUESTIONNAIRE_VERSION)
                 ->whereNotNull('completed_at')
-                ->whereNotNull('profile_scores')
+                ->whereNotNull('recommended_preferences')
                 ->latest('id')->first();
 
             if ($completed) {
@@ -67,14 +67,11 @@ class OnboardingController extends Controller
                 $user,
                 $service->start($user),
                 $validated['answers'],
-                true
+                false
             );
         });
 
-        return redirect()->route('preferences.onboarding.result', [
-            'locale' => $locale,
-            'assessment' => $assessment->id,
-        ]);
+        return redirect()->route('dashboard', ['locale' => $locale]);
     }
 
     public function result(Request $request, string $locale, int $assessment): View
@@ -85,3 +82,4 @@ class OnboardingController extends Controller
         return view('preferences.result', ['assessment' => $record]);
     }
 }
+

@@ -2,6 +2,7 @@
 
 @section('title', t('dashboard.ui.page_title') . ' · Aurora')
 @section('content')
+@include('preferences.partials.motivation-offer')
 @php
     $colorFor = function ($category) {
         $color = $category?->color ?? '';

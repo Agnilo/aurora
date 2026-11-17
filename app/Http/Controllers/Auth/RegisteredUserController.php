@@ -34,13 +34,13 @@ class RegisteredUserController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         $answers = $request->session()->get('onboarding.pending.answers');
 
         try {
-            $service->validateAnswers($answers);
+            $service->validateAnswers($answers, false);
         } catch (ValidationException $exception) {
             return redirect()->route('preferences.onboarding.create', ['locale' => app()->getLocale()])
                 ->withErrors($exception->errors())->withInput(['answers' => $answers]);
@@ -53,7 +53,7 @@ class RegisteredUserController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
-            $service->complete($user, $service->start($user), $answers, true);
+            $service->complete($user, $service->start($user), $answers, false);
 
             return $user;
         });
@@ -73,3 +73,4 @@ class RegisteredUserController extends Controller
             && is_array($request->session()->get('onboarding.pending.answers'));
     }
 }
+

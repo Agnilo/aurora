@@ -20,7 +20,10 @@ class OnboardingAssessmentService
     public const SOURCE_LOCALE = 'lt';
 
     private const PREFERENCE_CODES = [
-        'gamification_level', 'xp_mode', 'show_streak', 'priority_categories',
+        'gamification_level',
+        'xp_mode',
+        'show_streak',
+        'priority_categories',
     ];
 
     public function __construct(private readonly HexadScoringService $scorer)
@@ -59,8 +62,10 @@ class OnboardingAssessmentService
                 $this->fail('assessment', 'already_completed');
             }
 
-            if ($record->type !== UserAssessment::TYPE_ONBOARDING
-                || $record->questionnaire_version !== self::QUESTIONNAIRE_VERSION) {
+            if (
+                $record->type !== UserAssessment::TYPE_ONBOARDING
+                || $record->questionnaire_version !== self::QUESTIONNAIRE_VERSION
+            ) {
                 $this->fail('assessment', 'unsupported_assessment');
             }
 
@@ -99,18 +104,58 @@ class OnboardingAssessmentService
                 'completed_at' => now(),
             ]);
 
+            $settings = UserPreference::firstOrCreate(['user_id' => $user->getKey()]);
+            $settings->forceFill([
+                'gamification_level' => $recommended['gamification_level'],
+                'xp_mode' => $recommended['xp_mode'] ?? UserPreference::XP_SYSTEM,
+                'show_streak' => $recommended['show_streak'],
+                'priority_category_ids' => $recommended['priority_category_ids'],
+                'confirmed_at' => now(),
+                'onboarding_completed_at' => $settings->onboarding_completed_at ?? now(),
+            ])->save();
+            $record->update(['applied_preferences' => $recommended, 'applied_at' => now()]);
             if ($profile !== null) {
                 app(MotivationProfileService::class)->activate($user, $record);
             }
+            $user->unsetRelation('preferences');
 
             return $record->fresh(['answers.assessmentQuestion']);
         });
     }
 
     /** Validate without writing any records; also used before guest registration. */
-    public function validateAnswers(array $answers): void
+    public function validateAnswers(array $answers, bool $includeProfile = true): void
     {
-        $this->prepareAnswers($answers, true);
+        $this->prepareAnswers($answers, $includeProfile);
+    }
+
+    public function completeMotivation(User $user, array $answers): UserAssessment
+    {
+        $profile = $this->scorer->score($answers);
+        $questions = $this->questions();
+
+        return DB::transaction(function () use ($user, $profile, $questions) {
+            User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+            $assessment = $user->assessments()->create([
+                'type' => UserAssessment::TYPE_ONBOARDING,
+                'questionnaire_version' => self::QUESTIONNAIRE_VERSION,
+                'locale' => app()->getLocale(),
+                'scoring_version' => $profile['scoring_version'],
+                'profile_scores' => $profile['profile_scores'],
+                'dominant_player_types' => $profile['dominant_player_types'],
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
+            foreach ($profile['normalized_answers'] as $code => $value) {
+                $assessment->answers()->create([
+                    'assessment_question_id' => $questions[$code]->getKey(),
+                    'value' => $value,
+                    'answered_at' => now(),
+                ]);
+            }
+            app(MotivationProfileService::class)->activate($user, $assessment);
+            return $assessment;
+        });
     }
 
     private function prepareAnswers(array $answers, bool $includeProfile): array
@@ -177,18 +222,22 @@ class OnboardingAssessmentService
             ->get()->keyBy('code');
         $expected = array_merge(self::PREFERENCE_CODES, array_keys(HexadScoringService::ITEMS));
 
-        if ($questions->count() !== count($expected)
-            || array_diff($expected, $questions->keys()->all())) {
+        if (
+            $questions->count() !== count($expected)
+            || array_diff($expected, $questions->keys()->all())
+        ) {
             throw new LogicException('The onboarding question catalog is missing or inconsistent.');
         }
 
         foreach (HexadScoringService::ITEMS as $code => $dimension) {
             $question = $questions[$code];
 
-            if ($question->profile_dimension !== $dimension
+            if (
+                $question->profile_dimension !== $dimension
                 || $question->answer_type !== 'likert'
-                || array_column($question->options ?? [], 'value') !== range(1, 7)) {
-                throw new LogicException('The Hexad question catalog does not match scoring version '.HexadScoringService::SCORING_VERSION);
+                || array_column($question->options ?? [], 'value') !== range(1, 7)
+            ) {
+                throw new LogicException('The Hexad question catalog does not match scoring version ' . HexadScoringService::SCORING_VERSION);
             }
         }
 
@@ -198,13 +247,13 @@ class OnboardingAssessmentService
     private function choice(AssessmentQuestion $question, array $answers): string
     {
         if (!array_key_exists($question->code, $answers)) {
-            $this->fail('answers.'.$question->code, 'required_answer');
+            $this->fail('answers.' . $question->code, 'required_answer');
         }
 
         $value = $answers[$question->code];
 
         if (!is_string($value) || !in_array($value, array_column($question->options ?? [], 'value'), true)) {
-            $this->fail('answers.'.$question->code, 'invalid_choice');
+            $this->fail('answers.' . $question->code, 'invalid_choice');
         }
 
         return $value;
@@ -212,7 +261,7 @@ class OnboardingAssessmentService
 
     private function categories(AssessmentQuestion $question, array $answers): array
     {
-        $field = 'answers.'.$question->code;
+        $field = 'answers.' . $question->code;
         $values = $answers[$question->code] ?? null;
 
         if (!is_array($values) || !array_is_list($values) || $values === []) {
@@ -230,9 +279,11 @@ class OnboardingAssessmentService
         $normalized = [];
 
         foreach ($values as $value) {
-            if (!(is_int($value) && $value > 0)
+            if (
+                !(is_int($value) && $value > 0)
                 && !(is_string($value) && preg_match('/^[1-9][0-9]*$/D', $value) === 1
-                    && (string) (int) $value === $value)) {
+                    && (string) (int) $value === $value)
+            ) {
                 $this->fail($field, 'invalid_categories');
             }
 
@@ -241,9 +292,11 @@ class OnboardingAssessmentService
 
         $allowed = array_column($question->options ?? [], 'value');
 
-        if (count(array_unique($normalized)) !== count($normalized)
+        if (
+            count(array_unique($normalized)) !== count($normalized)
             || array_diff($normalized, $allowed)
-            || Category::query()->whereIn('id', $normalized)->count() !== count($normalized)) {
+            || Category::query()->whereIn('id', $normalized)->count() !== count($normalized)
+        ) {
             $this->fail($field, 'invalid_categories');
         }
 
@@ -280,7 +333,8 @@ class OnboardingAssessmentService
     private function fail(string $field, string $key): never
     {
         throw ValidationException::withMessages([
-            $field => t('preferences.onboarding.v1_0.errors.'.$key),
+            $field => t('preferences.onboarding.v1_0.errors.' . $key),
         ]);
     }
 }
+

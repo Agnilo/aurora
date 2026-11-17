@@ -19,7 +19,7 @@ class EnsureOnboardingCompleted
         if ($user && $protected && ! $user->assessments()
             ->where('type', UserAssessment::TYPE_ONBOARDING)
             ->whereNotNull('completed_at')
-            ->whereNotNull('profile_scores')
+            ->where(function ($query) { $query->whereNotNull('recommended_preferences')->orWhereNotNull('profile_scores'); })
             ->exists()) {
             $url = route('preferences.onboarding.create', [
                 'locale' => $request->route('locale') ?? app()->getLocale(),
@@ -35,3 +35,4 @@ class EnsureOnboardingCompleted
         return $next($request);
     }
 }
+

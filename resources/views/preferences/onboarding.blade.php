@@ -1,264 +1,137 @@
 @extends('layouts.onboarding')
 
-@section('title', t('preferences.ui.title').' · Aurora')
-
+@php
+    $motivationOnly = $motivationOnly ?? false;
+    $lt = app()->getLocale() === 'lt';
+    $tr = fn ($key, $ltText, $enText) => t('preferences.redesign.'.$key, [], $lt ? $ltText : $enText);
+    $questions = $motivationOnly ? $profileQuestions : $settingsQuestions;
+@endphp
+@section('title', $tr('title', 'Susipažinkime', 'Let’s get to know you').' · Aurora')
 @section('content')
-<div class="pref-overlay"><div class="pref-page" role="region" aria-labelledby="pref-title">
-    <header class="pref-heading">
-        <h1 id="pref-title">{{ t('preferences.ui.title') }}</h1>
-        <p>{{ t('preferences.ui.intro') }}</p>
+<section class="onb-card" aria-labelledby="onb-heading">
+    <header class="onb-heading">
+        <div><h1 id="onb-heading">{{ $tr('title', 'Susipažinkime.', 'Let’s get to know you.') }}</h1><h2 id="onb-question-title" hidden></h2></div>
+        <ol class="onb-dots" id="onb-dots" aria-label="{{ $tr('progress', 'Klausimų eiga', 'Question progress') }}" hidden></ol>
     </header>
-
-    @if($errors->any())
-        <div class="pref-errors" role="alert">
-            <ul>
-                @foreach($errors->all() as $message)
-                    <li>{{ $message }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <div class="pref-progress" id="pref-progress" hidden>
-        
-        <ol class="pref-dots" id="pref-progress-dots" aria-label="{{ t('preferences.ui.progress') }}"></ol>
-    </div>
-
-    <form method="POST" action="{{ route('preferences.onboarding.store', ['locale' => app()->getLocale()]) }}" id="pref-form">
-        @csrf
-
-        <section class="pref-panel" aria-labelledby="pref-settings-title">
-            <h2 id="pref-settings-title">{{ t('preferences.ui.settings') }}</h2>
-            @foreach($settingsQuestions as $question)
-                @php
-                    $selected = old('answers.'.$question->code, session('onboarding.pending.answers.'.$question->code, $question->answer_type === 'multiple_choice' ? [] : null));
-                    $dependent = in_array($question->code, ['xp_mode', 'show_streak'], true);
-                @endphp
-                <fieldset class="pref-question" data-step data-question @if($dependent) data-gamification-setting @endif>
-                    <legend>{{ $question->translated_text }}</legend>
-                    <div class="pref-options">
-                        @foreach($question->translated_options as $option)
-                            @php
-                                $multiple = $question->answer_type === 'multiple_choice';
-                                $checked = $multiple
-                                    ? in_array((string) $option['value'], array_map('strval', (array) $selected), true)
-                                    : (string) $selected === (string) $option['value'];
-                            @endphp
-                            <label class="pref-option">
-                                <input
-                                    type="{{ $multiple ? 'checkbox' : 'radio' }}"
-                                    name="answers[{{ $question->code }}]{{ $multiple ? '[]' : '' }}"
-                                    value="{{ $option['value'] }}"
-                                    @checked($checked)
-                                >
-                                <span>{{ $option['label'] }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('answers.'.$question->code)
-                        <p class="pref-error">{{ $message }}</p>
-                    @enderror
-                </fieldset>
-            @endforeach
+    @if($errors->any())<div class="onb-errors" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+    @if(!$motivationOnly && !$errors->any() && !old('answers'))
+        <section class="onb-intro" id="onb-intro">
+            <div><h2>{{ $tr('hello', 'Labas! Pradėkime nuo tavęs.', 'Hello! Let’s start with you.') }}</h2><p>{{ $tr('hello_text', 'Padėk man sužinoti, kas tau svarbu ir kaip norėtum naudotis „Aurora“.', 'Help me understand what matters to you and how you would like to use Aurora.') }}</p><button type="button" class="onb-next" id="onb-start">{{ $tr('start', 'Susipažinkime', 'Let’s begin') }} <span aria-hidden="true">→</span></button></div>
+            <img src="{{ asset('images/welcome/mascot-star2.png') }}" alt="">
         </section>
+    @endif
+    <form id="onb-form" method="POST" action="{{ $motivationOnly ? route('preferences.motivation.store', ['locale' => app()->getLocale()]) : route('preferences.onboarding.store', ['locale' => app()->getLocale()]) }}">
+        @csrf
+        <div class="onb-steps">
+            @foreach($questions as $question)
+                @php
+                    $multiple = $question->answer_type === 'multiple_choice';
+                    $selected = old('answers.'.$question->code, session('onboarding.pending.answers.'.$question->code, $multiple ? [] : null));
+                    $dependent = in_array($question->code, ['xp_mode', 'show_streak'], true);
+                    $isScale = $question->answer_type === 'likert';
+                    $displayQuestion = match ($question->code) {
+                        'gamification_level' => $tr('question_game', 'Kiek žaidybinių elementų norėtum matyti?', 'How many game elements would you like to see?'),
+                        'xp_mode' => $tr('question_xp', 'Kaip norėtum nustatyti užduoties XP?', 'How would you like task XP to be assigned?'),
+                        'show_streak' => $tr('question_streak', 'Ar norėtum matyti savo dienų seriją?', 'Would you like to see your daily streak?'),
+                        'priority_categories' => $tr('question_categories', 'Kurioms sritims šiuo metu nori skirti dėmesio?', 'Which areas would you like to focus on?'),
+                        default => $question->translated_text,
+                    };
 
-        <section class="pref-panel" aria-labelledby="pref-profile-title">
-            <h2 id="pref-profile-title">{{ t('preferences.ui.motivation') }}</h2>
-            <p class="pref-muted">{{ t('preferences.ui.motivation_hint') }}</p>
-            <input type="hidden" name="include_profile" value="1">
-            <div id="profile-questions">
-                @foreach($profileQuestions as $question)
-                    <fieldset class="pref-question" data-step data-question data-profile>
-                        <legend>{{ $question->translated_text }}</legend>
-                        <div class="pref-scale">
-                            @foreach(collect($question->translated_options)->sortByDesc(fn ($option) => (int) $option['value']) as $option)
-                                <label class="pref-scale-option">
-                                    <input type="radio" name="answers[{{ $question->code }}]" value="{{ $option['value'] }}" @checked((string) old('answers.'.$question->code, session('onboarding.pending.answers.'.$question->code)) === (string) $option['value'])>
-                                    <span class="pref-scale-label">{{ preg_replace('/^\s*[1-7]\s*[.\-:–—)]\s*/u', '', $option['label']) }}</span>
-                                </label>
+                @endphp
+                <fieldset class="onb-step" data-step data-code="{{ $question->code }}" data-title="{{ $displayQuestion }}" @if($dependent) data-dependent @endif>
+                    <legend class="onb-legend">{{ $displayQuestion }}</legend>
+                    @if($isScale)
+                        <p class="onb-hint">{{ $tr('scale_hint', 'Įvertink, kiek šis teiginys tinka tau.', 'How much do you agree with this statement?') }}</p>
+                        <div class="onb-scale">
+                            @foreach(collect($question->translated_options)->sortBy(fn ($option) => (int) $option['value']) as $option)
+                                <label><input type="radio" name="answers[{{ $question->code }}]" value="{{ $option['value'] }}" @checked((string) $selected === (string) $option['value'])><span aria-hidden="true">{{ $option['value'] }}</span><span class="onb-sr">{{ $option['label'] }}</span></label>
                             @endforeach
                         </div>
-                        @error('answers.'.$question->code)
-                            <p class="pref-error">{{ $message }}</p>
-                        @enderror
-                    </fieldset>
-                @endforeach
-            </div>
-        </section>
-
-        <p class="pref-error" id="pref-validation" role="alert" hidden>{{ t('preferences.ui.answer_required') }}</p>
-        <div class="pref-actions">
-            <button type="button" class="pref-back" id="pref-back" hidden>{{ t('preferences.ui.back') }}</button>
-            <button type="button" class="pref-button" id="pref-next" hidden>{{ t('preferences.ui.next') }}</button>
-            <button type="submit" class="pref-button" id="pref-submit">{{ auth()->check() ? t('preferences.ui.submit') : t('preferences.ui.continue_registration') }}</button>
+                        <div class="onb-scale-ends"><span>{{ $tr('disagree', 'Visiškai nesutinku', 'Strongly disagree') }}</span><span>{{ $tr('agree', 'Visiškai sutinku', 'Strongly agree') }}</span></div>
+                    @else
+                        <div class="onb-options {{ $question->code === 'gamification_level' ? 'onb-options-four' : '' }} {{ $multiple ? 'onb-options-categories' : '' }}">
+                            @foreach($question->translated_options as $option)
+                                @php
+                                    $value = (string) $option['value'];
+                                    $choiceLabel = $multiple ? ($value === 'none' ? $tr('no_categories', 'Kol kas neišskiriu nė vienos srities', 'I am not choosing an area yet') : ($categoryNames[(int) $value] ?? $option['label'])) : $option['label'];
+                                    $checked = $multiple ? in_array($value, array_map('strval', (array) $selected), true) : (string) $selected === $value;
+                                    $unsure = in_array($value, ['unsure', 'none'], true);
+                                    $color = ['hidden' => 'pink', 'subtle' => 'blue', 'prominent' => 'mint', 'system' => 'blue', 'manual' => 'mint', 'show' => 'pink', 'hide' => 'mint'][$value] ?? ['mint', 'pink', 'yellow', 'blue'][$loop->index % 4];
+                                @endphp
+                                <div class="onb-choice-wrap {{ $unsure ? 'onb-unsure-wrap' : '' }}">
+                                    <label class="onb-choice {{ $unsure ? 'onb-unsure' : '' }}">
+                                        <input type="{{ $multiple ? 'checkbox' : 'radio' }}" name="answers[{{ $question->code }}]{{ $multiple ? '[]' : '' }}" value="{{ $value }}" @checked($checked)>
+                                        <span class="onb-sr">{{ $choiceLabel }}</span>
+                                        @if($unsure)
+                                            <span class="onb-unsure-content"><span class="onb-colored-dots" aria-hidden="true"><i></i><i></i><i></i></span><strong>{{ $multiple ? $choiceLabel : $tr('unsure', 'Dar nežinau', 'Not sure yet') }}</strong>@if(!$multiple)<small>{{ $tr('default', 'Pradėsiu nuo numatyto varianto.', 'I’ll start with the default option.') }}</small>@endif</span>
+                                        @elseif($multiple)
+                                            <span class="onb-preview onb-{{ $color }} onb-category"><span class="onb-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">@switch($loop->index % 4) @case(0)<path d="M20 4C12 3 5 7 5 14a6 6 0 0 0 6 6c7 0 10-8 9-16Z"/><path d="m4 21 11-11"/>@break @case(1)<path d="M20.8 4.6a5.6 5.6 0 0 0-7.9 0l-.9.9-.9-.9a5.6 5.6 0 0 0-7.9 7.9L12 21l8.8-8.5a5.6 5.6 0 0 0 0-7.9Z"/>@break @case(2)<rect x="3" y="7" width="18" height="14" rx="3"/><path d="M8 7V4h8v3M3 12c6 3 12 3 18 0M10 12v3h4v-3"/>@break @default<path d="M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1 3-2 6-3 10-1V4c-4-2-7-1-10 1Zm0 0v15"/>@endswitch</svg></span><strong>{{ $choiceLabel }}</strong></span>
+                                        @else
+                                            <span class="onb-preview onb-{{ $color }}">
+                                                @if($question->code === 'gamification_level')
+                                                    <strong>{{ $tr('today', 'Šiandien', 'Today') }}</strong>
+                                                    <span class="onb-mini-meta">{{ $value === 'hidden' ? $tr('one_task', '1 užduotis atlikta', '1 task completed') : $tr('level', '2 lygis', 'Level 2').' · 30 / 182 XP' }}</span>
+                                                    <span class="onb-mini-task"><span>{{ $tr('today_tasks', 'Šiandienos užduotys', 'Today’s tasks') }}</span><strong>✓ &nbsp;{{ $tr('example_task', 'Pasivaikščioti 20 minučių', 'Walk for 20 minutes') }}</strong>@if($value !== 'hidden')<small>+10 XP</small>@endif</span>
+                                                    @if($value === 'prominent')<span class="onb-mini-toast">{{ $tr('task_done', 'Užduotis atlikta!', 'Task completed!') }} · +10 XP</span>@endif
+                                                @elseif($question->code === 'xp_mode')
+                                                    <strong>{{ $value === 'system' ? $tr('system', 'Pagal bendrą sistemą', 'System assigned') : $tr('manual', 'Nustatysiu pati / pats', 'Choose myself') }}</strong>
+                                                    <span class="onb-mini-task"><span>{{ $value === 'system' ? $tr('difficulty', 'Užduoties sunkumas', 'Task difficulty') : $tr('task_xp', 'Užduoties XP', 'Task XP') }}</span><strong>{{ $value === 'system' ? $tr('medium', 'Vidutinis', 'Medium') : $tr('enter_value', 'Įrašau pati / pats', 'I enter the amount') }}</strong></span>
+                                                @else
+                                                    <strong>{{ $value === 'show' ? $tr('show', 'Rodyti', 'Show') : $tr('hide', 'Nerodyti', 'Hide') }}</strong>
+                                                    <span class="onb-mini-task"><span>{{ $tr('today', 'Šiandien', 'Today') }}</span><strong>{{ $value === 'show' ? $tr('example_streak', '3 dienų serija', '3-day streak') : $tr('today_tasks', 'Šiandienos užduotys', 'Today’s tasks') }}</strong></span>
+                                                @endif
+                                            </span>
+                                        @endif
+                                    </label>
+                                    @if(!$unsure && !$multiple)
+                                        <details class="onb-info"><summary aria-label="{{ $tr('explanation', 'Paaiškinimas', 'Explanation') }}">i</summary><span>{{ $option['label'] }}</span></details>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @if($multiple)<p class="onb-hint">{{ $tr('multiple_hint', 'Gali pasirinkti kelias sritis. Toliau pereisi paspaudus „Baigti“.', 'Choose any areas, then select Finish.') }}</p>@endif
+                    @endif
+                    @error('answers.'.$question->code)<p class="onb-error">{{ $message }}</p>@enderror
+                </fieldset>
+            @endforeach
         </div>
+        <p class="onb-error" id="onb-error" role="alert" hidden>{{ $tr('required', 'Pasirink atsakymą, kad galėtum tęsti.', 'Choose an answer to continue.') }}</p>
+        <div class="onb-actions"><button type="button" class="onb-back" id="onb-back">← {{ $tr('back', 'Atgal', 'Back') }}</button><button type="button" class="onb-next" id="onb-next">{{ $tr('next', 'Toliau', 'Next') }} <span aria-hidden="true">→</span></button><button type="submit" class="onb-next" id="onb-submit">{{ $motivationOnly || auth()->check() ? $tr('finish', 'Baigti', 'Finish') : $tr('register', 'Baigti', 'Finish') }} <span aria-hidden="true">→</span></button></div>
     </form>
-</div></div>
-
+</section>
 <script>
 (() => {
-    const form = document.getElementById('pref-form');
-    const steps = [...form.querySelectorAll('[data-step]')];
-    const back = document.getElementById('pref-back');
-    const next = document.getElementById('pref-next');
-    const submit = document.getElementById('pref-submit');
-    const validation = document.getElementById('pref-validation');
-    const progress = document.getElementById('pref-progress-dots');
-    let submitting = false;
-    let exitAnimation = null;
-    let advanceTimer = null;
-    const cancelAdvance = () => {
-        window.clearTimeout(advanceTimer);
-        advanceTimer = null;
-    };
-    let previous = null;
-    let dotSteps = [];
-    let current = steps.find(step => step.querySelector('.pref-error')) || steps[0];
+    const form = document.getElementById('onb-form'), steps = [...form.querySelectorAll('[data-step]')];
+    if (!steps.length) return;
+    const intro = document.getElementById('onb-intro'), start = document.getElementById('onb-start');
+    const title = document.getElementById('onb-question-title'), dots = document.getElementById('onb-dots');
+    const back = document.getElementById('onb-back'), next = document.getElementById('onb-next'), submit = document.getElementById('onb-submit'), error = document.getElementById('onb-error');
+    let current = steps.find(step => step.querySelector('.onb-error')) || steps[0], timer;
+    const cancel = () => { clearTimeout(timer); timer = null; };
+    const activeSteps = () => { const hidden = form.querySelector('[name="answers[gamification_level]"]:checked')?.value === 'hidden'; return steps.filter(step => { const excluded = hidden && step.hasAttribute('data-dependent'); step.querySelectorAll('input').forEach(input => input.disabled = excluded); return !excluded; }); };
     const answered = step => !!step.querySelector('input:checked');
-    const activeSteps = () => {
-        const hideGame = form.querySelector('input[name="answers[gamification_level]"]:checked')?.value === 'hidden';
-        return steps.filter(step => {
-            const excluded = (step.hasAttribute('data-gamification-setting') && hideGame);
-            step.querySelectorAll('input').forEach(input => { input.disabled = excluded; });
-            return !excluded;
-        });
-    };
     function render(focus = false) {
-        const active = activeSteps();
-        if (!active.includes(current)) current = active[0];
-        const index = active.indexOf(current);
+        const active = activeSteps(); if (!active.includes(current)) current = active[0]; const index = active.indexOf(current);
         steps.forEach(step => { step.hidden = step !== current; });
-        form.querySelectorAll('.pref-panel').forEach(panel => {
-            panel.hidden = !panel.contains(current);
-            panel.querySelectorAll(':scope > h2, :scope > .pref-muted').forEach(el => {
-                el.hidden = !current.hasAttribute('data-consent');
-            });
-        });
-        const questions = active.filter(step => step.hasAttribute('data-question'));
-        if (questions.length !== dotSteps.length || questions.some((step, i) => dotSteps[i] !== step)) {
-            dotSteps = questions;
-            progress.replaceChildren(...questions.map(() => {
-                const dot = document.createElement('li');
-                dot.className = 'pref-dot';
-                return dot;
-            }));
-        }
-        [...progress.children].forEach((dot, i) => {
-            const step = questions[i];
-            dot.classList.toggle('is-complete', answered(step) && step !== current);
-            dot.classList.toggle('is-current', step === current);
-            if (step === current) dot.setAttribute('aria-current', 'step');
-            else dot.removeAttribute('aria-current');
-        });
-        if (previous !== current) {
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && current.animate) {
-                current.animate([
-                    { opacity: 0, transform: 'translateY(10px)' },
-                    { opacity: 1, transform: 'translateY(0)' }
-                ], { duration: 280, easing: 'cubic-bezier(.22, 1, .36, 1)' });
-            }
-            previous = current;
-        }
-        back.hidden = index === 0;
-        next.hidden = index === active.length - 1;
-        submit.hidden = !next.hidden;
-        validation.hidden = true;
-        if (focus) {
-            current.tabIndex = -1;
-            current.focus({ preventScroll: true });
-        }
+        title.textContent = current.dataset.title; title.hidden = false; dots.hidden = false;
+        dots.replaceChildren(...active.map((step, i) => { const dot = document.createElement('li'); dot.className = (answered(step) ? 'is-complete ' : '') + (i === index ? 'is-current' : ''); if (i === index) dot.setAttribute('aria-current', 'step'); return dot; }));
+        back.hidden = index === 0; next.hidden = index === active.length - 1; submit.hidden = index !== active.length - 1; error.hidden = true;
+        if (focus) { current.tabIndex = -1; current.focus({preventScroll: true}); }
     }
-    function validateCurrent() {
-        if (current.hasAttribute('data-question') && !answered(current)) {
-            validation.hidden = false;
-            current.querySelector('input')?.focus();
-            return false;
-        }
-        return true;
-    }
-    function advance() {
-        cancelAdvance();
-        if (!validateCurrent()) return;
-        const active = activeSteps();
-        const index = active.indexOf(current);
-        if (index < 0 || index >= active.length - 1) return;
-        current = active[index + 1];
-        render(true);
-    }
+    function advance() { cancel(); if (!answered(current)) { error.hidden = false; current.querySelector('input')?.focus(); return; } const a = activeSteps(), i = a.indexOf(current); if (i < a.length - 1) { current = a[i+1]; render(true); } }
+    form.classList.add('onb-wizard');
+    if (intro) { form.hidden = true; start.addEventListener('click', () => { intro.hidden = true; form.hidden = false; render(true); }); } else render();
     next.addEventListener('click', advance);
-    back.addEventListener('click', () => {
-        cancelAdvance();
-        const active = activeSteps();
-        current = active[active.indexOf(current) - 1];
-        render(true);
-    });
-    form.addEventListener('change', event => {
-        cancelAdvance();
-        const input = event.target;
-        if (input.matches('input[name="answers[priority_categories][]"]') && input.checked) {
-            form.querySelectorAll('input[name="answers[priority_categories][]"]').forEach(other => {
-                if (other !== input && (input.value === 'none' || other.value === 'none')) other.checked = false;
-            });
-        }
+    back.addEventListener('click', () => { cancel(); const a = activeSteps(), i = a.indexOf(current); if (i > 0) { current = a[i-1]; render(true); } });
+    form.addEventListener('change', e => {
+        cancel(); const input = e.target;
+        if (input.name === 'answers[priority_categories][]' && input.checked) form.querySelectorAll('[name="answers[priority_categories][]"]').forEach(other => { if (other !== input && (input.value === 'none' || other.value === 'none')) other.checked = false; });
         render();
-        const radio = input.matches('input[type="radio"]') && input.checked;
-        const multiple = input.matches('input[type="checkbox"]') && answered(current);
-        if ((radio || multiple) && current.contains(input)) {
-            const active = activeSteps();
-            if (active.indexOf(current) < active.length - 1) {
-                const source = current;
-                const delay = multiple ? 2500 : 450;
-                advanceTimer = window.setTimeout(() => {
-                    if (current === source) advance();
-                }, delay);
-            }
-        }
+        if (input.type === 'radio' && input.checked && current.contains(input) && activeSteps().indexOf(current) < activeSteps().length - 1) { const source = current; timer = setTimeout(() => { if (source === current) advance(); }, 2000); }
     });
-    window.addEventListener('pagehide', cancelAdvance);
-    form.addEventListener('submit', event => {
-        cancelAdvance();
-        if (submitting) { event.preventDefault(); return; }
-        if (!next.hidden) {
-            event.preventDefault();
-            next.click();
-            return;
-        }
-        const missing = activeSteps().find(step => step.hasAttribute('data-question') && !answered(step));
-        if (missing) {
-            event.preventDefault();
-            current = missing;
-            render(true);
-            validateCurrent();
-        } else {
-            event.preventDefault();
-            submitting = true;
-            submit.disabled = true;
-            form.inert = true;
-            form.setAttribute('aria-busy', 'true');
-            const send = () => HTMLFormElement.prototype.submit.call(form);
-            const card = form.closest('.pref-page');
-            if (card?.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                exitAnimation = card.animate([
-                    { opacity: 1, transform: 'translateY(0)' },
-                    { opacity: 0, transform: 'translateY(-6px)' }
-                ], { duration: 220, easing: 'ease-in', fill: 'forwards' });
-                exitAnimation.finished.then(send).catch(() => {});
-            } else {
-                send();
-            }
-        }
-    });
-    window.addEventListener('pageshow', () => {
-        exitAnimation?.cancel();
-        exitAnimation = null;
-        submitting = false;
-        submit.disabled = false;
-        form.inert = false;
-        form.removeAttribute('aria-busy');
-    });
-    document.getElementById('pref-progress').hidden = false;
-    form.classList.add('pref-wizard');
-    render();
+    form.querySelectorAll('.onb-info').forEach(info => { info.addEventListener('pointerenter', e => { cancel(); if (e.pointerType === 'mouse') info.open = true; }); info.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') info.open = false; }); info.addEventListener('toggle', () => { if (info.open) cancel(); }); });
+    form.addEventListener('submit', e => { cancel(); const missing = activeSteps().find(step => !answered(step)); if (missing) { e.preventDefault(); current = missing; render(true); error.hidden = false; current.querySelector('input')?.focus(); } else { submit.disabled = true; } });
+    window.addEventListener('pagehide', cancel);
 })();
 </script>
 @endsection

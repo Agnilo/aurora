@@ -26,6 +26,8 @@ class UserPreference extends Model
         'priority_category_ids',
         'confirmed_at',
         'onboarding_completed_at',
+        'motivation_offer_seen_at',
+        'motivation_remind_at',
     ];
 
     protected function casts(): array
@@ -35,6 +37,8 @@ class UserPreference extends Model
             'priority_category_ids' => 'array',
             'confirmed_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
+            'motivation_offer_seen_at' => 'datetime',
+            'motivation_remind_at' => 'datetime',
         ];
     }
 
@@ -48,3 +52,4 @@ class UserPreference extends Model
         return $this->belongsTo(UserAssessment::class, 'active_assessment_id');
     }
 }
+
