@@ -37,7 +37,11 @@ class Task extends Model
                 $task->goal_id = Milestone::findOrFail($task->milestone_id)->goal_id;
             }
             if ($task->goal_id) {
-                $task->user_id = Goal::findOrFail($task->goal_id)->user_id;
+                $goal = Goal::findOrFail($task->goal_id);
+                $task->user_id = $goal->user_id;
+                if ($task->milestone_id && !$task->completed_at) {
+                    $task->category_id = $goal->category_id;
+                }
             }
         });
     }

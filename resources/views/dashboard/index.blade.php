@@ -193,13 +193,13 @@
                         <div class="dashboard-ui-win"><span
                                 class="dashboard-ui-win-icon dashboard-ui-win-icon--pink"><x-lucide-check-check
                                     class="aurora-icon" width="22"
-                                    height="22" /></span><span><strong>{{ $completedToday }}
-                                    {{ t('dashboard.ui.today_done') }}</strong><small>{{ t('dashboard.ui.today_done_hint') }}</small></span>
+                                    height="22" /></span><span><strong>{{ $activitiesToday }}
+                                    {{ t('dashboard.ui.activity_today') }}</strong><small>{{ t('dashboard.ui.today_done_hint') }}</small></span>
                         </div>
                         <div class="dashboard-ui-win"><span
                                 class="dashboard-ui-win-icon dashboard-ui-win-icon--mint"><x-lucide-calendar-days
                                     class="aurora-icon" width="22" height="22" /></span><span><strong>{{ $weeklyTotal }}
-                                    {{ t('dashboard.ui.week_done') }}</strong><small>{{ t('dashboard.ui.week_done_hint') }}</small></span>
+                                    {{ t('dashboard.ui.activity_week') }}</strong><small>{{ t('dashboard.ui.week_done_hint') }}</small></span>
                         </div>
                         <div class="dashboard-ui-win"><span
                                 class="dashboard-ui-win-icon dashboard-ui-win-icon--blue"><x-lucide-target
@@ -330,24 +330,20 @@
                         </div><span class="dashboard-ui-weekly-range">{{ t('dashboard.ui.mon_sun') }}</span>
                     </div>
                     <p class="dashboard-ui-week-summary"><strong>{{ $weeklyTotal }}</strong>
-                        {{ t('dashboard.ui.tasks_completed_week') }}
+                        {{ t('dashboard.ui.activity_week') }}
                     </p>
-                    <div class="dashboard-ui-chart" role="img" aria-label="{{ t('dashboard.ui.weekly_rhythm') }}">
+                    <div class="dashboard-ui-chart" role="group" aria-labelledby="dashboard-ui-week-heading">
                         @foreach($weeklyActivity as $day)
-                            <div class="dashboard-ui-chart-day"><span
-                                    class="dashboard-ui-chart-count">{{ $day['count'] }}</span><span
-                                    class="dashboard-ui-chart-bar"
-                                    style="height: {{ $day['count'] ? max(12, ($day['count'] / $weeklyMax) * 100) : 3 }}%"
-                                    title="{{ $day['date'] }}: {{ $day['count'] }}"></span><span
-                                    class="dashboard-ui-chart-label">{{ $day['label'] }}</span></div>
+                            @include('dashboard.activity-day', ['section' => 'week'])
                         @endforeach
                     </div>
                 </section>
                 <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-calendar"
                     aria-labelledby="dashboard-ui-calendar-title">
                     <div class="dashboard-ui-panel-header dashboard-ui-calendar-header">
-                        <h2 id="dashboard-ui-calendar-title">{{ t('dashboard.ui.calendar') }}</h2>
-                        <nav class="dashboard-ui-calendar-navigation" aria-label="{{ t('dashboard.ui.calendar') }}">
+                        <h2 id="dashboard-ui-calendar-title">{{ t('dashboard.ui.activity_calendar') }}</h2>
+                        <nav class="dashboard-ui-calendar-navigation"
+                            aria-label="{{ t('dashboard.ui.activity_calendar') }}">
                             <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'month' => $calendarPrev, 'tasks' => $filter]) }}"
                                 aria-label="{{ t('dashboard.ui.previous_month') }}">
                                 <x-lucide-chevron-left class="aurora-icon" width="16" height="16" aria-hidden="true" />
@@ -364,19 +360,9 @@
                             <span>{{ $weekday }}</span>
                         @endforeach
                     </div>
-                    <div class="dashboard-ui-calendar-grid" role="list"
-                        aria-label="{{ $calendarMonth->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}">
+                    <div class="dashboard-ui-calendar-grid" role="group" aria-labelledby="dashboard-ui-calendar-title">
                         @foreach($calendarDays as $day)
-                            <div class="dashboard-ui-calendar-day {{ $day['currentMonth'] ? '' : 'is-outside' }} {{ $day['today'] ? 'is-today' : '' }}"
-                                role="listitem" @if($day['today']) aria-current="date" @endif
-                                aria-label="{{ $day['date'] }} · {{ t('dashboard.ui.scheduled_count') }}: {{ $day['scheduled'] }} · {{ t('dashboard.ui.completed_count') }}: {{ $day['completed'] }}"
-                                title="{{ $day['date'] }} · {{ t('dashboard.ui.scheduled_count') }}: {{ $day['scheduled'] }} · {{ t('dashboard.ui.completed_count') }}: {{ $day['completed'] }}">
-                                <time datetime="{{ $day['date'] }}">{{ $day['number'] }}</time>
-                                <span class="dashboard-ui-calendar-markers" aria-hidden="true">
-                                    @if($day['scheduled'] > 0)<i class="is-scheduled"></i>@endif
-                                    @if($day['completed'] > 0)<i class="is-completed"></i>@endif
-                                </span>
-                            </div>
+                            @include('dashboard.activity-day', ['section' => 'calendar'])
                         @endforeach
                     </div>
                     <div class="dashboard-ui-calendar-legend">

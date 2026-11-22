@@ -93,3 +93,29 @@ if (document.readyState === 'loading') {
 } else {
     initDashboardCalendar();
 }
+
+function positionDayPopover(panel) {
+    const trigger = document.querySelector(`[popovertarget="${panel.id}"].dashboard-day-trigger`);
+    if (!trigger) return;
+    const anchor = trigger.getBoundingClientRect();
+    const box = panel.getBoundingClientRect();
+    const width = document.documentElement.clientWidth;
+    const height = document.documentElement.clientHeight;
+    const below = anchor.bottom + 5;
+    const above = anchor.top - box.height - 5;
+    panel.style.left = Math.max(8, Math.min(anchor.left + (anchor.width - box.width) / 2, width - box.width - 8)) + 'px';
+    panel.style.top = Math.max(8, Math.min(below + box.height <= height ? below : above, height - box.height - 8)) + 'px';
+}
+
+document.addEventListener('toggle', event => {
+    if (event.newState === 'open' && event.target.matches('.dashboard-day-popover')) {
+        positionDayPopover(event.target);
+    }
+}, true);
+
+function repositionOpenDay() {
+    const panel = document.querySelector('.dashboard-day-popover:popover-open');
+    if (panel) positionDayPopover(panel);
+}
+window.addEventListener('resize', repositionOpenDay);
+window.addEventListener('scroll', repositionOpenDay, { passive: true });

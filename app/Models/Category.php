@@ -51,12 +51,13 @@ class Category extends Model
     {
         $slug = Str::slug($this->name, '_');
 
-        return t("lookup.categories.category.{$slug}");
+        return t("lookup.categories.category.{$slug}", $this->name);
     }
 
-        public function getImageUrlAttribute(): ?string
+    public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) return null;
+        if (!$this->image)
+            return null;
 
         return asset('storage/categories/' . $this->image);
     }

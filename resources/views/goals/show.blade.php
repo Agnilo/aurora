@@ -1,22 +1,52 @@
 @extends('layouts.app')
-@section('title', $goal->title.' · Aurora')
+@section('title', $goal->title . ' · Aurora')
 @section('content')
-<div class="container pl-page">
-    <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"><x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('plans.goals') }}</a>
-    <header class="pl-heading mt-4"><div><p class="pl-eyebrow">{{ $goal->category?->translated_name }}</p><h1>{{ $goal->title }}</h1></div>
-        <a class="pl-secondary" href="{{ route('goals.edit', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.edit_goal') }}</a>
-    </header>
-    @if($goal->description)<p>{{ $goal->description }}</p>@endif
-    <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} · {{ $goal->progress }}%</p>
-    <section class="pl-panel mb-4">
-        <header class="pl-heading"><h2>{{ t('plans.tasks') }}</h2><a class="pl-primary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.new_task') }}</a></header>
-        @forelse($goal->directTasks->whereNull('archived_at') as $task) @include('plans.task-row')
-        @empty<p class="pl-hint">{{ t('plans.direct_hint') }}</p>@endforelse
-    </section>
-    @foreach($goal->milestones as $milestone)
-        <section class="pl-panel mb-4"><header class="pl-heading"><h2>{{ $milestone->title }}</h2><span class="pl-number">{{ $milestone->progress }}%</span></header>
-            @foreach($milestone->tasks->whereNull('archived_at') as $task) @include('plans.task-row') @endforeach
+    <div class="container pl-page">
+        <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"><x-lucide-arrow-left class="aurora-icon"
+                width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('plans.goals') }}</a>
+        <header class="pl-heading mt-4">
+            <div>
+                <p class="pl-eyebrow">{{ $goal->category?->translated_name }}</p>
+                <h1>{{ $goal->title }}</h1>
+            </div>
+            <a class="pl-secondary"
+                href="{{ route('goals.edit', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.edit_goal') }}</a>
+        </header>
+        @if($goal->description)
+        <p>{{ $goal->description }}</p>@endif
+        <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} · {{ $goal->progress }}%</p>
+        <section class="pl-panel mb-4">
+            <header class="pl-heading">
+                <h2>{{ t('plans.tasks') }}</h2><a class="pl-primary"
+                    href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}"><x-lucide-plus
+                        class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" />
+                    {{ t('plans.new_task') }}</a>
+            </header>
+            @forelse($goal->directTasks->whereNull('archived_at') as $task) @include('plans.task-row')
+            @empty<p class="pl-hint">{{ t('plans.direct_hint') }}</p>@endforelse
         </section>
-    @endforeach
-</div>
+        @foreach($goal->milestones as $milestone)
+            <section class="pl-panel mb-4">
+                <header class="pl-heading">
+                    <h2>{{ $milestone->title }}</h2><span class="pl-number">{{ $milestone->progress }}%</span>
+                </header>
+                @foreach($milestone->tasks->whereNull('archived_at') as $task) @include('plans.task-row') @endforeach
+            </section>
+        @endforeach
+        <section class="pl-panel mb-4">
+            <header class="pl-heading">
+                <h2>{{ t('plans.linked_habits') }}</h2>
+                <a class="pl-primary"
+                    href="{{ route('habits.create', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
+                    <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" />
+                    {{ t('plans.add_habit') }}
+                </a>
+            </header>
+            @forelse ($goal->habits as $habit)
+                @include('plans.habit-row')
+            @empty
+                <p class="pl-hint">{{ t('plans.no_linked_habits') }}</p>
+            @endforelse
+        </section>
+    </div>
 @endsection

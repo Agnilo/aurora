@@ -75,6 +75,11 @@ class Goal extends Model
         return $this->hasMany(Task::class)->whereNull('milestone_id');
     }
 
+    public function habits()
+    {
+        return $this->hasMany(Habit::class);
+    }
+
     public function milestones()
     {
         return $this->hasMany(Milestone::class);

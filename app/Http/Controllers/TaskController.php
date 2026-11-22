@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Task, TaskStatus, Goal, Category, TaskPriority};
+use App\Http\Controllers\Concerns\ResolvesActivityAssignment;
+use App\Models\{Task, TaskStatus, Category, TaskPriority};
 use App\Models\Preferences\UserPreference;
 use App\Services\{GamificationService, PointsService, BadgeAwardingService, TaskXpService};
 use Illuminate\Http\Request;
@@ -12,10 +13,13 @@ use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
+    use ResolvesActivityAssignment;
+
     public function create(Request $request, string $locale)
     {
         $task = new Task(['goal_id' => $request->query('goal')]);
-        if ($task->goal_id) abort_unless($request->user()->goals()->whereKey($task->goal_id)->exists(), 404);
+        if ($task->goal_id)
+            abort_unless($request->user()->goals()->whereNotNull('category_id')->whereKey($task->goal_id)->exists(), 404);
         return $this->form($request, $task);
     }
 
@@ -29,8 +33,9 @@ class TaskController extends Controller
     private function form(Request $request, Task $task)
     {
         return view('plans.task-form', [
-            'task' => $task, 'categories' => Category::orderBy('order')->get(),
-            'goals' => $request->user()->goals()->orderBy('title')->get(),
+            'task' => $task,
+            'categories' => Category::orderBy('order')->get(),
+            'goals' => $request->user()->goals()->whereNotNull('category_id')->orderBy('title')->get(),
             'priorities' => TaskPriority::orderBy('order')->get(),
             'systemXp' => app(TaskXpService::class)->mode($request->user()) === UserPreference::XP_SYSTEM,
         ]);
@@ -53,25 +58,24 @@ class TaskController extends Controller
     private function saveTask(Request $request, Task $task): void
     {
         $system = app(TaskXpService::class)->mode($request->user()) === UserPreference::XP_SYSTEM;
-        $done = (bool) $task->completed_at;
-        $data = $request->validate([
-            'title' => 'required|string|max:255', 'description' => 'nullable|string|max:10000',
-            'category_id' => 'required|exists:categories,id', 'scheduled_on' => 'nullable|date_format:Y-m-d',
-            'goal_id' => ['nullable', Rule::exists('goals', 'id')->where('user_id', $request->user()->id)],
-            'points' => [Rule::excludeIf($system || $done), 'required', 'integer', 'min:0', 'max:100000'],
-            'priority_id' => [Rule::excludeIf(!$system || $done), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
-        ]);
-        DB::transaction(function () use ($task, $data, $system, $done) {
+        DB::transaction(function () use ($request, $task, $system) {
+            if ($task->exists) {
+                $task = Task::ownedBy($request->user())->lockForUpdate()->findOrFail($task->id);
+            }
+            $done = (bool) $task->completed_at;
+            $data = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string|max:10000',
+                'scheduled_on' => 'nullable|date_format:Y-m-d',
+                'points' => [Rule::excludeIf($system || $done), 'required', 'integer', 'min:0', 'max:100000'],
+                'priority_id' => [Rule::excludeIf(!$system || $done), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
+            ]);
             $oldGoal = $task->goal;
-            if ($task->milestone_id) $data['goal_id'] = $task->goal_id; // stage membership is edited in the goal
-            if ($done) {
-                $data['goal_id'] = $task->goal_id;
-                $data['category_id'] = $task->category_id;
-            } else {
+            $data += $this->activityAssignment($request, $task);
+            if (!$done) {
                 $data['points'] = $system ? app(TaskXpService::class)->pointsForPriority((int) $data['priority_id']) : $data['points'];
                 $data['manual_points'] = $system ? $task->manual_points : $data['points'];
             }
-            if (!empty($data['goal_id'])) $data['category_id'] = Goal::findOrFail($data['goal_id'])->category_id;
             $task->fill($data)->save();
             foreach (collect([$oldGoal, $task->fresh()->goal])->filter()->unique('id') as $goal) {
                 GamificationService::recalcGoalAndMilestones($goal);
@@ -85,7 +89,8 @@ class TaskController extends Controller
         $this->authorizeTask($request, $task);
         DB::transaction(function () use ($task) {
             $task->update(['archived_at' => $task->archived_at ? null : now()]);
-            if ($task->goal) GamificationService::recalcGoalAndMilestones($task->goal);
+            if ($task->goal)
+                GamificationService::recalcGoalAndMilestones($task->goal);
             PointsService::syncUserGamification($task->user);
         });
         return back();
@@ -117,8 +122,10 @@ class TaskController extends Controller
                     : TaskStatus::orderBy('order')->first()?->id;
                 $task->save();
                 if (!$done) {
-                    if (app(TaskXpService::class)->mode($user) === UserPreference::XP_SYSTEM) app(TaskXpService::class)->syncOpenTask($task);
-                    elseif ($task->manual_points !== null) $task->update(['points' => $task->manual_points]);
+                    if (app(TaskXpService::class)->mode($user) === UserPreference::XP_SYSTEM)
+                        app(TaskXpService::class)->syncOpenTask($task);
+                    elseif ($task->manual_points !== null)
+                        $task->update(['points' => $task->manual_points]);
                 }
                 if ($done) {
                     GamificationService::registerStreak($user);
@@ -127,21 +134,32 @@ class TaskController extends Controller
             }
             PointsService::syncTaskCompletion($task);
             BadgeAwardingService::check($user, 'task');
-            if ($task->goal) GamificationService::recalcGoalAndMilestones($task->goal);
+            if ($task->goal)
+                GamificationService::recalcGoalAndMilestones($task->goal);
             PointsService::syncUserGamification($user);
             $task->refresh()->load('status', 'milestone', 'goal');
             $user->load('gameDetails', 'categoryLevels');
-            $key = 'lookup.tasks.status.'.Str::slug($task->status?->name ?? '', '_');
+            $key = 'lookup.tasks.status.' . Str::slug($task->status?->name ?? '', '_');
             return [
-                'success' => true, 'task_id' => $task->id, 'completed_at' => $task->completed_at,
-                'status_id' => $task->status_id, 'status_key' => $key,
-                'status_label' => t($key), 'status_color' => $task->status?->color,
-                'milestone_progress' => $task->milestone?->progress, 'goal_progress' => $task->goal?->progress,
-                'xp' => $user->gameDetails->xp, 'xp_next' => $user->gameDetails->xp_next,
-                'level' => $user->gameDetails->level, 'coins' => $user->gameDetails->coins,
-                'category_xp' => $user->categoryLevels->mapWithKeys(fn($level) => [$level->category_id => [
-                    'xp' => $level->xp, 'xp_next' => $level->xp_next,
-                ]]),
+                'success' => true,
+                'task_id' => $task->id,
+                'completed_at' => $task->completed_at,
+                'status_id' => $task->status_id,
+                'status_key' => $key,
+                'status_label' => t($key),
+                'status_color' => $task->status?->color,
+                'milestone_progress' => $task->milestone?->progress,
+                'goal_progress' => $task->goal?->progress,
+                'xp' => $user->gameDetails->xp,
+                'xp_next' => $user->gameDetails->xp_next,
+                'level' => $user->gameDetails->level,
+                'coins' => $user->gameDetails->coins,
+                'category_xp' => $user->categoryLevels->mapWithKeys(fn($level) => [
+                    $level->category_id => [
+                        'xp' => $level->xp,
+                        'xp_next' => $level->xp_next,
+                    ]
+                ]),
             ];
         });
         return $request->expectsJson() ? response()->json($result) : back();

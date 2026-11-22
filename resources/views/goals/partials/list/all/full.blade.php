@@ -112,9 +112,9 @@
 
             <hr>
 
-            <div class="pl-secondary-actions">
+            <div class="pl-secondary-actions gap-2">
                 <a class="pl-secondary" href="{{ route('tasks.create', ['locale' => app()->getLocale(), 'goal' => $goal]) }}"><x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('plans.new_task') }}</a>
-                <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.open_goal') }}</a>
+                <a class="pl-secondary" href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.open_goal') }}</a>
             </div>
             @foreach($goal->directTasks->whereNull('archived_at') as $task)
                 @include('plans.task-row')
@@ -152,26 +152,27 @@
                     @foreach($milestone->tasks->whereNull('archived_at') as $task)
                         <div class="list-group-item px-2 py-1 mb-1 border rounded">
 
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between gap-2">
 
-                                <div>
+                                <div class="d-flex align-items-center gap-2">
 
                                     <input type="checkbox"
-                                        class="task-done-toggle"
+                                        class="task-done-toggle flex-shrink-0 m-0"
+                                        aria-label="{{ $task->title }}"
                                         data-task-id="{{ $task->id }}"
                                         {{ $task->completed_at ? 'checked' : '' }}>
 
                                     @if($task->is_favorite) <x-lucide-star class="text-warning aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
                                     @if($task->is_important) <x-lucide-circle-alert class="text-danger aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> @endif
 
-                                    {{ $task->title }}
+                                    <span class="text-break">{{ $task->title }}</span>
 
-                                    <span class="badge bg-secondary ms-2">
+                                    <span class="badge bg-secondary flex-shrink-0">
                                         {{ $task->points }} {{ t('goals.points.short') }}
                                     </span>
                                 </div>
 
-                                <div class="text-end">
+                                <div class="d-flex align-items-center justify-content-end">
 
                                     @php
                                         $color = $task->category->color ?? '#ccc';

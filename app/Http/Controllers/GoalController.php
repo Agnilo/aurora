@@ -59,14 +59,16 @@ class GoalController extends Controller
 
         match ($statusFilter) {
             'completed' => $baseGoalsQuery->where('is_completed', true),
-            'planned' => $baseGoalsQuery->whereHas('status', fn ($q) =>
-                $q->whereRaw('LOWER(name) = ?', ['planned'])
+            'planned' => $baseGoalsQuery->whereHas(
+                'status',
+                fn($q) =>
+                    $q->whereRaw('LOWER(name) = ?', ['planned'])
             ),
             'all' => null,
             default => $baseGoalsQuery->where('is_completed', false),
         };
 
-        $favoriteGoals  = (clone $baseGoalsQuery)
+        $favoriteGoals = (clone $baseGoalsQuery)
             ->where('is_favorite', true)
             ->get();
 
@@ -114,8 +116,15 @@ class GoalController extends Controller
         $taskCategories = Category::orderBy('order')->get();
 
         return view('goals.create', compact(
-            'statuses', 'priorities', 'types', 'categories',
-            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories', 'xpMode'
+            'statuses',
+            'priorities',
+            'types',
+            'categories',
+            'taskStatuses',
+            'taskTypes',
+            'taskPriorities',
+            'taskCategories',
+            'xpMode'
         ));
     }
 
@@ -135,7 +144,7 @@ class GoalController extends Controller
             'is_favorite' => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
             'visibility' => 'nullable|string|in:private,shared,public',
-            'reminder_date'=> 'nullable|date',
+            'reminder_date' => 'nullable|date',
             'tags' => 'nullable|string',
             'priority_id' => 'nullable|exists:goal_priorities,id',
             'status_id' => 'nullable|exists:goal_statuses,id',
@@ -183,7 +192,8 @@ class GoalController extends Controller
             return $goal;
         });
 
-        if ($request->boolean('open_goal')) return redirect()->route('goals.show', ['locale' => $locale, 'goal' => $createdGoal]);
+        if ($request->boolean('open_goal'))
+            return redirect()->route('goals.show', ['locale' => $locale, 'goal' => $createdGoal]);
         return redirect()->route('goals.index', ['locale' => $locale])
             ->with('success', 'Tikslas sėkmingai sukurtas!');
     }
@@ -199,6 +209,7 @@ class GoalController extends Controller
             'status',
             'priority',
             'milestones.tasks.status',
+            'habits' => fn($query) => $query->with('category', 'latestCompletion')->orderBy('title'),
         ]);
 
         $tasks = $goal->tasks;
@@ -239,8 +250,16 @@ class GoalController extends Controller
         $taskCategories = Category::orderBy('order')->get();
 
         return view('goals.edit', compact(
-            'goal', 'priorities', 'statuses', 'types', 'categories',
-            'taskStatuses', 'taskTypes', 'taskPriorities', 'taskCategories', 'xpMode'
+            'goal',
+            'priorities',
+            'statuses',
+            'types',
+            'categories',
+            'taskStatuses',
+            'taskTypes',
+            'taskPriorities',
+            'taskCategories',
+            'xpMode'
         ));
     }
 
@@ -248,7 +267,7 @@ class GoalController extends Controller
     {
         return DB::transaction(function () use ($request, $locale, $id) {
 
-            $goal = $request->user()->goals()->with('milestones.tasks')->findOrFail($id);
+            $goal = $request->user()->goals()->with('milestones.tasks')->lockForUpdate()->findOrFail($id);
             $user = $goal->user;
             $taskXp = app(TaskXpService::class);
             $systemXp = $taskXp->mode($user) === UserPreference::XP_SYSTEM;
@@ -264,16 +283,18 @@ class GoalController extends Controller
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date',
                 'is_favorite' => 'nullable|boolean',
-                'is_important'=> 'nullable|boolean',
+                'is_important' => 'nullable|boolean',
                 'visibility' => 'nullable|string|in:private,shared,public',
-                'reminder_date'=> 'nullable|date',
+                'reminder_date' => 'nullable|date',
                 'priority_id' => 'nullable|exists:goal_priorities,id',
                 'status_id' => 'nullable|exists:goal_statuses,id',
                 'type_id' => 'nullable|exists:goal_types,id',
 
                 'milestones' => 'array',
                 'milestones.*.id' => [
-                    'nullable', 'integer', 'distinct',
+                    'nullable',
+                    'integer',
+                    'distinct',
                     Rule::exists('milestones', 'id')->where('goal_id', $goal->id),
                 ],
                 'milestones.*.title' => 'nullable|string|max:255',
@@ -281,7 +302,9 @@ class GoalController extends Controller
 
                 'milestones.*.tasks' => 'array',
                 'milestones.*.tasks.*.id' => [
-                    'nullable', 'integer', 'distinct',
+                    'nullable',
+                    'integer',
+                    'distinct',
                     Rule::exists('tasks', 'id')
                         ->whereIn('milestone_id', $goal->milestones->modelKeys()),
                 ],
@@ -290,7 +313,6 @@ class GoalController extends Controller
                 'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
                 'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
                 'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'nullable', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
-                'milestones.*.tasks.*.category_id' => 'nullable|exists:categories,id',
             ]);
 
             // A task must also belong to its submitted milestone, not just this goal.
@@ -306,8 +328,10 @@ class GoalController extends Controller
                             "milestones.$mIndex.tasks.$tIndex.points" => __('validation.required', ['attribute' => 'points']),
                         ]);
                     }
-                    if (!empty($taskData['id']) && !Task::whereKey($taskData['id'])
-                        ->where('milestone_id', $milestoneData['id'] ?? null)->exists()) {
+                    if (
+                        !empty($taskData['id']) && !Task::whereKey($taskData['id'])
+                            ->where('milestone_id', $milestoneData['id'] ?? null)->exists()
+                    ) {
                         throw ValidationException::withMessages([
                             "milestones.$mIndex.tasks.$tIndex.id" => __('validation.exists', ['attribute' => 'id']),
                         ]);
@@ -358,7 +382,8 @@ class GoalController extends Controller
                             ? $previousTask->points
                             : $taskXp->pointsForPriority((int) $priorityId))
                         : ($tData['points'] ?? $previousTask?->points ?? 0);
-                    if ($previousTask?->completed_at && $newCompleted) $points = $previousTask->points;
+                    if ($previousTask?->completed_at && $newCompleted)
+                        $points = $previousTask->points;
                     $manualPoints = $systemXp
                         ? $previousTask?->manual_points
                         : $points;
@@ -372,7 +397,7 @@ class GoalController extends Controller
                             'status_id' => $tData['status_id'] ?? null,
                             'type_id' => $tData['type_id'] ?? null,
                             'priority_id' => $priorityId,
-                            'category_id' => $tData['category_id'] ?? $goal->category_id,
+                            'category_id' => $goal->category_id,
                         ]
                     );
 
@@ -413,6 +438,7 @@ class GoalController extends Controller
             }
 
             if ($categoryChanged) {
+                $goal->habits()->update(['category_id' => $newCategory]);
                 $goal->directTasks()->update(['category_id' => $goal->category_id]);
                 $goal->load('milestones.tasks');
                 foreach ($goal->milestones as $m) {
@@ -443,7 +469,7 @@ class GoalController extends Controller
             return redirect()
                 ->route('goals.index', ['locale' => $locale])
                 ->with('success', 'Tikslas atnaujintas!');
-        });
+        }, 3);
     }
 
     public function destroy($locale, $id)

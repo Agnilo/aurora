@@ -32,6 +32,17 @@ function enhancePlanEditor(form) {
         if (details) details.open = true;
     }, true);
 
+    const goal = form.elements.goal_id;
+    const category = form.elements.category_id;
+    const syncCategory = () => {
+        const inherited = goal.selectedOptions[0]?.dataset.categoryId;
+        if (inherited) category.value = inherited;
+        category.disabled = goal.disabled || Boolean(inherited);
+    };
+    goal.addEventListener('change', syncCategory);
+    window.addEventListener('pageshow', syncCategory);
+    syncCategory();
+
     const habitPresets = form.querySelector('[data-habit-presets]');
     if (habitPresets) {
         const frequency = form.querySelector('[data-habit-frequency]');
@@ -43,7 +54,7 @@ function enhancePlanEditor(form) {
         const matches = values => values.join(',') === selectedDays().join(',');
         const initial = frequency.value === 'weekly' ? 'weekly'
             : matches([1, 2, 3, 4, 5, 6, 7]) ? 'everyday'
-            : matches([1, 2, 3, 4, 5]) ? 'workdays' : 'custom';
+                : matches([1, 2, 3, 4, 5]) ? 'workdays' : 'custom';
 
         const render = preset => {
             days.hidden = preset !== 'custom';
@@ -79,7 +90,7 @@ function enhancePlanEditor(form) {
         const radios = [...taskPresets.querySelectorAll('input')];
         const initial = !date.value ? 'anytime'
             : date.value === taskPresets.dataset.today ? 'today'
-            : date.value === taskPresets.dataset.tomorrow ? 'tomorrow' : 'pick_date';
+                : date.value === taskPresets.dataset.tomorrow ? 'tomorrow' : 'pick_date';
         radios.find(radio => radio.value === initial).checked = true;
         dateLabel.hidden = initial !== 'pick_date';
         date.required = initial === 'pick_date';

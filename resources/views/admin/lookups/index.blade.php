@@ -1,5 +1,8 @@
 @extends('admin.lookups.layout')
 @section('lookups-content')
+    @error('category_id')
+        <p class="alert alert-danger" role="alert">{{ $message }}</p>
+    @enderror
     @foreach($blocks as $block)
         <div class="admin-panel admin-lookup-panel mb-4">
             <div class="admin-section-heading">
@@ -81,6 +84,6 @@
                     });
                 }
             @endforeach
-    });
+        });
     </script>
 @endsection

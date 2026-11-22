@@ -1912,3 +1912,126 @@ html[data-aurora-sidebar="expanded"] .aurora-rail-collapse-icon {
         transition: none;
     }
 }
+
+.dashboard-day-trigger {
+    border: 0;
+    position: relative;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.dashboard-day-trigger:hover,
+.dashboard-day-trigger:focus-visible {
+    background-color: var(--color-blue-soft, #eef3f7);
+    opacity: 1;
+}
+
+.dashboard-day-trigger:focus-visible {
+    outline: 2px solid var(--dashboard-ui-ink);
+    outline-offset: 1px;
+}
+
+.dashboard-day-trigger::after {
+    content: attr(data-summary);
+    display: none;
+    position: absolute;
+    z-index: 3;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: var(--dashboard-ui-ink);
+    color: white;
+    white-space: nowrap;
+    font: 11px var(--font-ui);
+    pointer-events: none;
+}
+
+.dashboard-day-trigger:focus-visible::after {
+    display: block;
+}
+
+@media (hover: hover) {
+    .dashboard-day-trigger:hover::after {
+        display: block;
+    }
+}
+
+.dashboard-day-trigger:nth-of-type(7n + 1)::after {
+    left: 0;
+    transform: none;
+}
+
+.dashboard-day-trigger:nth-of-type(7n)::after {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.dashboard-day-popover li a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.dashboard-day-popover {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
+    width: min(270px, calc(100vw - 16px));
+    max-height: min(295px, 65dvh);
+    overflow: auto;
+    padding: 14px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--dashboard-ui-surface, white);
+    color: var(--dashboard-ui-ink);
+    box-shadow: 0 5px 32px #2e223133;
+    font: 14px var(--font-ui);
+}
+
+.dashboard-day-popover header,
+.dashboard-day-popover li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dashboard-day-popover header button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.dashboard-day-popover h3 {
+    font-size: 12px;
+    margin: 12px 0 4px;
+}
+
+.dashboard-day-popover ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-day-popover li {
+    padding-block: 4px;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-day-popover small,
+.dashboard-day-popover p {
+    font-size: 12px;
+    color: var(--dashboard-ui-muted);
+}
+
+.dashboard-day-popover p {
+    margin: 10px 0 0;
+}

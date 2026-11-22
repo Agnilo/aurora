@@ -13,6 +13,10 @@ class Habit extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function goal()
+    {
+        return $this->belongsTo(Goal::class);
+    }
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -25,7 +29,19 @@ class Habit extends Model
     {
         return $this->hasMany(HabitCompletion::class);
     }
-    public function today(): CarbonImmutable { return CarbonImmutable::now($this->timezone)->startOfDay(); }
+    public function latestCompletion()
+    {
+        return $this->hasOne(HabitCompletion::class)->ofMany('period_start', 'max');
+    }
+    public function getCurrentCompletionAttribute(): ?HabitCompletion
+    {
+        $entry = $this->latestCompletion;
+        return $entry?->period_start->toDateString() === $this->period() ? $entry : null;
+    }
+    public function today(): CarbonImmutable
+    {
+        return CarbonImmutable::now($this->timezone)->startOfDay();
+    }
     public function period(): string
     {
         return ($this->frequency === 'weekly' ? $this->today()->startOfWeek(1) : $this->today())->toDateString();

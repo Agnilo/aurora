@@ -8,6 +8,7 @@ use App\Models\Localization\Translation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class LookupAdminController extends Controller
 {
@@ -88,10 +89,25 @@ class LookupAdminController extends Controller
     ];
 
     protected array $iconList = [
-        'heart', 'star', 'sun', 'moon', 'check', 'x',
-        'alert-circle', 'smile', 'calendar', 'clock',
-        'flame', 'leaf', 'book', 'flag', 'map-pin',
-        'target', 'thumbs-up', 'sparkles', 'trophy'
+        'heart',
+        'star',
+        'sun',
+        'moon',
+        'check',
+        'x',
+        'alert-circle',
+        'smile',
+        'calendar',
+        'clock',
+        'flame',
+        'leaf',
+        'book',
+        'flag',
+        'map-pin',
+        'target',
+        'thumbs-up',
+        'sparkles',
+        'trophy'
     ];
 
     public function index(Request $request)
@@ -134,7 +150,7 @@ class LookupAdminController extends Controller
         return view('admin.lookups.index', [
             'section' => $section,
             'blocks' => $blocks,
-            'sectionsConfig'=> $this->sections,
+            'sectionsConfig' => $this->sections,
         ]);
     }
 
@@ -162,7 +178,7 @@ class LookupAdminController extends Controller
 
         $languages = Language::where('is_active', true)->pluck('code');
 
-        $mainLang  = app()->getLocale();
+        $mainLang = app()->getLocale();
         $mainValue = $request->input("value.$mainLang");
 
         if (!$mainValue) {
@@ -170,24 +186,23 @@ class LookupAdminController extends Controller
         }
 
         $insert = [
-            'name'  => $mainValue,
+            'name' => $mainValue,
             'order' => (DB::table($def['table'])->max('order') ?? 0) + 1,
         ];
 
         if (($def['has_color'] ?? false)) {
-        $rawHex = $request->input('color_hex');
-        $rawPicker = $request->input('color');
+            $rawHex = $request->input('color_hex');
+            $rawPicker = $request->input('color');
 
-        if (!empty($rawHex)) {
-            if (!str_starts_with($rawHex, '#')) {
-                $rawHex = '#'.$rawHex;
+            if (!empty($rawHex)) {
+                if (!str_starts_with($rawHex, '#')) {
+                    $rawHex = '#' . $rawHex;
+                }
+                $update['color'] = $rawHex;
+            } else {
+                $update['color'] = $rawPicker ?: null;
             }
-            $update['color'] = $rawHex;
         }
-        else {
-            $update['color'] = $rawPicker ?: null;
-        }
-    }
 
         if ($def['has_icon'] ?? false) {
             $insert['icon'] = $request->input('icon') ?: null;
@@ -204,8 +219,8 @@ class LookupAdminController extends Controller
             if ($val) {
                 Translation::updateOrCreate(
                     [
-                        'group'         => 'lookup',
-                        'key'           => $keyWithoutGroup,
+                        'group' => 'lookup',
+                        'key' => $keyWithoutGroup,
                         'language_code' => $code,
                     ],
                     ['value' => $val]
@@ -217,7 +232,7 @@ class LookupAdminController extends Controller
 
         return redirect()
             ->route('admin.lookups.index', [
-                'locale'  => $locale,
+                'locale' => $locale,
                 'section' => $section
             ])
             ->with('success', 'Lookup created.');
@@ -253,10 +268,10 @@ class LookupAdminController extends Controller
             'item' => $item,
             'slug' => $slug,
             'fullKey' => $fullKey,
-            'keyWithoutGroup'=> $keyWithoutGroup,
+            'keyWithoutGroup' => $keyWithoutGroup,
             'languages' => $languages,
             'translations' => $translations,
-            'blockDefinition'=> $def,
+            'blockDefinition' => $def,
             'iconList' => $this->iconList,
         ]);
     }
@@ -303,10 +318,10 @@ class LookupAdminController extends Controller
             ]);
 
             if (!empty($item->image)) {
-                \Storage::disk('public')->delete('categories/'.$item->image);
+                \Storage::disk('public')->delete('categories/' . $item->image);
             }
 
-            $filename = Str::slug($item->name).'_'.time().'.'.$file->getClientOriginalExtension();
+            $filename = Str::slug($item->name) . '_' . time() . '.' . $file->getClientOriginalExtension();
 
             $file->storeAs('categories', $filename, 'public');
 
@@ -357,17 +372,25 @@ class LookupAdminController extends Controller
     {
         $def = $this->resolveBlock($section, $type);
 
-        $item = DB::table($def['table'])->find($id);
-        if (!$item) abort(404);
+        DB::transaction(function () use ($def, $id, $section, $type) {
+            $item = DB::table($def['table'])->lockForUpdate()->find($id);
+            abort_unless($item, 404);
 
-        DB::table($def['table'])->where('id', $id)->delete();
+            if ($def['table'] === 'categories') {
+                foreach (['goals', 'tasks', 'habits'] as $table) {
+                    if (DB::table($table)->where('category_id', $id)->exists()) {
+                        throw ValidationException::withMessages(['category_id' => t('plans.assignment.category_in_use')]);
+                    }
+                }
+            }
 
-        $slug = Str::slug($item->name, '_');
-        $keyWithoutGroup = "$section.$type.$slug";
+            DB::table($def['table'])->where('id', $id)->delete();
+            $slug = Str::slug($item->name, '_');
 
-        Translation::where('group', 'lookup')
-            ->where('key', $keyWithoutGroup)
-            ->delete();
+            Translation::where('group', 'lookup')
+                ->where('key', "$section.$type.$slug")
+                ->delete();
+        }, 3);
 
         app('translation')->flushCache();
 
