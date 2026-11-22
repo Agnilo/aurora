@@ -1,6 +1,6 @@
 <section class="onb-card" aria-labelledby="onb-heading">
     <header class="onb-heading">
-        <div><h1 id="onb-heading">{{ t('preferences.onboarding.ui.heading') }}</h1><h2 id="onb-question-title" hidden></h2></div>
+        <div><h2 id="onb-question-title" hidden></h2></div>
         <ol class="onb-dots" id="onb-dots" aria-label="{{ t('preferences.onboarding.ui.progress') }}" hidden></ol>
     </header>
     @if($errors->any())<div class="onb-errors" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
