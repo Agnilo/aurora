@@ -25,7 +25,7 @@
             <a
                 class="pr-avatar-edit"
                 href="{{ route('profile.avatar', ['locale' => app()->getLocale()]) }}#pr-avatar-file"
-                aria-label="{{ t('profile.ui.edit_photo', [], app()->getLocale() === 'lt' ? 'Keisti profilio nuotrauką' : 'Change profile photo') }}"
+                aria-label="{{ t('profile.ui.edit_photo') }}"
             >
                 <x-lucide-pencil
                     class="aurora-icon"
@@ -48,7 +48,7 @@
             class="pr-public-link"
             href="{{ route('public.show', ['locale' => app()->getLocale(), 'user' => $user->id]) }}"
         >
-            {{ t('profile.ui.view_public', [], app()->getLocale() === 'lt' ? 'Peržiūrėti viešą profilį' : 'View public profile') }}
+            {{ t('profile.ui.view_public') }}
 
             <x-lucide-arrow-up-right
                 class="aurora-icon"

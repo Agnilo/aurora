@@ -34,6 +34,6 @@ class XpRuleAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.xp-rules.index', app()->getLocale())
-            ->with('success', 'XP taisyklė atnaujinta');
+            ->with('success', t('admin.xp_rule_updated'));
     }
 }

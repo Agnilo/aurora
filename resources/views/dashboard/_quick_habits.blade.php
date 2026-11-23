@@ -1,6 +1,6 @@
 <div class="dashboard-card h-100">
     <div class="card-header dashboard-header">
-        Įpročiai greitam startui
+        {{ t('dashboard.quick_habits') }}
     </div>
 
     <div class="card-body small dashboard-body">
@@ -9,12 +9,12 @@
             {{-- Placeholder / default --}}
             @php
                 $habits = $quickHabits ?? [
-                    'Meditacija',
-                    'Joga',
-                    'Mokymasis',
-                    'Rašymas',
-                    'Bėgimas',
-                    'Švarus kambarys',
+                    t('dashboard.example_meditation'),
+                    t('dashboard.example_yoga'),
+                    t('dashboard.example_learning'),
+                    t('dashboard.example_writing'),
+                    t('dashboard.example_running'),
+                    t('dashboard.example_clean_room'),
                 ];
             @endphp
 

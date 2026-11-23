@@ -36,17 +36,17 @@ class LevelAdminController extends Controller
 
         $overlap = Level::where(function ($q) use ($data) {
             $q->whereBetween('level_from', [$data['level_from'], $data['level_to'] ?? PHP_INT_MAX])
-            ->orWhereBetween('level_to', [$data['level_from'], $data['level_to'] ?? PHP_INT_MAX])
-            ->orWhere(function ($q) use ($data) {
-                $q->where('level_from', '<=', $data['level_from'])
-                    ->where('level_to', '>=', $data['level_to'] ?? PHP_INT_MAX);
-            });
+                ->orWhereBetween('level_to', [$data['level_from'], $data['level_to'] ?? PHP_INT_MAX])
+                ->orWhere(function ($q) use ($data) {
+                    $q->where('level_from', '<=', $data['level_from'])
+                        ->where('level_to', '>=', $data['level_to'] ?? PHP_INT_MAX);
+                });
         })->exists();
 
         if ($overlap) {
             return back()
                 ->withErrors([
-                    'level_from' => 'Šis lygio intervalas kertasi su kitu lygiu.',
+                    'level_from' => t('admin.range_overlap'),
                 ])
                 ->withInput();
         }
@@ -59,9 +59,11 @@ class LevelAdminController extends Controller
             return back()
                 ->withErrors([
                     'xp_required' =>
-                        'XP turi būti didesnė nei ankstesnio lygio ('
-                        . $previous->level_from . '–' . $previous->level_to
-                        . ', XP: ' . $previous->xp_required . ')',
+                        t('admin.range_xp_min_value', [
+                            'from' => $previous->level_from,
+                            'to' => $previous->level_to,
+                            'xp' => $previous->xp_required,
+                        ]),
                 ])
                 ->withInput();
         }
@@ -89,7 +91,7 @@ class LevelAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.levels.index', $locale)
-            ->with('success', 'Lygio intervalas sukurtas');
+            ->with('success', t('admin.range_created'));
     }
 
     /**
@@ -113,24 +115,24 @@ class LevelAdminController extends Controller
             'title' => 'required|string|max:255',
         ]);
 
-            $overlap = Level::where('id', '!=', $level->id)
-                ->where(function ($q) use ($data) {
-                    $q->whereBetween('level_from', [$data['level_from'], $data['level_to']])
+        $overlap = Level::where('id', '!=', $level->id)
+            ->where(function ($q) use ($data) {
+                $q->whereBetween('level_from', [$data['level_from'], $data['level_to']])
                     ->orWhereBetween('level_to', [$data['level_from'], $data['level_to']])
                     ->orWhere(function ($q) use ($data) {
                         $q->where('level_from', '<=', $data['level_from'])
                             ->where('level_to', '>=', $data['level_to']);
                     });
-                })
-                ->exists();
+            })
+            ->exists();
 
-            if ($overlap) {
-                return back()
-                    ->withErrors([
-                        'level_from' => 'Šis lygio intervalas kertasi su kitu lygiu.'
-                    ])
-                    ->withInput();
-            }
+        if ($overlap) {
+            return back()
+                ->withErrors([
+                    'level_from' => t('admin.range_overlap')
+                ])
+                ->withInput();
+        }
 
         $previous = Level::where('id', '!=', $level->id)
             ->where('level_to', '<', $data['level_from'])
@@ -141,9 +143,10 @@ class LevelAdminController extends Controller
             return back()
                 ->withErrors([
                     'xp_required' =>
-                        'XP turi būti didesnė nei ankstesnio lygio ('
-                        . $previous->level_from . '–' . $previous->level_to
-                        . ')',
+                        t('admin.range_xp_min', [
+                            'from' => $previous->level_from,
+                            'to' => $previous->level_to,
+                        ]),
                 ])
                 ->withInput();
         }
@@ -156,7 +159,7 @@ class LevelAdminController extends Controller
         ]);
 
         $translationKey = $level->translation_key;
-        $defaultLocale  = config('app.fallback_locale', 'lt');
+        $defaultLocale = config('app.fallback_locale', 'lt');
 
         Translation::updateOrCreate(
             [
@@ -194,14 +197,14 @@ class LevelAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.levels.index', $locale)
-            ->with('success', 'Lygio intervalas atnaujintas');
+            ->with('success', t('admin.range_updated'));
     }
 
     public function destroy($locale, Level $level)
     {
         if ($level->hasUsers()) {
             return back()->withErrors([
-                'delete' => 'Šio lygio intervalo ištrinti negalima – jame yra naudotojų.'
+                'delete' => t('admin.range_in_use')
             ]);
         }
 
@@ -215,6 +218,6 @@ class LevelAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.levels.index', $locale)
-            ->with('success', 'Lygio intervalas ištrintas');
+            ->with('success', t('admin.range_deleted'));
     }
 }

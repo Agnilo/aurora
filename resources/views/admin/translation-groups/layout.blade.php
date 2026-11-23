@@ -2,27 +2,27 @@
 
 @section('content')
 
-<div class="w-100 px-4">
+    <div class="w-100 px-4">
 
-    {{-- PAGE HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+        {{-- PAGE HEADER --}}
+        <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h1 class="admin-title">{{ t('dashboard.translation_groups') }}</h1>
+            <h1 class="admin-title">{{ t('dashboard.translation_groups') }}</h1>
 
-        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
 
-            <a href="{{ route('admin.translation-groups.create', app()->getLocale()) }}"
-            class="btn btn-primary mb-3">
-                <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" /> {{ t('button.add_new') }}
-            </a>
+                <a href="{{ route('admin.translation-groups.create', app()->getLocale()) }}" class="btn btn-primary mb-3">
+                    <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" focusable="false" />
+                    {{ t('button.add_new') }}
+                </a>
+
+            </div>
 
         </div>
 
+        {{-- INNER CONTENT --}}
+        @yield('translations-content')
+
     </div>
-
-    {{-- INNER CONTENT --}}
-    @yield('translations-content')
-
-</div>
 
 @endsection

@@ -42,7 +42,7 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('users.index', ['locale' => app()->getLocale()])
-            ->with('success', 'User created successfully!');
+            ->with('success', t('admin.user_created'));
     }
 
     /**
@@ -81,7 +81,7 @@ class UserController extends Controller
         $user->update($validated);
 
         return redirect()->route('users.index', ['locale' => app()->getLocale()])
-            ->with('success', 'User updated successfully!');
+            ->with('success', t('dashboard.user_updated'));
     }
 
     /**
@@ -91,6 +91,6 @@ class UserController extends Controller
     {
         $user->delete();
         return redirect()->route('users.index', ['locale' => app()->getLocale()])
-            ->with('success', 'User deleted successfully!');
+            ->with('success', t('admin.user_deleted'));
     }
 }

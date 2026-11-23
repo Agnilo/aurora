@@ -97,7 +97,7 @@ class BonusAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.bonuses.index', $locale)
-            ->with('success', 'Bonusas sukurtas');
+            ->with('success', t('admin.bonus_created'));
     }
 
     public function edit($locale, Bonus $bonus)
@@ -181,6 +181,6 @@ class BonusAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.bonuses.index', $locale)
-            ->with('success', 'Bonusas atnaujintas');
-        }
+            ->with('success', t('admin.bonus_updated'));
+    }
 }

@@ -40,17 +40,17 @@ class ProfileUpdateRequest extends FormRequest
                 'regex:/^[A-Za-z0-9_]+$/',
                 Rule::unique('user_details', 'handle')->ignore($this->user()->id, 'user_id'),
             ],
-        
+
         ];
     }
 
-        public function messages(): array
-        {
-            return [
-                'handle.regex' => 'Handle gali būti tik raidės, skaičiai ir _ be tarpų.',
-                'handle.unique' => 'Toks handle jau egzistuoja.',
-                'gender.in' => 'Lyties pasirinkimas neteisingas.',
-                'birthdate.before' => 'Gimimo data turi būti ankstesnė nei šiandiena.',
-            ];
-        }
+    public function messages(): array
+    {
+        return [
+            'handle.regex' => t('profile.handle_format'),
+            'handle.unique' => t('profile.handle_taken'),
+            'gender.in' => t('profile.invalid_gender'),
+            'birthdate.before' => t('profile.birthdate_before_today'),
+        ];
+    }
 }

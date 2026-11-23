@@ -26,7 +26,7 @@
                         <x-lucide-medal class="aurora-icon text-muted" width="20" height="20" aria-hidden="true" />
                     @endif
                 </td>
-                <td><div class="fw-semibold">{{ $badge->name }}</div><code>{{ $badge->key }}</code></td>
+                <td><div class="fw-semibold">{{ $badge->translated_name }}</div><code>{{ $badge->key }}</code></td>
                 <td>{{ $badge->category ? t('gamification.' . $badge->category->label) : '—' }}</td>
                 <td>
                     @switch(optional($badge->category)->key)

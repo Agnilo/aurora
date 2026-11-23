@@ -40,15 +40,15 @@ class TranslationGroupController extends Controller
 
         foreach ($languages as $lang) {
             Translation::create([
-                'group'         => 'group',
-                'key'           => $group->key . '.group',
+                'group' => 'group',
+                'key' => $group->key . '.group',
                 'language_code' => $lang,
-                'value'         => $group->name,
+                'value' => $group->name,
             ]);
         }
 
         return redirect()->route('admin.translation-groups.index', $locale)
-            ->with('success', 'Group created with default translations.');
+            ->with('success', t('admin.group_created'));
     }
 
     public function edit($locale, TranslationGroup $translation_group)
@@ -69,7 +69,7 @@ class TranslationGroupController extends Controller
         ]);
 
         return redirect()->route('admin.translation-groups.index', $locale)
-            ->with('success', 'Group updated.');
+            ->with('success', t('admin.group_updated'));
     }
 
     public function destroy($locale, TranslationGroup $translation_group)
@@ -77,6 +77,6 @@ class TranslationGroupController extends Controller
         $translation_group->delete();
 
         return redirect()->route('admin.translation-groups.index', $locale)
-            ->with('success', 'Group deleted.');
+            ->with('success', t('admin.group_deleted'));
     }
 }

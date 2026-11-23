@@ -28,7 +28,7 @@ trait ResolvesActivityAssignment
                 ->lockForUpdate()->find($data['goal_id']);
             if (!$goal) {
                 throw ValidationException::withMessages([
-                    'goal_id' => __('validation.exists', ['attribute' => t('plans.goal')]),
+                    'goal_id' => t('plans.invalid_linked_goal'),
                 ]);
             }
         }

@@ -1,8 +1,8 @@
 <div class="admin-navbar">
     <div class="admin-navbar-container d-flex justify-content-between align-items-center">
         <a href="{{ route('admin.dashboard', ['locale' => app()->getLocale()]) }}" class="admin-logo"
-            aria-label="Aurora Admin">
-            AURORA<span class="admin-topbar-tag">Admin</span>
+            aria-label="{{ t('admin.portal_title') }}">
+            AURORA<span class="admin-topbar-tag">{{ t('admin.ui.title') }}</span>
         </a>
         <div class="admin-header-actions">
             <nav class="admin-lang-switch" aria-label="{{ t('admin.ui.language') }}">

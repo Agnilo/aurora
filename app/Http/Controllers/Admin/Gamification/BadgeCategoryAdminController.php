@@ -68,7 +68,7 @@ class BadgeCategoryAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.badge-categories.index', $locale)
-            ->with('success', 'Badge kategorija sukurta');
+            ->with('success', t('admin.badge_category_created'));
     }
 
     public function edit($locale, BadgeCategory $badgeCategory)
@@ -87,7 +87,7 @@ class BadgeCategoryAdminController extends Controller
         ]);
 
         $translationKey = $badgeCategory->label;
-        $defaultLocale  = config('app.fallback_locale', 'lt');
+        $defaultLocale = config('app.fallback_locale', 'lt');
 
         Translation::updateOrCreate(
             [
@@ -125,18 +125,18 @@ class BadgeCategoryAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.badge-categories.index', $locale)
-            ->with('success', 'Badge kategorija atnaujinta');
+            ->with('success', t('admin.badge_category_updated'));
     }
 
     public function destroy($locale, BadgeCategory $badgeCategory)
     {
         if ($badgeCategory->badges()->exists()) {
-            return back()->with('error', 'Negalima trinti – kategorija turi badge’ų');
+            return back()->with('error', t('admin.category_has_badges'));
         }
 
         $badgeCategory->delete();
 
-        return back()->with('success', 'Badge kategorija ištrinta');
+        return back()->with('success', t('admin.badge_category_deleted'));
     }
 
     private function validated(Request $request): array

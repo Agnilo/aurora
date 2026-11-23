@@ -4,9 +4,12 @@ namespace App\Models\Preferences;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class AssessmentQuestion extends Model
 {
+    public const ONBOARDING_V1_PREFIX = 'preferences.onboarding.v1_0';
+
     protected $fillable = [
         'code',
         'questionnaire_type',
@@ -37,23 +40,39 @@ class AssessmentQuestion extends Model
 
     public function getTranslatedTextAttribute(): string
     {
-        $fallback = (string) $this->text;
+        $key = $this->text_key;
+        if (!$key && $this->usesOnboardingV1()) {
+            $key = self::ONBOARDING_V1_PREFIX . '.questions.' . $this->code;
+        }
 
-        return $this->text_key ? t($this->text_key, [], $fallback) : $fallback;
+        return $key ? t($key, (string) $this->text) : (string) $this->text;
     }
 
     public function getTranslatedOptionsAttribute(): array
     {
         return array_map(function (array $option): array {
-            if (!empty($option['label_key'])) {
-                $option['label'] = t(
-                    $option['label_key'],
-                    [],
-                    (string) ($option['label'] ?? '')
-                );
+            $label = (string) ($option['label'] ?? '');
+            $key = $option['label_key'] ?? null;
+            if (!$key && $this->usesOnboardingV1() && isset($option['value'])) {
+                $value = $option['value'];
+                $key = match (true) {
+                    $this->answer_type === 'likert' => self::ONBOARDING_V1_PREFIX . '.likert.' . $value,
+                    $this->code === 'priority_categories' && is_numeric($value) =>
+                        'lookup.categories.category.' . Str::slug($label, '_'),
+                    default => self::ONBOARDING_V1_PREFIX . '.options.' . $this->code . '.' . $value,
+                };
+            }
+            if ($key) {
+                $option['label'] = t($key, $label);
             }
 
             return $option;
         }, $this->options ?? []);
+    }
+
+    private function usesOnboardingV1(): bool
+    {
+        return $this->questionnaire_type === UserAssessment::TYPE_ONBOARDING
+            && $this->questionnaire_version === '1.0';
     }
 }

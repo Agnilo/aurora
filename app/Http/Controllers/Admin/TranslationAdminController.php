@@ -20,7 +20,7 @@ class TranslationAdminController extends Controller
         $groups = TranslationGroup::orderBy('name')->get();
 
         $query = Translation::query()
-            ->when($group, fn ($q) => $q->where('group', $group))
+            ->when($group, fn($q) => $q->where('group', $group))
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
                     $sub->where('key', 'like', "%{$search}%")
@@ -29,7 +29,6 @@ class TranslationAdminController extends Controller
                 });
             });
 
-        // A translation is identified by its group AND key, across all languages.
         $keyPage = (clone $query)
             ->select('group', 'key')
             ->groupBy('group', 'key')
@@ -52,11 +51,15 @@ class TranslationAdminController extends Controller
                 })
                 ->orderBy('group')->orderBy('key')->orderBy('language_code')
                 ->get()
-                ->groupBy(fn ($translation) => json_encode([$translation->group, $translation->key]));
+                ->groupBy(fn($translation) => json_encode([$translation->group, $translation->key]));
         }
 
         return view('admin.translations.index', compact(
-            'translations', 'groups', 'group', 'languages', 'keyPage'
+            'translations',
+            'groups',
+            'group',
+            'languages',
+            'keyPage'
         ));
     }
 
@@ -72,7 +75,7 @@ class TranslationAdminController extends Controller
     {
         $request->validate([
             'group' => 'required|string',
-            'key'   => 'required|string',
+            'key' => 'required|string',
             'value' => 'required|array'
         ]);
 
@@ -83,17 +86,18 @@ class TranslationAdminController extends Controller
 
         if (!$groupModel) {
             return back()->withErrors([
-                'group' => 'Selected group does not exist.'
+                'group' => t('admin.unknown_group')
             ]);
         }
 
         foreach ($request->value as $langCode => $val) {
-            if ($val === null || $val === '') continue;
+            if ($val === null || $val === '')
+                continue;
 
             Translation::updateOrCreate(
                 [
                     'group' => $groupKey,
-                    'key'   => $key,
+                    'key' => $key,
                     'language_code' => $langCode
                 ],
                 [
@@ -105,7 +109,7 @@ class TranslationAdminController extends Controller
         app('translation')->flushCache();
 
         return redirect()->route('admin.translations.index', $locale)
-            ->with('success', 'Translation created successfully.');
+            ->with('success', t('admin.translation_created'));
     }
 
     public function edit($locale, $translationGroup, $translationKey)
@@ -120,7 +124,11 @@ class TranslationAdminController extends Controller
         $group = $translationGroup;
 
         return view('admin.translations.edit', compact(
-            'translationKey', 'translations', 'languages', 'groups', 'group'
+            'translationKey',
+            'translations',
+            'languages',
+            'groups',
+            'group'
         ));
     }
 
@@ -134,7 +142,7 @@ class TranslationAdminController extends Controller
         ]);
 
         if (array_diff(array_keys($data['value']), Language::pluck('code')->all())) {
-            throw ValidationException::withMessages(['value' => 'Unknown language.']);
+            throw ValidationException::withMessages(['value' => t('admin.unknown_language')]);
         }
 
         DB::transaction(function () use ($data, $translationGroup, $translationKey) {
@@ -149,7 +157,7 @@ class TranslationAdminController extends Controller
 
             if ($conflict) {
                 throw ValidationException::withMessages([
-                    'key' => "Vertimas su šia grupe ir raktu jau egzistuoja.",
+                    'key' => t('admin.translation_conflict'),
                 ]);
             }
 
@@ -170,7 +178,7 @@ class TranslationAdminController extends Controller
         app('translation')->flushCache();
 
         return redirect()->route('admin.translations.index', ['locale' => $locale])
-            ->with('success', 'Translation updated.');
+            ->with('success', t('admin.translation_updated'));
     }
 
     public function destroy($locale, $translationGroup, $translationKey)
@@ -182,10 +190,10 @@ class TranslationAdminController extends Controller
         app('translation')->flushCache();
 
         return redirect()->route('admin.translations.index', ['locale' => $locale])
-            ->with('success', 'Translation deleted.');
+            ->with('success', t('admin.translation_deleted'));
     }
 
-   public function export()
+    public function export()
     {
         $filename = 'translations_' . date('Y_m_d') . '.csv';
         $handle = fopen($filename, 'w+');
@@ -205,7 +213,7 @@ class TranslationAdminController extends Controller
 
         return response()->download($filename)->deleteFileAfterSend();
     }
-    
+
     public function import(Request $request, $locale)
     {
         $request->validate([
@@ -214,9 +222,9 @@ class TranslationAdminController extends Controller
 
         $file = $request->file('file');
         $rows = array_map('str_getcsv', file($file->getRealPath()));
-        array_shift($rows); 
-        
-        $countAdded  = 0;
+        array_shift($rows);
+
+        $countAdded = 0;
         $countSkipped = 0;
         $countInvalid = 0;
         $groupsCreated = 0;
@@ -255,10 +263,10 @@ class TranslationAdminController extends Controller
             }
 
             Translation::create([
-                'group'         => $group,
-                'key'           => $key,
+                'group' => $group,
+                'key' => $key,
                 'language_code' => $language_code,
-                'value'         => $value
+                'value' => $value
             ]);
 
             $countAdded++;
@@ -266,12 +274,14 @@ class TranslationAdminController extends Controller
 
         app('translation')->flushCache();
 
-        return back()->with('success',
-            "Import completed: 
-            $countAdded added, 
-            $countSkipped skipped, 
-            $countInvalid invalid rows, 
-            $groupsCreated groups created."
+        return back()->with(
+            'success',
+            t('admin.import_summary', [
+                'added' => $countAdded,
+                'skipped' => $countSkipped,
+                'invalid' => $countInvalid,
+                'groups' => $groupsCreated,
+            ])
         );
     }
 

@@ -44,7 +44,7 @@ class Category extends Model
     public function translatedName()
     {
         $key = "categories.category.{$this->id}.name";
-        return t($key, $this->name);
+        return t($key, $this->translated_name);
     }
 
     public function getTranslatedNameAttribute(): string

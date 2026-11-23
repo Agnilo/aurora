@@ -11,14 +11,14 @@
             <div>
                 <h2 class="fw-bold text-white mb-1">{{ t('dashboard.you_can') }}</h2>
                 <p class="text-white-50 small mb-0">
-                    Šiandien puiki diena judėti pirmyn <x-lucide-sparkles class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
+                    {{ t('dashboard.day_encouragement') }} <x-lucide-sparkles class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
                 </p>
             </div>
 
             @if($user->gameDetails)
                 <div class="text-end text-white">
                     <div class="fw-bold fs-5">
-                        Lvl {{ $user->gameDetails->level }}
+                        {{ t('profile.level_short') }} {{ $user->gameDetails->level }}
                     </div>
 
                     <div class="small">
@@ -37,25 +37,25 @@
     </div>
 
     @hasrole('admin')
-        <p>You are an administrator.</p>
+        <p>{{ t('dashboard.is_admin') }}</p>
     @else
-        <p>You are not an administrator.</p>
+        <p>{{ t('dashboard.is_not_admin') }}</p>
     @endhasrole
 
 
     {{-- ============================
          GYVENIMO ASPEKTAI (REAL)
     ============================= --}}
-    <h5 class="fw-bold mb-3">Gyvenimo aspektai</h5>
+    <h5 class="fw-bold mb-3">{{ t('dashboard.life_areas') }}</h5>
 
     <div class="d-flex flex-wrap gap-3 mb-5">
         @foreach($categoryLevels as $level)
             <div
                 class="aspect-icon rounded-circle d-flex flex-column align-items-center justify-content-center text-center"
-                title="{{ $level->category->name }}"
+                title="{{ $level->category->translated_name }}"
             >
                 <div class="fw-semibold small">
-                    {{ $level->category->name }}
+                    {{ $level->category->translated_name }}
                 </div>
                 <div class="text-muted small">
                     {{ $level->xp }} XP
@@ -72,10 +72,10 @@
         ============================= --}}
         <div class="col-md-4">
             <div class="dashboard-card h-100">
-                <div class="card-header dashboard-header">Laikas susikaupti</div>
+                <div class="card-header dashboard-header">{{ t('dashboard.focus_time') }}</div>
                 <div class="card-body text-center d-flex flex-column justify-content-center" style="min-height: 150px;">
                     <div class="fs-3 fw-monospace mb-3">00:00:00</div>
-                    <button class="btn btn-warning w-100">Susikaupti</button>
+                    <button class="btn btn-warning w-100">{{ t('button.focus') }}</button>
                 </div>
             </div>
         </div>
@@ -85,14 +85,14 @@
         ============================= --}}
         <div class="col-md-4">
             <div class="dashboard-card h-100">
-                <div class="card-header dashboard-header">Kasdienės užduotys</div>
+                <div class="card-header dashboard-header">{{ t('dashboard.daily_tasks_title') }}</div>
                 <div class="card-body small">
                     <ul class="list-unstyled mb-3">
-                        <li class="mb-1">Pagroti gitarą 15 min</li>
-                        <li class="mb-1">Pasivaikščioti su draugais</li>
-                        <li>Išplauti indus</li>
+                        <li class="mb-1">{{ t('dashboard.example_guitar') }}</li>
+                        <li class="mb-1">{{ t('dashboard.example_walk') }}</li>
+                        <li>{{ t('dashboard.example_dishes') }}</li>
                     </ul>
-                    <a href="#" class="text-decoration-underline">+ Pridėti naują</a>
+                    <a href="#" class="text-decoration-underline">+ {{ t('button.add_new') }}</a>
                 </div>
             </div>
         </div>
@@ -102,13 +102,13 @@
         ============================= --}}
         <div class="col-md-4">
             <div class="dashboard-card h-100">
-                <div class="card-header dashboard-header">Įpročiai greitam startui</div>
+                <div class="card-header dashboard-header">{{ t('dashboard.quick_habits') }}</div>
                 <div class="card-body small">
                     <div class="row">
-                        <div class="col-6 mb-2">Meditacija</div>
-                        <div class="col-6 mb-2">Joga</div>
-                        <div class="col-6">Mokymasis</div>
-                        <div class="col-6">Rašymas</div>
+                        <div class="col-6 mb-2">{{ t('dashboard.example_meditation') }}</div>
+                        <div class="col-6 mb-2">{{ t('dashboard.example_yoga') }}</div>
+                        <div class="col-6">{{ t('dashboard.example_learning') }}</div>
+                        <div class="col-6">{{ t('dashboard.example_writing') }}</div>
                     </div>
                 </div>
             </div>
@@ -119,19 +119,19 @@
     {{-- ============================
          ĮGŪDŽIAI (placeholder)
     ============================= --}}
-    <h5 class="fw-bold mt-5 mb-3">Įgūdžiai tobulėjimui</h5>
+    <h5 class="fw-bold mt-5 mb-3">{{ t('dashboard.skills_title') }}</h5>
 
     <div class="row g-4 mb-4">
         @for($i = 1; $i <= 2; $i++)
             <div class="col-md-6">
                 <div class="dashboard-card h-100">
                     <div class="card-body">
-                        <h6 class="fw-bold">Įgūdžio pavadinimas</h6>
-                        <p class="small text-muted mb-2">Trumpas aprašymas čia…</p>
+                        <h6 class="fw-bold">{{ t('dashboard.example_skill_name') }}</h6>
+                        <p class="small text-muted mb-2">{{ t('dashboard.example_description') }}</p>
                         <div class="progress mb-1" style="height: 5px;">
                             <div class="progress-bar bg-success" style="width: 30%;"></div>
                         </div>
-                        <small class="text-muted">Progresas: 30%</small>
+                        <small class="text-muted">{{ t('public.progress') }}: 30%</small>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,7 @@
     {{-- ============================
          TIKSLAI / PROJEKTAI (REAL)
     ============================= --}}
-    <h5 class="fw-bold mb-3">Tikslai arba projektai</h5>
+    <h5 class="fw-bold mb-3">{{ t('dashboard.goals_or_projects') }}</h5>
 
     <div class="row g-4">
 
@@ -161,7 +161,7 @@
                     </div>
 
                     <small class="text-muted">
-                        {{ $featuredGoal->progress }}% atlikta
+                        {{ t('goals.percent_complete', ['percent' => $featuredGoal->progress]) }}
                     </small>
                 </a>
             </div>
@@ -176,7 +176,7 @@
                         {{ $goal->title }}
                     </div>
                     <small class="text-muted">
-                        {{ $goal->progress }}% atlikta
+                        {{ t('goals.percent_complete', ['percent' => $goal->progress]) }}
                     </small>
                 </a>
             </div>
@@ -188,7 +188,7 @@
     <div class="text-center mt-4">
         <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}"
            class="btn btn-warning text-white fw-semibold px-4">
-            + Naujas tikslas
+            + {{ t('goals.new') }}
         </a>
     </div>
 

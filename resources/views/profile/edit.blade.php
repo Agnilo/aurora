@@ -96,7 +96,7 @@
 
     <div class="pr-field">
         <label for="pr-handle">
-            {{ t('profile.ui.handle', [], app()->getLocale() === 'lt' ? 'Naudotojo vardas' : 'Username') }}
+            {{ t('profile.ui.handle') }}
         </label>
         <div class="pr-input-prefix">
             <span aria-hidden="true">@</span>

@@ -2,7 +2,7 @@
 
 @section('profile-content')
     <h2 class="pr-section-title">
-        {{ t('profile.ui.photo_title', [], app()->getLocale() === 'lt' ? 'Profilio nuotrauka' : 'Profile photo') }}
+        {{ t('profile.ui.photo_title') }}
     </h2>
 
     <form action="{{ route('profile.avatar.update', ['locale' => app()->getLocale()]) }}" method="POST"
@@ -20,7 +20,7 @@
 
             <div class="pr-field">
                 <label for="pr-avatar-file">
-                    {{ t('profile.ui.choose_photo', [], app()->getLocale() === 'lt' ? 'Pasirinkti nuotrauką' : 'Choose photo') }}
+                    {{ t('profile.ui.choose_photo') }}
                 </label>
 
                 <input id="pr-avatar-file" type="file" name="avatar" accept="image/*" @error('avatar') aria-invalid="true"
@@ -33,13 +33,13 @@
         </div>
 
         <p class="pr-photo-hint">
-            {{ t('profile.ui.photo_hint', [], app()->getLocale() === 'lt' ? 'Paveikslėlis iki 2 MB.' : 'An image up to 2 MB.') }}
+            {{ t('profile.ui.photo_hint') }}
         </p>
 
         <div class="pr-actions pr-avatar-actions">
             @if($details?->avatar)
                 <button type="submit" form="pr-remove-avatar-form" class="pr-button-secondary">
-                    {{ t('profile.ui.remove_photo', [], app()->getLocale() === 'lt' ? 'Pašalinti nuotrauką' : 'Remove photo') }}
+                    {{ t('profile.ui.remove_photo') }}
                 </button>
             @endif
 

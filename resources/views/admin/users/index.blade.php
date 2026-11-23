@@ -24,7 +24,7 @@
                                     <span class="text-muted">—</span>
                                 @else
                                     @foreach($user->roles as $role)
-                                        <span class="badge bg-primary">{{ $role->name }}</span>
+                                        <span class="badge bg-primary">{{ t('admin.roles.' . $role->name, $role->name) }}</span>
                                     @endforeach
                                 @endif
                             </td>

@@ -156,7 +156,7 @@
                                 @endif
                             </span>
                             <span class="admin-game__badge-copy">
-                                <strong>{{ $badge->name }}</strong>
+                                <strong>{{ $badge->translated_name }}</strong>
                                 <small>{{ $badge->key }}</small>
                             </span>
                             <x-lucide-arrow-up-right class="aurora-icon admin-game__badge-arrow" width="16" height="16"

@@ -1,5 +1,5 @@
 <h5 class="fw-bold mt-5 mb-3">
-    Įgūdžiai tobulėjimui
+    {{ t('dashboard.skills_title') }}
 </h5>
 
 <div class="row g-4 mb-4">
@@ -18,13 +18,12 @@
                         </p>
 
                         <div class="progress mb-1" style="height: 5px;">
-                            <div class="progress-bar bg-success"
-                                 style="width: {{ $skill->progress }}%;">
+                            <div class="progress-bar bg-success" style="width: {{ $skill->progress }}%;">
                             </div>
                         </div>
 
                         <small class="text-muted">
-                            Progresas: {{ $skill->progress }}%
+                            {{ t('public.progress') }}: {{ $skill->progress }}%
                         </small>
                     </div>
                 </div>
@@ -34,7 +33,8 @@
         {{-- Empty state --}}
         <div class="col-12">
             <div class="dashboard-card p-4 text-center text-muted">
-                Dar nepridėjai jokių įgūdžių <x-lucide-sprout class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" />
+                {{ t('dashboard.no_skills') }} <x-lucide-sprout class="aurora-icon" width="20" height="20"
+                    aria-hidden="true" focusable="false" />
             </div>
         </div>
     @endif

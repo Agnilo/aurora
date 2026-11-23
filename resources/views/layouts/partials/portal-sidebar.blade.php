@@ -59,10 +59,9 @@
         </nav>
     </div>
     <button class="aurora-rail-toggle" type="button" data-rail-toggle hidden aria-controls="aurora-sidebar"
-        aria-expanded="false"
-        aria-label="{{ t('app_shell.sidebar_expand', app()->getLocale() === 'lt' ? 'Išskleisti meniu' : 'Expand menu') }}"
-        data-expand-label="{{ t('app_shell.sidebar_expand', app()->getLocale() === 'lt' ? 'Išskleisti meniu' : 'Expand menu') }}"
-        data-collapse-label="{{ t('app_shell.sidebar_collapse', app()->getLocale() === 'lt' ? 'Suskleisti meniu' : 'Collapse menu') }}">
+        aria-expanded="false" aria-label="{{ t('app_shell.sidebar_expand') }}"
+        data-expand-label="{{ t('app_shell.sidebar_expand') }}"
+        data-collapse-label="{{ t('app_shell.sidebar_collapse') }}">
         <span class="aurora-rail-expand-icon"><x-lucide-chevron-right class="aurora-icon" width="17" height="17"
                 aria-hidden="true" focusable="false" /></span>
         <span class="aurora-rail-collapse-icon"><x-lucide-chevron-left class="aurora-icon" width="17" height="17"

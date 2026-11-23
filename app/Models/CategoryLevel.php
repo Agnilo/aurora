@@ -35,10 +35,11 @@ class CategoryLevel extends Model
 
     public function getProgressPercentAttribute(): float
     {
-        $xp  = $this->xp ?? 0;
+        $xp = $this->xp ?? 0;
         $max = $this->xp_next ?? 100;
 
-        if ($max <= 0) return 0;
+        if ($max <= 0)
+            return 0;
 
         return max(0, min(100, ($xp / $max) * 100));
     }
@@ -52,14 +53,14 @@ class CategoryLevel extends Model
     {
         return (int) round(fmod($this->progress_percent, 10) * 10);
     }
-    
+
     public function getLevelNameAttribute(): string
     {
         return match (true) {
-            $this->level <= 1 => 'Seed',
-            $this->level <= 2 => 'Growing',
-            $this->level <= 4 => 'Stable',
-            default           => 'Thriving',
+            $this->level <= 1 => t('gamification.area_level.seed'),
+            $this->level <= 2 => t('gamification.area_level.growing'),
+            $this->level <= 4 => t('gamification.area_level.stable'),
+            default => t('gamification.area_level.thriving'),
         };
     }
 

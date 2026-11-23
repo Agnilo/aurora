@@ -4,7 +4,7 @@
 
 <div class="container py-4">
 
-    <h1 class="fw-bold mb-4">Pridėti ženklelį</h1>
+    <h1 class="fw-bold mb-4">{{ t('admin.game_overview.add_badge') }}</h1>
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -16,11 +16,11 @@
 
                 {{-- CATEGORY --}}
                 <div class="mb-3">
-                    <label class="form-label">Kategorija</label>
+                    <label class="form-label">{{ t('admin.consistency.category') }}</label>
                     <select name="badge_category_id"
                             class="form-select @error('badge_category_id') is-invalid @enderror"
                             required>
-                        <option value="">— Pasirinkite —</option>
+                        <option value="">{{ t('admin.consistency.choose') }}</option>
 
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}"
@@ -39,7 +39,7 @@
 
                 {{-- NAME --}}
                 <div class="mb-3">
-                    <label class="form-label">Pavadinimas</label>
+                    <label class="form-label">{{ t('admin.consistency.name') }}</label>
                     <input type="text"
                            name="name"
                            class="form-control @error('name') is-invalid @enderror"
@@ -53,7 +53,7 @@
 
                 {{-- DESCRIPTION --}}
                 <div class="mb-3">
-                    <label class="form-label">Aprašymas</label>
+                    <label class="form-label">{{ t('goals.description') }}</label>
                     <textarea name="description"
                               class="form-control @error('description') is-invalid @enderror"
                               rows="3">{{ old('description') }}</textarea>
@@ -65,14 +65,14 @@
 
                 {{-- ICON IMAGE --}}
                 <div class="mb-4">
-                    <label class="form-label">Ženklelio paveikslėlis</label>
+                    <label class="form-label">{{ t('admin.badge_image') }}</label>
                     <input type="file"
                            name="icon"
                            class="form-control @error('icon') is-invalid @enderror"
                            accept="image/*">
 
                     <div class="form-text">
-                        PNG / JPG / WEBP, rekomenduojama 256×256
+                        {{ t('admin.badge_image_hint') }}
                     </div>
 
                     @error('icon')
@@ -85,7 +85,7 @@
 
                     {{-- TASKS --}}
                     <div class="condition-field d-none" data-category="task">
-                        <label class="form-label">Užbaigtų užduočių skaičius</label>
+                        <label class="form-label">{{ t('admin.tasks_completed_count') }}</label>
                         <input type="number"
                                name="condition[tasks_completed]"
                                class="form-control"
@@ -94,7 +94,7 @@
 
                     {{-- STREAK --}}
                     <div class="condition-field d-none" data-category="streak">
-                        <label class="form-label">Dienų streak</label>
+                        <label class="form-label">{{ t('admin.consistency.streak_days') }}</label>
                         <input type="number"
                                name="condition[days]"
                                class="form-control"
@@ -103,7 +103,7 @@
 
                     {{-- GOALS --}}
                     <div class="condition-field d-none" data-category="goals">
-                        <label class="form-label">Užbaigtų tikslų skaičius</label>
+                        <label class="form-label">{{ t('admin.goals_completed_count') }}</label>
                         <input type="number"
                                name="condition[goals_completed]"
                                class="form-control"
@@ -112,7 +112,7 @@
 
                     {{-- MILESTONES --}}
                     <div class="condition-field d-none" data-category="milestones">
-                        <label class="form-label">Užbaigtų etapų skaičius</label>
+                        <label class="form-label">{{ t('admin.milestones_completed_count') }}</label>
                         <input type="number"
                                name="condition[milestones_completed]"
                                class="form-control"
@@ -121,7 +121,7 @@
 
                     {{-- LEVEL --}}
                     <div class="condition-field d-none" data-category="level">
-                        <label class="form-label">Pasiektas lygis</label>
+                        <label class="form-label">{{ t('admin.level_reached') }}</label>
                         <input type="number"
                                name="condition[level]"
                                class="form-control"
@@ -134,11 +134,11 @@
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('admin.gamification.badges.index', app()->getLocale()) }}"
                        class="btn btn-outline-secondary">
-                        <x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> Atgal
+                        <x-lucide-arrow-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('preferences.ui.back') }}
                     </a>
 
                     <button class="btn btn-primary">
-                        Sukurti
+                        {{ t('button.create') }}
                     </button>
                 </div>
 

@@ -171,7 +171,7 @@ class GoalController extends Controller
 
             foreach ($validated['milestones'] ?? [] as $milestoneData) {
                 $milestone = $goal->milestones()->create([
-                    'title' => $milestoneData['title'] ?? 'Be pavadinimo',
+                    'title' => $milestoneData['title'] ?? t('goals.untitled'),
                     'deadline' => $milestoneData['deadline'] ?? null,
                 ]);
 
@@ -195,7 +195,7 @@ class GoalController extends Controller
         if ($request->boolean('open_goal'))
             return redirect()->route('goals.show', ['locale' => $locale, 'goal' => $createdGoal]);
         return redirect()->route('goals.index', ['locale' => $locale])
-            ->with('success', 'Tikslas sėkmingai sukurtas!');
+            ->with('success', t('goals.created'));
     }
 
     public function show(string $locale, Goal $goal)
@@ -320,12 +320,12 @@ class GoalController extends Controller
                 foreach (($milestoneData['tasks'] ?? []) as $tIndex => $taskData) {
                     if ($systemXp && empty($taskData['id']) && empty($taskData['priority_id'])) {
                         throw ValidationException::withMessages([
-                            "milestones.$mIndex.tasks.$tIndex.priority_id" => __('validation.required', ['attribute' => 'priority_id']),
+                            "milestones.$mIndex.tasks.$tIndex.priority_id" => t('goals.missing_priority'),
                         ]);
                     }
                     if (!$systemXp && empty($taskData['id']) && !array_key_exists('points', $taskData)) {
                         throw ValidationException::withMessages([
-                            "milestones.$mIndex.tasks.$tIndex.points" => __('validation.required', ['attribute' => 'points']),
+                            "milestones.$mIndex.tasks.$tIndex.points" => t('goals.missing_points'),
                         ]);
                     }
                     if (
@@ -333,7 +333,7 @@ class GoalController extends Controller
                             ->where('milestone_id', $milestoneData['id'] ?? null)->exists()
                     ) {
                         throw ValidationException::withMessages([
-                            "milestones.$mIndex.tasks.$tIndex.id" => __('validation.exists', ['attribute' => 'id']),
+                            "milestones.$mIndex.tasks.$tIndex.id" => t('goals.invalid_task'),
                         ]);
                     }
                 }
@@ -468,7 +468,7 @@ class GoalController extends Controller
 
             return redirect()
                 ->route('goals.index', ['locale' => $locale])
-                ->with('success', 'Tikslas atnaujintas!');
+                ->with('success', t('goals.updated'));
         }, 3);
     }
 
@@ -491,7 +491,7 @@ class GoalController extends Controller
 
             return redirect()
                 ->route('goals.index', ['locale' => $locale])
-                ->with('success', 'Tikslas sėkmingai ištrintas!');
+                ->with('success', t('goals.deleted'));
         });
     }
 }

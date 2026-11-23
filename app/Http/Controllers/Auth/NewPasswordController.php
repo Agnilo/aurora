@@ -64,13 +64,13 @@ class NewPasswordController extends Controller
                 ->route('login', [
                     'locale' => app()->getLocale(),
                 ])
-                ->with('status', __($status));
+                ->with('status', t($status));
         }
 
         return back()
             ->withInput($request->only('email'))
             ->withErrors([
-                'email' => __($status),
+                'email' => t($status),
             ]);
     }
 }

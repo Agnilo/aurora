@@ -27,8 +27,7 @@
 
 </head>
 
-<body class="aurora-app"
-    data-calendar-load-error-message="{{ t('dashboard.ui.calendar_load_error', app()->getLocale() === 'lt' ? 'Kalendoriaus nepavyko atnaujinti. Bandyk dar kartą.' : 'The calendar could not be updated. Please try again.') }}">
+<body class="aurora-app" data-calendar-load-error-message="{{ t('dashboard.ui.calendar_load_error') }}">
 
     @php
         $appBackground = 'images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg';

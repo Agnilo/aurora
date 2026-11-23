@@ -21,10 +21,10 @@
 
             <div class="pr-level-copy">
                 <span>
-                    {{ t('profile.ui.current_level', [], app()->getLocale() === 'lt' ? 'Dabartinis lygis' : 'Current level') }}
+                    {{ t('profile.ui.current_level') }}
                 </span>
                 <strong>
-                    {{ t('profile.ui.level_value', ['level' => $game->level ?? 1], app()->getLocale() === 'lt' ? ($game->level ?? 1) . ' lygis' : 'Level ' . ($game->level ?? 1)) }}
+                    {{ t('profile.ui.level_value', ['level' => $game->level ?? 1]) }}
                 </strong>
             </div>
         </div>
@@ -37,7 +37,7 @@
         <p class="pr-xp-label">
             <span>{{ $xp }} / {{ $xpNext }} XP</span>
             <span>
-                {{ t('profile.ui.xp_remaining', ['xp' => $xpRemaining], app()->getLocale() === 'lt' ? 'Iki kito: ' . $xpRemaining . ' XP' : 'Next level: ' . $xpRemaining . ' XP') }}
+                {{ t('profile.ui.xp_remaining', ['xp' => $xpRemaining]) }}
             </span>
         </p>
 
@@ -60,7 +60,7 @@
                             <x-lucide-flame class="aurora-icon" width="16" height="16" aria-hidden="true"
                                 focusable="false" />
                         </span>
-                        {{ t('profile.ui.streak_current', [], app()->getLocale() === 'lt' ? 'Dienų serija' : 'Current streak') }}
+                        {{ t('profile.ui.streak_current') }}
                     </dt>
                     <dd>{{ $streak }}</dd>
                 </div>
@@ -71,7 +71,7 @@
                             <x-lucide-trophy class="aurora-icon" width="16" height="16" aria-hidden="true"
                                 focusable="false" />
                         </span>
-                        {{ t('profile.ui.streak_best', [], app()->getLocale() === 'lt' ? 'Ilgiausia serija' : 'Longest streak') }}
+                        {{ t('profile.ui.streak_best') }}
                     </dt>
                     <dd>{{ $game->streak_best ?? 0 }}</dd>
                 </div>
@@ -94,10 +94,10 @@
         @if($next)
             <div class="pr-reward">
                 <span>
-                    {{ t('profile.ui.next_reward', [], app()->getLocale() === 'lt' ? 'Kitas serijos atlygis' : 'Next streak reward') }}
+                    {{ t('profile.ui.next_reward') }}
                 </span>
                 <p>
-                    {{ t('profile.ui.reward_hint', ['days' => $next['day'] - $streak, 'coins' => $next['coins']], app()->getLocale() === 'lt' ? 'Po ' . ($next['day'] - $streak) . ' d. (+' . $next['coins'] . ' monetų)' : 'In ' . ($next['day'] - $streak) . ' days (+' . $next['coins'] . ' coins)') }}
+                    {{ t('profile.ui.reward_hint', ['days' => $next['day'] - $streak, 'coins' => $next['coins']]) }}
                 </p>
             </div>
         @endif

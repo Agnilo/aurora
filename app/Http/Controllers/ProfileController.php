@@ -87,7 +87,7 @@ class ProfileController extends Controller
 
         return redirect()
             ->route('profile.edit', ['locale' => $locale])
-            ->with('success', t('profile.updated') ?? 'Profilis atnaujintas.');
+            ->with('success', t('profile.updated'));
     }
 
     /**
@@ -148,28 +148,14 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request, $locale): RedirectResponse
     {
-        $isLt = app()->getLocale() === 'lt';
-
         $validated = $request->validate(
             [
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
             ],
             [
-                'current_password.required' => t(
-                    'profile.ui.current_password_required',
-                    [],
-                    $isLt
-                    ? 'Įvesk esamą slaptažodį.'
-                    : 'Enter your current password.'
-                ),
-                'current_password.current_password' => t(
-                    'profile.ui.current_password_invalid',
-                    [],
-                    $isLt
-                    ? 'Esamas slaptažodis neteisingas.'
-                    : 'The current password is incorrect.'
-                ),
+                'current_password.required' => t('profile.ui.current_password_required'),
+                'current_password.current_password' => t('profile.ui.current_password_invalid'),
             ]
         );
 
@@ -183,13 +169,7 @@ class ProfileController extends Controller
             ->route('profile.password.form', ['locale' => $locale])
             ->with(
                 'success',
-                t(
-                    'profile.ui.password_updated',
-                    [],
-                    $isLt
-                    ? 'Slaptažodis pakeistas.'
-                    : 'Password updated.'
-                )
+                t('profile.ui.password_updated')
             );
     }
 
@@ -255,13 +235,7 @@ class ProfileController extends Controller
 
             return back()->with(
                 'success',
-                t(
-                    'profile.ui.photo_removed',
-                    [],
-                    app()->getLocale() === 'lt'
-                    ? 'Profilio nuotrauka pašalinta.'
-                    : 'Profile photo removed.'
-                )
+                t('profile.ui.photo_removed')
             );
         }
 
@@ -288,13 +262,7 @@ class ProfileController extends Controller
 
         return back()->with(
             'success',
-            t(
-                'profile.ui.photo_updated',
-                [],
-                app()->getLocale() === 'lt'
-                ? 'Profilio nuotrauka atnaujinta.'
-                : 'Profile photo updated.'
-            )
+            t('profile.ui.photo_updated')
         );
     }
 
@@ -318,7 +286,7 @@ class ProfileController extends Controller
             $details->save();
         }
 
-        return back()->with('success', 'Viršelis atnaujintas!');
+        return back()->with('success', t('profile.cover_updated'));
     }
 
     public function badges($locale, StreakVisibilityService $streakVisibility)

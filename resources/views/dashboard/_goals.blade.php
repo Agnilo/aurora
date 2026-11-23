@@ -1,60 +1,61 @@
 <h5 class="fw-bold mt-5 mb-3">
-    Tikslai arba projektai
+    {{ t('dashboard.goals_or_projects') }}
 </h5>
 
 <div class="row g-4">
 
     {{-- Featured --}}
     @if($featuredGoals->isNotEmpty())
-    <h5 class="fw-bold mt-5 mb-3">
-        Pagrindiniai tikslai
-    </h5>
+        <h5 class="fw-bold mt-5 mb-3">
+            {{ t('dashboard.featured_goals_title') }}
+        </h5>
 
-    <div class="featured-carousel" data-count="{{ $featuredGoals->count() }}">
+        <div class="featured-carousel" data-count="{{ $featuredGoals->count() }}">
 
-        <button class="carousel-btn prev"><x-lucide-chevron-left class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
+            <button class="carousel-btn prev"><x-lucide-chevron-left class="aurora-icon" width="20" height="20"
+                    aria-hidden="true" focusable="false" /></button>
 
-        <div class="carousel-track">
-            @foreach($featuredGoals as $goal)
-                <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
-                class="featured-card">
+            <div class="carousel-track">
+                @foreach($featuredGoals as $goal)
+                    <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
+                        class="featured-card">
 
-                    <div class="featured-title">
-                        {{ $goal->title }}
-                    </div>
-
-                    <div class="featured-progress">
-                        <div class="bar">
-                            <div class="fill"
-                                style="
-                                    background-color: {{ $goal->category->color }};
-                                    width: {{ $goal->progress }}%;
-                                    "></div>
+                        <div class="featured-title">
+                            {{ $goal->title }}
                         </div>
-                        <small>{{ $goal->progress }}%</small>
-                    </div>
 
-                </a>
-            @endforeach
+                        <div class="featured-progress">
+                            <div class="bar">
+                                <div class="fill" style="
+                                            background-color: {{ $goal->category->color }};
+                                            width: {{ $goal->progress }}%;
+                                            "></div>
+                            </div>
+                            <small>{{ $goal->progress }}%</small>
+                        </div>
+
+                    </a>
+                @endforeach
+            </div>
+
+            <button class="carousel-btn next"><x-lucide-chevron-right class="aurora-icon" width="20" height="20"
+                    aria-hidden="true" focusable="false" /></button>
+
         </div>
-
-        <button class="carousel-btn next"><x-lucide-chevron-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></button>
-
-    </div>
     @endif
 
     {{-- Other goals --}}
     @foreach($recentGoals as $goal)
         <div class="col-md-4">
             <a href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
-               class="goal-item p-3 rounded d-block shadow-sm">
+                class="goal-item p-3 rounded d-block shadow-sm">
 
                 <div class="fw-semibold mb-1">
                     {{ $goal->title }}
                 </div>
 
                 <small class="text-muted">
-                    {{ $goal->progress }}% atlikta
+                    {{ t('goals.percent_complete', ['percent' => $goal->progress]) }}
                 </small>
             </a>
         </div>

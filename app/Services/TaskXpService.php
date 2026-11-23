@@ -21,7 +21,8 @@ class TaskXpService
         foreach (\App\Models\Habit::where('user_id', $user->id)->get() as $habit) {
             $habit->priority_id ??= TaskPriority::where('name', 'Medium')->value('id');
             $habit->points = $this->pointsForPriority((int) $habit->priority_id);
-            if ($habit->isDirty()) $habit->save();
+            if ($habit->isDirty())
+                $habit->save();
         }
         Task::query()
             ->ownedBy($user)
@@ -116,11 +117,11 @@ class TaskXpService
         $level = strtolower($priority?->name ?? '');
 
         if (!in_array($level, ['low', 'medium', 'high'], true)) {
-            throw ValidationException::withMessages(['milestones' => 'Choose a task difficulty.']);
+            throw ValidationException::withMessages(['milestones' => t('goals.choose_difficulty')]);
         }
 
         $defaults = ['low' => 5, 'medium' => 10, 'high' => 20];
-        $rule = XpRule::where('key', 'task_difficulty_'.$level)->first();
+        $rule = XpRule::where('key', 'task_difficulty_' . $level)->first();
 
         if ($rule && !$rule->active) {
             return 0;

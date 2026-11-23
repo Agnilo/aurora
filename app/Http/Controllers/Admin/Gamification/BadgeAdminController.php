@@ -50,7 +50,7 @@ class BadgeAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.badges.index', $locale)
-            ->with('success', 'Badge sukurtas');
+            ->with('success', t('admin.badge_created'));
     }
 
     public function edit($locale, Badge $badge)
@@ -79,14 +79,14 @@ class BadgeAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.badges.index', $locale)
-            ->with('success', 'Badge atnaujintas');
+            ->with('success', t('admin.badge_updated'));
     }
 
     public function destroy($locale, Badge $badge)
     {
         $badge->delete();
 
-        return back()->with('success', 'Badge ištrintas');
+        return back()->with('success', t('admin.badge_deleted'));
     }
 
     private function generateKey(string $name): string
@@ -120,7 +120,7 @@ class BadgeAdminController extends Controller
                 'goals' => $rules['condition.goals_completed'] = 'required|integer|min:1',
                 'milestones' => $rules['condition.milestones_completed'] = 'required|integer|min:1',
                 'level' => $rules['condition.level'] = 'required|integer|min:1',
-                default => abort(422, 'Unsupported badge category.'),
+                default => abort(422, t('admin.unsupported_badge_category')),
             };
         }
 

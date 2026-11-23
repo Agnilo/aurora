@@ -32,7 +32,7 @@ class LanguageController extends Controller
         ]);
 
         $data['is_default'] = !empty($data['is_default']);
-        $data['is_active']  = !empty($data['is_active']);
+        $data['is_active'] = !empty($data['is_active']);
 
         if ($data['is_default']) {
             Language::query()->update(['is_default' => false]);
@@ -42,7 +42,7 @@ class LanguageController extends Controller
 
         return redirect()
             ->route('admin.languages.index', $locale)
-            ->with('success', 'Kalba sukurta.');
+            ->with('success', t('admin.language_created'));
     }
 
     public function edit($locale, Language $language)
@@ -59,7 +59,7 @@ class LanguageController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $data['is_active']  = !empty($data['is_active']);
+        $data['is_active'] = !empty($data['is_active']);
         $data['is_default'] = !empty($data['is_default']);
 
 
@@ -76,7 +76,7 @@ class LanguageController extends Controller
 
         return redirect()
             ->route('admin.languages.index', $locale)
-            ->with('success', 'Kalba atnaujinta.');
+            ->with('success', t('admin.language_updated'));
     }
 
 
@@ -84,11 +84,11 @@ class LanguageController extends Controller
     public function destroy($locale, Language $language)
     {
         if ($language->is_default) {
-            return back()->with('error', 'Negalite ištrinti numatytosios kalbos.');
+            return back()->with('error', t('admin.consistency.cannot_delete_default_language'));
         }
 
         $language->delete();
 
-        return back()->with('success', 'Kalba ištrinta.');
+        return back()->with('success', t('admin.language_deleted'));
     }
 }

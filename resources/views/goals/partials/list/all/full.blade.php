@@ -1,8 +1,8 @@
 @if($goals->isEmpty())
     <div class="alert alert-light border shadow-sm">
-        <x-lucide-target class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> Dar neturi tikslų!
+        <x-lucide-target class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('goals.noGoalsYet') }}
         <a href="{{ route('goals.create', ['locale' => app()->getLocale()]) }}" 
-           class="fw-semibold text-warning">Sukurk pirmąjį</a>.
+           class="fw-semibold text-warning">{{ t('goals.createFirst') }}</a>.
     </div>
 @else
 
@@ -52,7 +52,7 @@
             <div class="small mt-2">
 
                 <span class="me-3">{{ t('goals.deadline') }}:
-                    <strong>{{ $goal->deadline?->format('Y-m-d') ?? 'Nenurodytas' }}</strong>
+                    <strong>{{ $goal->deadline?->format('Y-m-d') ?? t('goals.unspecified') }}</strong>
                 </span>
 
                 <span class="me-3">{{ t('goals.category') }}:
@@ -208,7 +208,7 @@
 
                 <form action="{{ route('goals.destroy', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}"
                       method="POST"
-                      onsubmit="return confirm('Ar tikrai nori ištrinti šį tikslą?');">
+                      data-confirm="{{ t('goals.confirm_delete') }}" onsubmit="return confirm(this.dataset.confirm)">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-sm btn-danger">{{ t('button.delete') }}</button>

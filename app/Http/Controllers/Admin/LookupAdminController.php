@@ -182,7 +182,7 @@ class LookupAdminController extends Controller
         $mainValue = $request->input("value.$mainLang");
 
         if (!$mainValue) {
-            return back()->withErrors(['value' => 'Main language value is required']);
+            return back()->withErrors(['value' => t('lookup.main_value_required')]);
         }
 
         $insert = [
@@ -235,7 +235,7 @@ class LookupAdminController extends Controller
                 'locale' => $locale,
                 'section' => $section
             ])
-            ->with('success', 'Lookup created.');
+            ->with('success', t('lookup.created'));
     }
 
     public function edit($locale, string $section, string $type, int $id)
@@ -365,7 +365,7 @@ class LookupAdminController extends Controller
                 'locale' => $locale,
                 'section' => $section,
             ])
-            ->with('success', 'Lookup translations updated.');
+            ->with('success', t('lookup.updated'));
     }
 
     public function destroy($locale, string $section, string $type, int $id)
@@ -396,7 +396,7 @@ class LookupAdminController extends Controller
 
         return redirect()
             ->route('admin.lookups.index', ['locale' => $locale, 'section' => $section])
-            ->with('success', 'Lookup deleted.');
+            ->with('success', t('lookup.deleted'));
     }
 
 

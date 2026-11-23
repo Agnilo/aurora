@@ -1,6 +1,6 @@
 @extends('admin.lookups.layout')
 @section('lookups-content')
-    <h2 class="admin-title mb-3">{{ $title }} — {{ $item->name }}</h2>
+    <h2 class="admin-title mb-3">{{ $title }} — {{ t($fullKey, $item->name) }}</h2>
     <div class="admin-form-card">
         <form
             action="{{ route('admin.lookups.update', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $type, 'id' => $item->id]) }}"

@@ -74,7 +74,7 @@ class BonusContextAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.bonus-contexts.index', $locale)
-            ->with('success', 'Bonus kontekstas sukurtas');
+            ->with('success', t('admin.bonus_context_created'));
     }
 
     public function edit($locale, BonusContext $bonusContext)
@@ -136,6 +136,6 @@ class BonusContextAdminController extends Controller
 
         return redirect()
             ->route('admin.gamification.bonus-contexts.index', $locale)
-            ->with('success', 'Bonus kontekstas atnaujintas');
+            ->with('success', t('admin.bonus_context_updated'));
     }
 }
