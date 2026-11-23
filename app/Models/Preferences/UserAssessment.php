@@ -50,6 +50,34 @@ class UserAssessment extends Model
         ];
     }
 
+    public function effectiveSurveyPreferences(): array
+    {
+        $recommendations = $this->recommended_preferences;
+        if (empty($recommendations) && $this->completed_at) {
+            $previous = self::query()
+                ->where('user_id', $this->user_id)
+                ->where('type', self::TYPE_ONBOARDING)
+                ->whereNotNull('recommended_preferences')
+                ->where(function ($query) {
+                    $query->where('completed_at', '<', $this->completed_at)
+                        ->orWhere(function ($sameTime) {
+                            $sameTime->where('completed_at', $this->completed_at)->where('id', '<', $this->id);
+                        });
+                })
+                ->orderByDesc('completed_at')->orderByDesc('id')
+                ->get(['recommended_preferences'])
+                ->first(fn($item) => !empty($item->recommended_preferences));
+            $recommendations = $previous?->recommended_preferences;
+        }
+
+        $recommendations ??= [];
+        if (($recommendations['gamification_level'] ?? null) === UserPreference::GAMIFICATION_HIDDEN) {
+            $recommendations['xp_mode'] = UserPreference::XP_SYSTEM;
+            $recommendations['show_streak'] = false;
+        }
+        return $recommendations;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

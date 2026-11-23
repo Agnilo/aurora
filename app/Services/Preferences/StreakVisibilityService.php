@@ -22,14 +22,14 @@ class StreakVisibilityService
         }
 
         $answer = $assessment->answers()
-            ->whereHas('assessmentQuestion', fn ($query) => $query->where('code', 'show_streak'))
+            ->whereHas('assessmentQuestion', fn($query) => $query->where('code', 'show_streak'))
             ->first()?->value;
 
         return match ($answer) {
             'hide' => false,
             'show', 'unsure' => true,
             // The hidden-gamification path never asks the streak question.
-            default => $assessment->recommended_preferences['show_streak'] ?? true,
+            default => $assessment->effectiveSurveyPreferences()['show_streak'] ?? true,
         };
     }
 }

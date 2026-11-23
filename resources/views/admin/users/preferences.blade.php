@@ -1,11 +1,31 @@
 @php
-    $preference = $user->preferences;
+    $preference = $editable ? $user->preferences : null;
     $selectedCategories = old('priority_category_ids', $preference?->priority_category_ids ?? []);
     $priorityMode = old('priority_mode', match (true) {
         $preference?->priority_category_ids === null => 'survey',
         $preference->priority_category_ids === [] => 'none',
         default => 'custom',
     });
+    $selectedSurvey = [];
+    $categoryLabels = $categories->pluck('translated_name', 'id');
+    if ($activeAssessment) {
+        $answers = $activeAssessment->effectiveSurveyPreferences();
+        $labels = [];
+        foreach (['gamification' => 'gamification_level', 'xp' => 'xp_mode'] as $field => $key) {
+            if (isset($answers[$key])) {
+                $labels[$field] = t('admin_user_preferences.' . $field . '.' . $answers[$key]);
+            }
+        }
+        if (isset($answers['show_streak'])) {
+            $labels['streak'] = t('admin_user_preferences.streak.' . ($answers['show_streak'] ? 'show' : 'hide'));
+        }
+        if (isset($answers['priority_category_ids'])) {
+            $ids = $answers['priority_category_ids'];
+            $labels['priority'] = $ids === [] ? t('admin_user_preferences.priority.none')
+                : $categoryLabels->only($ids)->implode(', ');
+        }
+        $selectedSurvey = $labels;
+    }
 @endphp
 
 <section class="card mt-4" aria-labelledby="admin-preferences-title">
@@ -29,22 +49,44 @@
             @method('PUT')
 
             <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label for="admin-active-assessment"
+                        class="form-label">{{ t('admin_user_preferences.active_assessment') }}</label>
+                    <select id="admin-active-assessment" name="active_assessment_id" class="form-select">
+                        <option value="" disabled>{{ t('admin_user_preferences.no_assessment') }}</option>
+                        @foreach($assessments as $assessment)
+                            <option value="{{ $assessment->id }}" @selected((string) $activeAssessment?->id === (string) $assessment->id)>
+                                {{ t('preferences.admin.types.' . $assessment->type, $assessment->type) }}
+                                ({{ $assessment->completed_at?->format('Y-m-d') }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="col-md-6">
                     <label for="admin-gamification-level"
                         class="form-label">{{ t('admin_user_preferences.gamification_level') }}</label>
-                    <select id="admin-gamification-level" name="gamification_level" class="form-select" required>
+                    <select id="admin-gamification-level" name="gamification_level" @disabled(!$editable)
+                        class="form-select" required>
                         @foreach(['survey', 'hidden', 'subtle', 'prominent'] as $value)
-                            <option value="{{ $value }}" @selected(old('gamification_level', $preference?->gamification_level ?? 'survey') === $value)>
-                                {{ t('admin_user_preferences.gamification.' . $value) }}</option>
+                            <option @if($value === 'survey') data-survey-field="gamification"
+                            data-survey-base="{{ t('admin_user_preferences.gamification.survey') }}" @endif
+                                value="{{ $value }}" @selected(old('gamification_level', $preference?->gamification_level ?? 'survey') === $value)>
+                                @if($value === 'survey'){{ t('admin_user_preferences.gamification.survey') }}{{ !empty($selectedSurvey['gamification']) ? ' (' . $selectedSurvey['gamification'] . ')' : '' }}@else{{ t('admin_user_preferences.gamification.' . $value) }}@endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
 
                 <div class="col-md-6">
                     <label for="admin-xp-mode" class="form-label">{{ t('admin_user_preferences.xp_mode') }}</label>
-                    <select id="admin-xp-mode" name="xp_mode" class="form-select" required>
+                    <select id="admin-xp-mode" name="xp_mode" @disabled(!$editable) class="form-select" required>
                         @foreach(['survey', 'manual', 'system'] as $value)
-                            <option value="{{ $value }}" @selected(old('xp_mode', $preference?->xp_mode ?? 'survey') === $value)>{{ t('admin_user_preferences.xp.' . $value) }}</option>
+                            <option @if($value === 'survey') data-survey-field="xp"
+                            data-survey-base="{{ t('admin_user_preferences.xp.survey') }}" @endif value="{{ $value }}"
+                                @selected(old('xp_mode', $preference?->xp_mode ?? 'survey') === $value)>
+                                @if($value === 'survey'){{ t('admin_user_preferences.xp.survey') }}{{ !empty($selectedSurvey['xp']) ? ' (' . $selectedSurvey['xp'] . ')' : '' }}@else{{ t('admin_user_preferences.xp.' . $value) }}@endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -55,41 +97,35 @@
                     @php
                         $streakChoice = $preference?->show_streak === null ? 'survey' : ($preference->show_streak ? 'show' : 'hide');
                     @endphp
-                    <select id="admin-show-streak" name="show_streak" class="form-select" required>
+                    <select id="admin-show-streak" name="show_streak" @disabled(!$editable) class="form-select"
+                        required>
                         @foreach(['survey', 'show', 'hide'] as $value)
-                            <option value="{{ $value }}" @selected(old('show_streak', $streakChoice) === $value)>
-                                {{ t('admin_user_preferences.streak.' . $value) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="admin-active-assessment"
-                        class="form-label">{{ t('admin_user_preferences.active_assessment') }}</label>
-                    <select id="admin-active-assessment" name="active_assessment_id" class="form-select">
-                        <option value="">{{ t('admin_user_preferences.no_assessment') }}</option>
-                        @foreach($assessments as $assessment)
-                            <option value="{{ $assessment->id }}" @selected((string) old('active_assessment_id', $preference?->active_assessment_id) === (string) $assessment->id)>
-                                #{{ $assessment->id }} ·
-                                {{ t('preferences.admin.types.' . $assessment->type, $assessment->type) }} ·
-                                {{ $assessment->completed_at?->format('Y-m-d') }}
+                            <option @if($value === 'survey') data-survey-field="streak"
+                            data-survey-base="{{ t('admin_user_preferences.streak.survey') }}" @endif
+                                value="{{ $value }}" @selected(old('show_streak', $streakChoice) === $value)>
+                                @if($value === 'survey'){{ t('admin_user_preferences.streak.survey') }}{{ !empty($selectedSurvey['streak']) ? ' (' . $selectedSurvey['streak'] . ')' : '' }}@else{{ t('admin_user_preferences.streak.' . $value) }}@endif
                             </option>
                         @endforeach
                     </select>
                 </div>
             </div>
 
-            <fieldset class="mt-4">
-                <legend class="h6">{{ t('admin_user_preferences.priority_categories') }}</legend>
-                <div class="d-flex flex-wrap gap-3 mb-3">
+            <div class="mt-4 col-md-6">
+                <label for="admin-priority-mode"
+                    class="form-label">{{ t('admin_user_preferences.priority_categories') }}</label>
+                <select id="admin-priority-mode" name="priority_mode" @disabled(!$editable) class="form-select"
+                    aria-controls="admin-priority-areas">
                     @foreach(['survey', 'none', 'custom'] as $mode)
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="radio" name="priority_mode" value="{{ $mode }}"
-                                @checked($priorityMode === $mode)>
-                            {{ t('admin_user_preferences.priority.' . $mode) }}
-                        </label>
+                        <option value="{{ $mode }}" @selected($priorityMode === $mode)
+                           @if($mode === 'survey') data-survey-field="priority"
+                        data-survey-base="{{ t('admin_user_preferences.priority.survey') }}" @endif>
+                            {{ t('admin_user_preferences.priority.' . $mode) }}{{ $mode === 'survey' && !empty($selectedSurvey['priority']) ? ' (' . $selectedSurvey['priority'] . ')' : '' }}
+                        </option>
                     @endforeach
-                </div>
+                </select>
+            </div>
+            <fieldset id="admin-priority-areas" class="mt-3" @if($priorityMode !== 'custom') hidden disabled @endif>
+                <legend class="visually-hidden">{{ t('admin_user_preferences.priority_categories') }}</legend>
                 <div class="d-flex flex-wrap gap-3">
                     @foreach($categories as $category)
                         <label class="form-check-label">
@@ -101,70 +137,62 @@
                 </div>
             </fieldset>
 
-            <button class="btn btn-primary mt-4" type="submit">{{ t('button.save') }}</button>
-        </form>
-
-        <div class="mt-4 border-top pt-3">
-            <h3 class="h6">{{ t('admin_user_preferences.assessment_answers') }}</h3>
-            @if($activeAssessment)
-                <p class="text-muted">{{ t('admin_user_preferences.assessment_version') }}
-                    {{ $activeAssessment->questionnaire_version }} ·
-                    {{ $activeAssessment->completed_at?->format('Y-m-d H:i') }}</p>
-                <dl class="row">
-                    @foreach($activeAssessment->answers->filter(fn($answer) => $answer->assessmentQuestion?->profile_dimension === null) as $answer)
-                        @php
-                            $question = $answer->assessmentQuestion;
-                            $raw = (array) $answer->value;
-                            $labels = collect($question->translated_options)
-                                ->filter(fn($option) => in_array((string) $option['value'], array_map('strval', $raw), true))
-                                ->pluck('label')->implode(', ');
-                        @endphp
-                        <dt class="col-sm-4">{{ $question->translated_text }}</dt>
-                        <dd class="col-sm-8">{{ $labels ?: '—' }}</dd>
-                    @endforeach
-                </dl>
-
-                @php
-                    $recommended = $activeAssessment->recommended_preferences ?? [];
-                    $recommendedAreas = $categories
-                        ->filter(fn($category) => in_array($category->id, $recommended['priority_category_ids'] ?? [], true))
-                        ->map(fn($category) => $category->translated_name)
-                        ->implode(', ');
-                @endphp
-                <h3 class="h6">{{ t('admin_user_preferences.recommendations') }}</h3>
-                <dl class="row">
-                    <dt class="col-sm-4">{{ t('admin_user_preferences.gamification_level') }}</dt>
-                    <dd class="col-sm-8">
-                        {{ isset($recommended['gamification_level']) ? t('admin_user_preferences.gamification.' . $recommended['gamification_level']) : '—' }}
-                    </dd>
-                    <dt class="col-sm-4">{{ t('admin_user_preferences.xp_mode') }}</dt>
-                    <dd class="col-sm-8">
-                        {{ isset($recommended['xp_mode']) ? t('admin_user_preferences.xp.' . $recommended['xp_mode']) : '—' }}
-                    </dd>
-                    <dt class="col-sm-4">{{ t('admin_user_preferences.show_streak') }}</dt>
-                    <dd class="col-sm-8">
-                        {{ isset($recommended['show_streak']) ? t('admin_user_preferences.streak.' . ($recommended['show_streak'] ? 'show' : 'hide')) : '—' }}
-                    </dd>
-                    <dt class="col-sm-4">{{ t('admin_user_preferences.priority_categories') }}</dt>
-                    <dd class="col-sm-8">{{ $recommendedAreas ?: t('admin_user_preferences.priority.none') }}</dd>
-                </dl>
-
+            <div class="mt-4 border-top pt-3">
                 <h3 class="h6">{{ t('admin_user_preferences.motivation_profile') }}</h3>
-                <dl class="row">
-                    @foreach($activeAssessment->profile_scores ?? [] as $type => $score)
-                        <dt class="col-sm-4">{{ t('preferences.admin.dimensions.' . $type) }}</dt>
-                        <dd class="col-sm-8">{{ $score }} / 14</dd>
+                @if($activeAssessment)
+                    @php
+                        $savedAnswers = $activeAssessment->answers->keyBy('assessmentQuestion.code');
+                        $submitted = (string) old('active_assessment_id') === (string) $activeAssessment->id;
+                    @endphp
+                    @foreach($assessmentQuestions as $question)
+                        @php
+                            $code = $question->code;
+                            $value = $submitted ? old('answers.' . $code) : $savedAnswers->get($code)?->value;
+                        @endphp
+                        <div class="mb-3">
+                            <label class="form-label" for="answer-{{ $code }}">{{ $question->translated_text }}</label>
+                            <select class="form-select" id="answer-{{ $code }}" name="answers[{{ $code }}]"
+                                @disabled(!$editable) required>
+                                <option value=""></option>
+                                @foreach($question->translated_options as $option)
+                                    <option value="{{ $option['value'] }}" @selected((string) $value === (string) $option['value'])>
+                                        {{ $option['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     @endforeach
-                </dl>
-            @else
-                <p class="text-muted">{{ t('admin_user_preferences.no_assessment') }}</p>
+                    <dl class="row">
+                        @foreach($activeAssessment->profile_scores ?? [] as $type => $score)
+                            <dt class="col-sm-4">{{ t('preferences.admin.dimensions.' . $type) }}</dt>
+                            <dd class="col-sm-8">{{ $score }} / 14</dd>
+                        @endforeach
+                    </dl>
+
+
+                @else
+                    <p class="text-muted">{{ t('admin_user_preferences.no_assessment') }}</p>
+                @endif
+            </div>
+            @if($editable)
+                <button class="btn btn-primary mt-4" type="submit">{{ t('button.save') }}</button>
             @endif
-            <p class="text-muted small mb-0">
-                {{ t('admin_user_preferences.confirmed_at') }}:
-                {{ $preference?->confirmed_at?->format('Y-m-d H:i') ?? '—' }} ·
-                {{ t('admin_user_preferences.onboarding_completed_at') }}:
-                {{ $preference?->onboarding_completed_at?->format('Y-m-d H:i') ?? '—' }}
-            </p>
-        </div>
+        </form>
+        <script>
+            (() => {
+                const select = document.getElementById('admin-active-assessment');
+                select.addEventListener('change', () => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('assessment', select.value);
+                    url.hash = 'admin-preferences-title';
+                    window.location.assign(url);
+                });
+                const mode = document.getElementById('admin-priority-mode');
+                const areas = document.getElementById('admin-priority-areas');
+                mode.addEventListener('change', () => {
+                    areas.hidden = areas.disabled = mode.value !== 'custom';
+                });
+            })();
+        </script>
     </div>
 </section>

@@ -8,6 +8,7 @@ use App\Models\Preferences\UserAssessment;
 use App\Models\Preferences\UserPreference;
 use App\Models\User;
 use App\Services\TaskXpService;
+use App\Services\Preferences\OnboardingAssessmentService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,31 +28,37 @@ class UserAdminController extends Controller
     {
         $roles = Role::orderBy('name')->get();
         $user->load('preferences');
-        $assessments = $user->assessments()->whereNotNull('completed_at')
-            ->whereNotNull('profile_scores')->whereNotNull('scoring_version')
-            ->latest('id')->get();
-        $activeAssessment = $assessments->firstWhere('id', $user->preferences?->active_assessment_id);
+        $assessments = $this->completedProfiles($user)->get();
+        $latest = $assessments->first();
+        $activeAssessment = request()->has('assessment')
+            ? $assessments->firstWhere('id', request()->integer('assessment'))
+            : $latest;
+        abort_if(request()->has('assessment') && !$activeAssessment, 404);
         $activeAssessment?->load('answers.assessmentQuestion');
 
         return view('admin.users.edit', [
-            'user'  => $user,
+            'user' => $user,
             'roles' => $roles,
             'categories' => Category::orderBy('order')->orderBy('id')->get(),
             'assessments' => $assessments,
+            'editable' => $latest && $activeAssessment->is($latest),
             'activeAssessment' => $activeAssessment,
+            'assessmentQuestions' => $activeAssessment
+                ? app(OnboardingAssessmentService::class)->adminQuestions()->sortBy('sort_order')
+                : collect(),
         ]);
     }
 
     public function update(Request $request, $locale, User $user)
     {
         $request->validate([
-            'name'  => 'required|string',
+            'name' => 'required|string',
             'email' => 'required|email',
             'roles' => 'array'
         ]);
 
         $user->update([
-            'name'  => $request->name,
+            'name' => $request->name,
             'email' => $request->email,
         ]);
 
@@ -66,6 +73,7 @@ class UserAdminController extends Controller
     public function updatePreferences(Request $request, string $locale, User $user)
     {
         $data = $request->validate([
+            'answers' => ['required', 'array'],
             'gamification_level' => ['required', Rule::in(['survey', 'hidden', 'subtle', 'prominent'])],
             'xp_mode' => ['required', Rule::in(['survey', 'manual', 'system'])],
             'show_streak' => ['required', Rule::in(['survey', 'show', 'hide'])],
@@ -73,11 +81,14 @@ class UserAdminController extends Controller
             'priority_category_ids' => ['sometimes', 'array'],
             'priority_category_ids.*' => ['required', 'integer', 'distinct', Rule::exists('categories', 'id')],
             'active_assessment_id' => [
-                'nullable', 'integer', Rule::exists('user_assessments', 'id')->where(fn ($query) =>
-                    $query->where('user_id', $user->id)
-                        ->whereNotNull('completed_at')
-                        ->whereNotNull('scoring_version')
-                        ->whereNotNull('profile_scores')
+                'required',
+                'integer',
+                Rule::exists('user_assessments', 'id')->where(
+                    fn($query) =>
+                        $query->where('user_id', $user->id)
+                            ->whereNotNull('completed_at')
+                            ->whereNotNull('scoring_version')
+                            ->whereNotNull('profile_scores')
                 ),
             ],
         ]);
@@ -89,13 +100,18 @@ class UserAdminController extends Controller
         }
 
         DB::transaction(function () use ($user, $data) {
+            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $latest = $this->completedProfiles($user)->lockForUpdate()->first();
+            abort_unless($latest && (int) $data['active_assessment_id'] === (int) $latest->id, 409);
             $taskXp = app(TaskXpService::class);
             $previousMode = $taskXp->mode($user);
             $preferences = $user->preferences()->lockForUpdate()->firstOrCreate([]);
 
             $nextChoice = $data['xp_mode'] === 'survey' ? null : $data['xp_mode'];
-            if ($previousMode === UserPreference::XP_MANUAL
-                && $nextChoice === UserPreference::XP_SYSTEM) {
+            if (
+                $previousMode === UserPreference::XP_MANUAL
+                && $nextChoice === UserPreference::XP_SYSTEM
+            ) {
                 $taskXp->rememberManualPoints($user);
             }
 
@@ -116,15 +132,18 @@ class UserAdminController extends Controller
                 || $preferences->xp_mode !== null
                 || $preferences->show_streak !== null
                 || $preferences->priority_category_ids !== null
-                    ? now() : null;
+                ? now() : null;
             $preferences->save();
+            app(OnboardingAssessmentService::class)->reviseActive($user, (int) $latest->id, $data['answers']);
 
             $user->unsetRelation('preferences');
             $currentMode = $taskXp->mode($user);
 
-            if ($previousMode === UserPreference::XP_MANUAL
+            if (
+                $previousMode === UserPreference::XP_MANUAL
                 && $currentMode === UserPreference::XP_SYSTEM
-                && $nextChoice !== UserPreference::XP_SYSTEM) {
+                && $nextChoice !== UserPreference::XP_SYSTEM
+            ) {
                 $taskXp->rememberManualPoints($user);
             }
 
@@ -137,5 +156,11 @@ class UserAdminController extends Controller
 
         return redirect()->route('admin.users.edit', ['locale' => $locale, 'user' => $user->id])
             ->with('success', t('admin_user_preferences.saved'));
+    }
+    private function completedProfiles(User $user)
+    {
+        return $user->assessments()->whereNotNull('completed_at')
+            ->whereNotNull('profile_scores')->whereNotNull('scoring_version')
+            ->orderByDesc('completed_at')->orderByDesc('id');
     }
 }

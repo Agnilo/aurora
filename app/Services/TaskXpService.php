@@ -96,7 +96,7 @@ class TaskXpService
         }
 
         $recommended = app(\App\Services\Preferences\MotivationProfileService::class)
-            ->active($user)?->recommended_preferences ?? [];
+            ->active($user)?->effectiveSurveyPreferences() ?? [];
 
         // The progress-only path did not ask an XP question; it still earns system XP.
         if (($recommended['gamification_level'] ?? null) === UserPreference::GAMIFICATION_HIDDEN) {

@@ -621,8 +621,8 @@
 }
 
 .onb-main {
-    width: min(calc(100% - 44px), 840px);
-    margin: auto;
+    width: min(calc(100% - 44px), 720px);
+    margin: 20px auto 0;
     padding: 28px 0
 }
 
@@ -635,10 +635,10 @@
 
 .onb-heading {
     display: flex;
-    justify-content: space-between;
-    gap: 18px;
-    min-height: 132px;
-    align-items: flex-start
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 24px
 }
 
 .onb-heading h1 {
@@ -664,24 +664,26 @@
     align-items: center;
     gap: 7px;
     list-style: none;
-    margin: 29px 0 0;
+    margin: 0;
     padding: 0
 }
 
 .onb-dots li {
     width: 9px;
     height: 9px;
-    border: 1px solid #aaa0a6;
+    border: 1px solid #c89aaa;
     border-radius: 50%
 }
 
 .onb-dots .is-complete {
-    background: var(--onb-ink);
-    border-color: var(--onb-ink)
+    background: #e9b3c0;
+    border-color: #e9b3c0
 }
 
 .onb-dots .is-current {
-    outline: 2px solid var(--onb-ink);
+    background: #bc8392;
+    border-color: #bc8392;
+    outline: 2px solid #bc8392;
     outline-offset: 3px
 }
 
@@ -711,10 +713,6 @@
 
 .onb-intro .onb-next {
     margin-top: 14px
-}
-
-.onb-steps {
-    min-height: 460px
 }
 
 .onb-step {
@@ -992,6 +990,13 @@
     cursor: pointer
 }
 
+.onb-scale label:not(.motivation-overlay *) {
+    width: 100%;
+    max-width: 48px;
+    justify-self: center;
+    font-size: 13px;
+}
+
 .onb-scale label:has(input:checked) {
     background: #bc8392;
     color: #fff
@@ -1078,6 +1083,7 @@
 
     .onb-main {
         width: calc(100% - 24px);
+        margin-top: 0;
         padding: 18px 0
     }
 
@@ -1087,16 +1093,12 @@
     }
 
     .onb-heading {
-        min-height: 145px;
-        gap: 10px
+        gap: 12px;
+        margin-bottom: 18px
     }
 
     .onb-heading h2 {
         font-size: clamp(21px, 5.7vw, 27px)
-    }
-
-    .onb-steps {
-        min-height: 390px
     }
 
     .onb-intro {

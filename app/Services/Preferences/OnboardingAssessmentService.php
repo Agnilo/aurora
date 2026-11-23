@@ -158,6 +158,36 @@ class OnboardingAssessmentService
         });
     }
 
+    public function adminQuestions(): Collection
+    {
+        return $this->questions()->filter(fn(AssessmentQuestion $question) =>
+            array_key_exists($question->code, HexadScoringService::ITEMS));
+    }
+
+    public function reviseActive(User $user, int $id, array $answers): void
+    {
+        DB::transaction(function () use ($user, $id, $answers) {
+            $settings = $user->preferences()->lockForUpdate()->firstOrFail();
+            abort_unless((int) $settings->active_assessment_id === $id, 409);
+            $record = $user->assessments()->whereKey($id)->whereNotNull('completed_at')
+                ->where('type', UserAssessment::TYPE_ONBOARDING)
+                ->where('questionnaire_version', self::QUESTIONNAIRE_VERSION)
+                ->where('scoring_version', HexadScoringService::SCORING_VERSION)
+                ->lockForUpdate()->firstOrFail();
+            $questions = $this->adminQuestions();
+            $profile = $this->scorer->score($answers);
+            foreach ($profile['normalized_answers'] as $code => $value) {
+                $answer = $record->answers()->firstOrNew(['assessment_question_id' => $questions[$code]->id]);
+                if (!$answer->exists || $answer->value !== $value) {
+                    $answer->fill(['value' => $value, 'answered_at' => now()])->save();
+                }
+            }
+            $record->profile_scores = $profile['profile_scores'];
+            $record->dominant_player_types = $profile['dominant_player_types'];
+            $record->save();
+        });
+    }
+
     private function prepareAnswers(array $answers, bool $includeProfile): array
     {
         $questions = $this->questions();
