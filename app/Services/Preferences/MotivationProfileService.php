@@ -10,6 +10,13 @@ use LogicException;
 
 class MotivationProfileService
 {
+    public function gamificationLevel(User $user): string
+    {
+        return $user->preferences?->gamification_level
+            ?? ($this->active($user)?->effectiveSurveyPreferences()['gamification_level'] ?? null)
+            ?? UserPreference::GAMIFICATION_SUBTLE;
+    }
+
     /** Activate a completed, owned profile without treating settings as confirmed. */
     public function activate(User $user, UserAssessment $assessment): UserAssessment
     {
@@ -22,8 +29,10 @@ class MotivationProfileService
             }
 
             $scores = $record->profile_scores ?? [];
-            if (count($scores) !== count(UserAssessment::PLAYER_TYPES)
-                || array_diff(UserAssessment::PLAYER_TYPES, array_keys($scores))) {
+            if (
+                count($scores) !== count(UserAssessment::PLAYER_TYPES)
+                || array_diff(UserAssessment::PLAYER_TYPES, array_keys($scores))
+            ) {
                 throw new LogicException('The assessment must contain all six player-type scores.');
             }
 

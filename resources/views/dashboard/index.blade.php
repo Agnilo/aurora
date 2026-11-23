@@ -122,6 +122,13 @@
                     aria-label="{{ t('dashboard.ui.companion') }}">
                     <div class="dashboard-ui-companion-top">
                         <h2>{{ t('dashboard.ui.companion') }}</h2>
+                        @if(app(\App\Services\Preferences\MotivationProfileService::class)->gamificationLevel($user) === 'prominent')
+                            <a class="dashboard-ui-badge-count"
+                                href="{{ route('profile.badges', ['locale' => app()->getLocale()]) }}">
+                                <x-lucide-award class="aurora-icon" width="18" height="18" aria-hidden="true" />
+                                {{ t('dashboard.ui.badges') }} · {{ $user->badges()->count() }}
+                            </a>
+                        @endif
                         <div class="dashboard-ui-coins" title="{{ t('dashboard.ui.coins') }}">
                             <x-lucide-coins class="aurora-icon" width="18" height="18" aria-hidden="true" />
                             <strong>{{ $details?->coins ?? 0 }}</strong>
@@ -254,7 +261,8 @@
 
                             <a class="dashboard-ui-task-info"
                                 href="{{ $goal ? route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal]) : route('tasks.edit', ['locale' => app()->getLocale(), 'task' => $task]) }}">
-                                <strong>{{ $task->title }}</strong>
+                                <strong>{{ $task->title }}</strong> <small
+                                    class="aurora-reward">{{ t('gamification.reward', ['xp' => $task->points], '+' . (int) $task->points . ' XP') }}</small>
                                 <small>{{ $goal?->title ?? t('plans.standalone') }}</small>
                             </a>
 

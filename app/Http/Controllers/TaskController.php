@@ -142,6 +142,9 @@ class TaskController extends Controller
             $key = 'lookup.tasks.status.' . Str::slug($task->status?->name ?? '', '_');
             return [
                 'success' => true,
+                'completion_notice' => $done && !$wasDone
+                    ? t('gamification.task_done', ['xp' => (int) \App\Models\PointsLog::where('task_id', $task->id)->where('type', 'task_completed')->value('points')])
+                    : null,
                 'task_id' => $task->id,
                 'completed_at' => $task->completed_at,
                 'status_id' => $task->status_id,
@@ -162,6 +165,6 @@ class TaskController extends Controller
                 ]),
             ];
         });
-        return $request->expectsJson() ? response()->json($result) : back();
+        return $request->expectsJson() ? response()->json($result) : back()->with('completion_notice', $result['completion_notice']);
     }
 }

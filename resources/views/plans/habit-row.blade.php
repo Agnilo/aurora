@@ -17,5 +17,5 @@
             @elseif(!$habit->dueToday()) · {{ t('plans.not_today') }} @endif
         </small>
     </div>
-    <span class="pl-number">{{ $habit->currentCompletion?->awarded_xp ?? $habit->points }} XP</span>
+    <span class="pl-number aurora-reward">{{ $habit->currentCompletion?->awarded_xp ?? $habit->points }} XP</span>
 </div>

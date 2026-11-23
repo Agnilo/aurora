@@ -161,7 +161,7 @@
                     <div class="pl-row">
                         <span>{{ $entry->period_start->format('Y-m-d') }}</span>
                         <span>{{ t($entry->completed_at ? 'plans.completed' : 'plans.undone') }}</span>
-                        <span class="pl-number">{{ $entry->completed_at ? $entry->awarded_xp : 0 }} XP</span>
+                        <span class="pl-number aurora-reward">{{ $entry->completed_at ? $entry->awarded_xp : 0 }} XP</span>
                     </div>
                 @empty
                     <p>{{ t('plans.empty_history') }}</p>
