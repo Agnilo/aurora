@@ -1,3 +1,5 @@
+import './aurora-date-picker.js';
+
 export function initDashboardCalendar(doc = document) {
     if (doc.documentElement.dataset.calendarNavigationReady === 'true') return;
     doc.documentElement.dataset.calendarNavigationReady = 'true';
@@ -9,22 +11,49 @@ export function initDashboardCalendar(doc = document) {
             || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         const link = event.target.closest?.('.dashboard-ui-calendar-navigation a');
         if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
-        const calendar = link.closest('.dashboard-ui-calendar');
-        if (!calendar) return;
+        const panel = link.closest('.dashboard-ui-calendar, .dashboard-ui-weekly');
+        if (!panel) return;
 
         const target = new URL(link.href, win.location.href);
         const current = new URL(win.location.href);
+        const parameter = panel.matches('.dashboard-ui-weekly') ? 'week' : 'month';
         if (target.origin !== current.origin || target.pathname !== current.pathname
-            || !target.searchParams.has('month')) return;
+            || !target.searchParams.has(parameter)) return;
         event.preventDefault();
+        await navigate(panel, target, link);
+    });
+
+    doc.addEventListener('change', async event => {
+        const picker = event.target.closest?.('[data-week-picker]');
+        if (!picker) return;
+        if (!picker.value || !picker.validity.valid || pending) {
+            picker.value = picker.defaultValue;
+            return;
+        }
+        const panel = picker.closest('.dashboard-ui-weekly');
+        if (!panel) return;
+        const target = new URL(win.location.href);
+        target.searchParams.set('week', picker.value);
+        await navigate(panel, target, picker);
+    });
+
+    async function navigate(panel, target, trigger) {
+        const weekly = panel.matches('.dashboard-ui-weekly');
+        const parameter = weekly ? 'week' : 'month';
+        const selector = weekly ? '.dashboard-ui-weekly' : '.dashboard-ui-calendar';
+        const contentSelector = weekly ? '.dashboard-ui-chart' : '.dashboard-ui-calendar-grid';
+        const current = new URL(win.location.href);
         if (pending) return;
         pending = true;
 
-        const month = target.searchParams.get('month');
-        current.searchParams.set('month', month);
-        const navLinks = [...calendar.querySelectorAll('.dashboard-ui-calendar-navigation a')];
-        calendar.querySelector('[data-calendar-load-error]')?.remove();
-        calendar.setAttribute('aria-busy', 'true');
+        let value = target.searchParams.get(parameter);
+        current.searchParams.set(parameter, value);
+        const navLinks = [...panel.querySelectorAll('.dashboard-ui-calendar-navigation a')];
+        const picker = panel.querySelector('[data-week-picker]');
+        const keepFocus = panel.contains(doc.activeElement);
+        if (picker) picker.disabled = true;
+        panel.querySelector('[data-calendar-load-error]')?.remove();
+        panel.setAttribute('aria-busy', 'true');
         navLinks.forEach(anchor => anchor.setAttribute('aria-disabled', 'true'));
         const controller = new win.AbortController();
         const timeout = win.setTimeout(() => controller.abort(), 15000);
@@ -36,56 +65,63 @@ export function initDashboardCalendar(doc = document) {
                 cache: 'no-store',
                 signal: controller.signal,
             });
-            if (!response.ok) throw new Error('Calendar request failed');
-            if (response.redirected) throw new Error('Calendar request redirected');
+            if (!response.ok || response.redirected) throw new Error('Dashboard request failed');
             const html = await response.text();
             const parsed = new win.DOMParser().parseFromString(html, 'text/html');
-            const replacement = parsed.querySelector('.dashboard-ui-calendar');
-            if (!replacement || !replacement.querySelector('.dashboard-ui-calendar-grid')
+            const replacement = parsed.querySelector(selector);
+            if (!replacement || !replacement.querySelector(contentSelector)
                 || !replacement.querySelector('.dashboard-ui-calendar-navigation')) {
-                throw new Error('Calendar missing from response');
+                throw new Error('Dashboard panel missing from response');
             }
-            if (!calendar.isConnected) return;
+            if (!panel.isConnected) return;
 
             replacement.querySelectorAll('script').forEach(script => script.remove());
             replacement.removeAttribute('aria-busy');
-            replacement.querySelectorAll('[aria-disabled]').forEach(anchor => anchor.removeAttribute('aria-disabled'));
-            replacement.style.minHeight = `${calendar.getBoundingClientRect().height}px`;
-            const keepFocus = calendar.contains(doc.activeElement);
-            const direction = navLinks.indexOf(link);
+            replacement.querySelectorAll('[aria-disabled="true"] a, a[aria-disabled="true"]').forEach(anchor => anchor.removeAttribute('aria-disabled'));
+            if (weekly) {
+                value = replacement.querySelector('[data-week-picker]')?.value || value;
+                current.searchParams.set(parameter, value);
+            }
+            const direction = navLinks.indexOf(trigger);
             const scroll = { left: win.scrollX, top: win.scrollY, behavior: 'instant' };
-            calendar.replaceWith(replacement);
+            panel.replaceWith(replacement);
 
             doc.querySelectorAll('a[href]').forEach(anchor => {
                 if (replacement.contains(anchor)) return;
                 const url = new URL(anchor.href, win.location.href);
-                if (url.origin === current.origin && url.pathname === current.pathname
-                    && url.searchParams.has('month')) {
-                    url.searchParams.set('month', month);
+                if (url.origin !== current.origin || url.pathname !== current.pathname) return;
+                if (anchor.closest('.dashboard-ui-calendar-navigation') && anchor.closest(selector)) return;
+                if (url.searchParams.has(parameter) || url.searchParams.has('tasks') || url.searchParams.has('page')) {
+                    url.searchParams.set(parameter, value);
                     anchor.href = url.href;
                 }
             });
             try {
                 win.history.replaceState(win.history.state, '', current.href);
             } catch { }
-            if (keepFocus) replacement.querySelectorAll('.dashboard-ui-calendar-navigation a')[direction]?.focus({ preventScroll: true });
+            if (keepFocus) {
+                const links = replacement.querySelectorAll('.dashboard-ui-calendar-navigation a');
+                const focusTarget = trigger === picker ? replacement.querySelector('[data-week-picker]') : (links[direction] || links[0]);
+                focusTarget?.focus({ preventScroll: true });
+            }
             win.scrollTo(scroll);
         } catch {
-            if (calendar.isConnected) {
+            if (panel.isConnected) {
                 const message = doc.createElement('p');
                 message.className = 'dashboard-ui-error';
                 message.dataset.calendarLoadError = '';
                 message.setAttribute('role', 'alert');
                 message.textContent = doc.body.dataset.calendarLoadErrorMessage;
-                calendar.append(message);
+                panel.append(message);
             }
         } finally {
             win.clearTimeout(timeout);
-            calendar.removeAttribute('aria-busy');
+            panel.removeAttribute('aria-busy');
             navLinks.forEach(anchor => anchor.removeAttribute('aria-disabled'));
+            if (picker) { picker.disabled = false; picker.value = picker.defaultValue; }
             pending = false;
         }
-    });
+    }
 }
 
 if (document.readyState === 'loading') {

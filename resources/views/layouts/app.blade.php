@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Aurora')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @include('layouts.partials.date-picker-labels')
 
     {{-- Bootstrap CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,7 +18,7 @@
             }
         } catch { }
     </script>
-    @vite(['resources/css/frontend/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/frontend/app.css', 'resources/js/app.js', 'resources/js/aurora-rich-text-editor.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,6 +86,8 @@
             })();
         </script>
     </main>
+
+    @include('components.rich-text-editor-template')
 
     <div class="page-fade-overlay"></div>
 

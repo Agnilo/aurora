@@ -205,7 +205,8 @@
                         </div>
                         <div class="dashboard-ui-win"><span
                                 class="dashboard-ui-win-icon dashboard-ui-win-icon--mint"><x-lucide-calendar-days
-                                    class="aurora-icon" width="22" height="22" /></span><span><strong>{{ $weeklyTotal }}
+                                    class="aurora-icon" width="22"
+                                    height="22" /></span><span><strong>{{ $currentWeeklyTotal }}
                                     {{ t('dashboard.ui.activity_week') }}</strong><small>{{ t('dashboard.ui.week_done_hint') }}</small></span>
                         </div>
                         <div class="dashboard-ui-win"><span
@@ -227,9 +228,9 @@
                                 aria-hidden="true" /></a>
                     </div>
                     <nav class="dashboard-ui-task-tabs" aria-label="{{ t('dashboard.ui.task_filters') }}">
-                        <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'active', 'month' => $calendarMonth->format('Y-m')]) }}"
+                        <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'active', 'month' => $calendarMonth->format('Y-m'), 'week' => $weekStart->toDateString()]) }}"
                             @if($filter === 'active') aria-current="page" @endif>{{ t('dashboard.ui.active') }}</a>
-                        <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'completed', 'month' => $calendarMonth->format('Y-m')]) }}"
+                        <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => 'completed', 'month' => $calendarMonth->format('Y-m'), 'week' => $weekStart->toDateString()]) }}"
                             @if($filter === 'completed') aria-current="page" @endif>{{ t('dashboard.ui.completed') }}</a>
                     </nav>
                     <p class="dashboard-ui-error" role="alert" data-task-error hidden>{{ t('dashboard.ui.save_error') }}
@@ -330,15 +331,40 @@
                         @endforelse
                     </div>
                 </section>
-                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-weekly"
+                <section id="dashboard-ui-weekly" class="dashboard-ui-card dashboard-ui-panel dashboard-ui-weekly"
                     aria-labelledby="dashboard-ui-week-heading">
                     <div class="dashboard-ui-panel-header">
                         <div>
                             <h2 id="dashboard-ui-week-heading">{{ t('dashboard.ui.weekly_rhythm') }}</h2>
-                        </div><span class="dashboard-ui-weekly-range">{{ t('dashboard.ui.mon_sun') }}</span>
+                        </div>
+                        <nav class="dashboard-ui-calendar-navigation"
+                            aria-label="{{ t('dashboard.ui.weekly_rhythm') }}">
+                            <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'week' => $weekPrev, 'month' => $calendarMonth->format('Y-m'), 'tasks' => $filter, 'page' => $tasks->currentPage()]) }}#dashboard-ui-weekly"
+                                aria-label="{{ t('dashboard.ui.previous') }}">
+                                <x-lucide-chevron-left class="aurora-icon" width="16" height="16" aria-hidden="true" />
+                            </a>
+                            <label class="dashboard-week-picker" title="{{ $weekRange }}">
+                                <strong aria-hidden="true">{{ $weekRange }}</strong>
+                                <x-lucide-calendar-days class="aurora-icon" width="15" height="15" aria-hidden="true" />
+                                <input type="date" data-week-picker value="{{ $weekStart->toDateString() }}"
+                                    min="2000-01-03" max="{{ today('Europe/Vilnius')->toDateString() }}"
+                                    aria-label="{{ t('dashboard.ui.weekly_rhythm') }}: {{ $weekRange }}">
+                            </label>
+                            @if ($weekNext)
+                                <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'week' => $weekNext, 'month' => $calendarMonth->format('Y-m'), 'tasks' => $filter, 'page' => $tasks->currentPage()]) }}#dashboard-ui-weekly"
+                                    aria-label="{{ t('dashboard.ui.next') }}">
+                                    <x-lucide-chevron-right class="aurora-icon" width="16" height="16" aria-hidden="true" />
+                                </a>
+                            @else
+                                <span aria-disabled="true"
+                                    style="display: grid; place-items: center; width: 28px; height: 28px; opacity: .35;">
+                                    <x-lucide-chevron-right class="aurora-icon" width="16" height="16" aria-hidden="true" />
+                                </span>
+                            @endif
+                        </nav>
                     </div>
                     <p class="dashboard-ui-week-summary"><strong>{{ $weeklyTotal }}</strong>
-                        {{ t('dashboard.ui.activity_week') }}
+                        {{ t('dashboard.ui.completed_count') }}
                     </p>
                     <div class="dashboard-ui-chart" role="group" aria-labelledby="dashboard-ui-week-heading">
                         @foreach($weeklyActivity as $day)
@@ -352,12 +378,12 @@
                         <h2 id="dashboard-ui-calendar-title">{{ t('dashboard.ui.activity_calendar') }}</h2>
                         <nav class="dashboard-ui-calendar-navigation"
                             aria-label="{{ t('dashboard.ui.activity_calendar') }}">
-                            <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'month' => $calendarPrev, 'tasks' => $filter]) }}"
+                            <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'month' => $calendarPrev, 'tasks' => $filter, 'week' => $weekStart->toDateString()]) }}"
                                 aria-label="{{ t('dashboard.ui.previous_month') }}">
                                 <x-lucide-chevron-left class="aurora-icon" width="16" height="16" aria-hidden="true" />
                             </a>
                             <strong>{{ $calendarMonth->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}</strong>
-                            <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'month' => $calendarNext, 'tasks' => $filter]) }}"
+                            <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'month' => $calendarNext, 'tasks' => $filter, 'week' => $weekStart->toDateString()]) }}"
                                 aria-label="{{ t('dashboard.ui.next_month') }}">
                                 <x-lucide-chevron-right class="aurora-icon" width="16" height="16" aria-hidden="true" />
                             </a>
@@ -384,6 +410,48 @@
         </div>
     </div>
 </div>
+<style>
+    .dashboard-week-picker {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 4px;
+        white-space: nowrap;
+    }
+
+    .dashboard-week-picker:hover {
+        background: rgba(25, 30, 40, 0.05);
+    }
+
+    .dashboard-week-picker:focus-within {
+        outline: 2px solid var(--app-rose-deep, #bc8392);
+        outline-offset: 2px;
+    }
+
+    .dashboard-week-picker input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .dashboard-week-picker input::-webkit-calendar-picker-indicator {
+        position: absolute;
+        inset: 0;
+        width: auto;
+        height: auto;
+        cursor: pointer;
+    }
+
+    .dashboard-week-picker:has(input:disabled) {
+        opacity: .5;
+    }
+</style>
 <script>
     (() => {
         // Search only the tasks loaded on this Dashboard page (not a global search).

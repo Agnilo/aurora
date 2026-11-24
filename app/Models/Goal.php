@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasRichDescription;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Goal extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRichDescription;
 
     protected $fillable = [
         'user_id',

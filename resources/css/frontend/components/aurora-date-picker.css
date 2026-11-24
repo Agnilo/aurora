@@ -1,0 +1,201 @@
+.aurora-date-popover {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
+    width: 318px;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    overflow: auto;
+    padding: 14px;
+    border: 1px solid var(--color-border-light, #e9e3dd);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--color-bg-card, #fffdfa);
+    color: var(--color-text-main, #28222c);
+    box-shadow: 0 16px 48px var(--color-rule, #28222c22);
+    font: 400 13px/1.4 var(--font-ui, 'DM Sans', sans-serif);
+    z-index: 1100;
+    color-scheme: light;
+}
+
+.aurora-date-popover *,
+.aurora-date-popover *::before,
+.aurora-date-popover *::after {
+    box-sizing: border-box;
+}
+
+.aurora-date-popover button,
+.aurora-date-popover select {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    border-radius: var(--radius-xs, 6px);
+    background: transparent;
+    min-width: 0;
+    min-height: 32px;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.aurora-date-popover button:not(:disabled),
+.aurora-date-popover select {
+    cursor: pointer;
+}
+
+.aurora-date-popover button:disabled {
+    opacity: .32;
+    cursor: default;
+}
+
+.aurora-date-popover :is(button, select):focus-visible {
+    outline: 2px solid var(--color-focus, #6953a4);
+    outline-offset: 1px;
+}
+
+.aurora-date-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.aurora-date-heading strong {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.aurora-date-popover .aurora-date-close {
+    width: 30px;
+    font-size: 21px;
+    line-height: 1;
+    color: var(--color-text-muted, #68616b);
+}
+
+.aurora-date-navigation {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) 72px 30px;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.aurora-date-popover .aurora-date-arrow {
+    font-size: 22px;
+    line-height: 1;
+    background: var(--color-bg-soft, #f4f0ed);
+}
+
+.aurora-date-popover select {
+    width: 100%;
+    padding: 4px 5px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--color-bg-soft, #f4f0ed);
+}
+
+.aurora-date-month {
+    text-transform: capitalize !important;
+}
+
+.aurora-date-weekdays,
+.aurora-date-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+    text-align: center;
+    align-items: center;
+}
+
+.aurora-date-weekdays {
+    color: var(--color-text-muted, #68616b);
+    font-size: 11px;
+    text-transform: capitalize;
+    margin-bottom: 6px;
+}
+
+.aurora-date-grid {
+    display: grid;
+    gap: 3px;
+}
+
+.aurora-date-row {
+    border-radius: var(--radius-sm, 9px);
+}
+
+.aurora-date-popover .aurora-date-day {
+    min-height: 34px;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.aurora-date-popover .aurora-date-day.is-outside {
+    color: var(--color-text-soft, #847c85);
+    opacity: .65;
+}
+
+.aurora-date-popover .aurora-date-day.is-outside:disabled {
+    opacity: .28;
+}
+
+.aurora-date-popover .aurora-date-day.is-today:not(.is-selected) {
+    box-shadow: inset 0 0 0 1px var(--color-pink-deep, #ba7588);
+}
+
+.aurora-date-popover .aurora-date-row.is-selected-week {
+    background: var(--color-pink-soft, #fae8eb);
+}
+
+.aurora-date-popover .aurora-date-row.is-selected-week .aurora-date-day:not(:disabled) {
+    font-weight: 600;
+    color: var(--color-ink, #28222c);
+}
+
+.aurora-date-popover .aurora-date-day.is-selected:not(:disabled),
+.aurora-date-popover .aurora-date-row.is-selected-week .aurora-date-day.is-selected:not(:disabled) {
+    background: var(--color-pink-deep, #ba7588);
+    color: var(--color-ink-inverse, #fff);
+    opacity: 1;
+}
+
+.aurora-date-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid var(--color-border-light, #e9e3dd);
+    margin-top: 12px;
+    padding-top: 10px;
+}
+
+.aurora-date-popover .aurora-date-current {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--color-pink-soft, #fae8eb);
+    font-weight: 600;
+}
+
+.aurora-date-popover .aurora-date-clear {
+    padding: 6px 10px;
+    color: var(--color-text-muted, #68616b);
+}
+
+@media (hover: hover) {
+    .aurora-date-popover button:not(:disabled):hover {
+        background: var(--color-bg-soft, #f4f0ed);
+    }
+
+    .aurora-date-popover .aurora-date-row.is-week:has(.aurora-date-day:not(:disabled):hover) {
+        background: var(--color-pink-soft, #fae8eb);
+    }
+
+    .aurora-date-popover .aurora-date-day:not(:disabled):hover,
+    .aurora-date-popover .aurora-date-row.is-selected-week .aurora-date-day:not(:disabled):hover {
+        background: var(--color-pink, #f5c6cd);
+        color: var(--color-ink, #28222c);
+        opacity: 1;
+    }
+}

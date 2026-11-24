@@ -47,7 +47,7 @@
         <div class="accordion-body bg-white">
 
             {{-- GOAL DETAILS --}}
-            <p class="mb-0 text-muted">{{ $goal->description ?: t('goals.noDescription') }}</p>
+            <x-rich-text-content :value="$goal->description ?: t('goals.noDescription')" class="mb-0 text-muted" />
 
             <div class="small mt-2">
 

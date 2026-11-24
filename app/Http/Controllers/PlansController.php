@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Preferences\CategoryVisibilityService;
+
 use App\Models\{Task, Habit};
 use App\Services\TaskXpService;
 use Illuminate\Http\Request;
@@ -22,6 +24,8 @@ class PlansController extends Controller
             $status = 'active';
         $query = $tab === 'tasks' ? Task::ownedBy($request->user())->with('goal', 'category')
             : Habit::where('user_id', $request->user()->id)->with('category', 'latestCompletion');
+        $visibleCategoryIds = app(CategoryVisibilityService::class)->ids($request->user());
+        $query->whereIn('category_id', $visibleCategoryIds);
         if ($status === 'archived')
             $query->whereNotNull('archived_at');
         else {

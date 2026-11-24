@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Preferences\CategoryVisibilityService;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,8 +35,10 @@ class GoalController extends Controller
         $request->validate(['category' => 'nullable|integer|exists:categories,id', 'status' => 'sometimes|string|in:active,planned,completed,all', 'page' => 'sometimes|integer|min:1|max:1000000']);
         app(TaskXpService::class)->syncOpenTasks($request->user());
 
-        $categories = Category::all();
-
+        $user = $request->user();
+        $categoryVisibility = app(CategoryVisibilityService::class);
+        $visibleCategoryIds = $categoryVisibility->ids($user);
+        $categories = $categoryVisibility->categories($user);
         $categoryLevels = auth()->user()
             ->categoryLevels()
             ->with('category')
@@ -49,10 +53,11 @@ class GoalController extends Controller
         }
 
         $baseGoalsQuery = Goal::with(['milestones.tasks', 'directTasks.category', 'status', 'priority', 'type'])
-            ->where('user_id', Auth::id());
+            ->where('user_id', $user->id)
+            ->whereIn('category_id', $visibleCategoryIds);
 
         if ($request->has('category') && $request->category !== null) {
-            $activeCategory = Category::find($request->category);
+            $activeCategory = $categories->find($request->category);
             if ($activeCategory) {
                 $baseGoalsQuery->where('category_id', $activeCategory->id);
             }

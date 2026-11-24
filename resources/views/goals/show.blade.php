@@ -13,7 +13,8 @@
                 href="{{ route('goals.edit', ['locale' => app()->getLocale(), 'goal' => $goal]) }}">{{ t('plans.edit_goal') }}</a>
         </header>
         @if($goal->description)
-        <p>{{ $goal->description }}</p>@endif
+            <x-rich-text-content :value="$goal->description" class="mb-3" />
+        @endif
         <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} · {{ $goal->progress }}%</p>
         <section class="pl-panel mb-4">
             <header class="pl-heading">

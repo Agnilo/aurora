@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ t('admin.portal_title') }}</title>
+    @include('layouts.partials.date-picker-labels')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -18,6 +19,7 @@
         'resources/css/admin/layout.css',
         'resources/css/admin/sidebar.css',
         'resources/css/admin/dashboard.css',
+        'resources/js/aurora-date-picker.js',
     ])
 </head>
 

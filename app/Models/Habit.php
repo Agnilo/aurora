@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasRichDescription;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 
 class Habit extends Model
 {
+    use HasRichDescription;
+
     protected $guarded = ['id'];
     protected $casts = ['weekdays' => 'array', 'starts_on' => 'date', 'ends_on' => 'date', 'archived_at' => 'datetime'];
     public function user()
