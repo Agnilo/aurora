@@ -562,3 +562,7 @@
         grid-row: 1;
     }
 }
+
+.auth-field input:user-invalid {
+    border-color: var(--color-danger);
+}

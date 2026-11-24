@@ -20,6 +20,12 @@
         })->all()
         : [];
     $formMilestones = old('milestones', session()->hasOldInput() ? [] : $savedMilestones);
+    $formMilestones = is_array($formMilestones) ? array_filter($formMilestones, 'is_array') : [];
+    foreach ($formMilestones as &$formMilestone) {
+        $formMilestone['tasks'] = is_array($formMilestone['tasks'] ?? null)
+            ? array_filter($formMilestone['tasks'], 'is_array') : [];
+    }
+    unset($formMilestone);
     $settingsFields = ['status_id', 'type_id', 'priority_id', 'color', 'progress', 'is_completed', 'is_favorite', 'is_important', 'start_date', 'end_date', 'reminder_date', 'tags'];
     $settingsHasErrors = collect($settingsFields)->contains(fn($field) => $errors->has($field));
     $systemXp = ($xpMode ?? \App\Models\Preferences\UserPreference::XP_MANUAL)
@@ -60,7 +66,7 @@
         </div>
         <div class="gf-field">
             <label for="gf-description">{{ t('goals.description') }}</label>
-            <textarea id="gf-description" name="description"
+            <textarea id="gf-description" name="description" maxlength="10000"
                 rows="3">{{ old('description', $goal->description ?? '') }}</textarea>
             @error('description')
                 <p class="gf-error">{{ $message }}</p>
@@ -194,7 +200,7 @@
             </div>
             <div class="gf-field ">
                 <label for="gf-tags">{{ t('goals.hashtag') }}</label>
-                <input id="gf-tags" type="text" name="tags"
+                <input id="gf-tags" type="text" name="tags" maxlength="1000"
                     value="{{ old('tags', isset($goal->tags) ? implode(',', $goal->tags) : '') }}"
                     aria-describedby="gf-tags-help">
                 @error('tags')
@@ -227,7 +233,7 @@
                         <div class="gf-field">
                             <label for="gf-milestone-{{ $milestoneIndex }}-title">{{ t('goals.milestoneName') }}</label>
                             <input id="gf-milestone-{{ $milestoneIndex }}-title" type="text"
-                                name="milestones[{{ $milestoneIndex }}][title]" value="{{ $milestone['title'] ?? '' }}"
+                                name="milestones[{{ $milestoneIndex }}][title]" required maxlength="255" value="{{ $milestone['title'] ?? '' }}"
                                 placeholder="{{ t('goals.milestoneName') }}">
                         </div>
                         <div class="gf-field">
@@ -248,14 +254,14 @@
                                     <label
                                         for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title">{{ t('goals.taskName') }}</label>
                                     <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title" type="text"
-                                        name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][title]"
+                                        name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][title]" required maxlength="255"
                                         value="{{ $task['title'] ?? '' }}" placeholder="{{ t('goals.taskName') }}">
                                 </div>
                                 @if(!$systemXp)
                                     <div class="gf-field gf-task-points">
                                         <label
                                             for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points">{{ t('goals.form.points') }}</label>
-                                        <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0"
+                                        <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0" max="100000"
                                             step="1" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][points]"
                                             value="{{ $task['points'] ?? 0 }}" required>
                                     </div>
@@ -326,7 +332,7 @@
             <div class="gf-field">
                 <label for="gf-milestone-__MILESTONE_INDEX__-title">{{ t('goals.milestoneName') }}</label>
                 <input id="gf-milestone-__MILESTONE_INDEX__-title" type="text"
-                    name="milestones[__MILESTONE_INDEX__][title]" value="" placeholder="{{ t('goals.milestoneName') }}">
+                    name="milestones[__MILESTONE_INDEX__][title]" required maxlength="255" value="" placeholder="{{ t('goals.milestoneName') }}">
             </div>
             <div class="gf-field">
                 <label for="gf-milestone-__MILESTONE_INDEX__-deadline">{{ t('goals.deadline') }}</label>
@@ -346,13 +352,13 @@
         <div class="gf-field gf-task-title">
             <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-title">{{ t('goals.taskName') }}</label>
             <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-title" type="text"
-                name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][title]" value=""
+                name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][title]" required maxlength="255" value=""
                 placeholder="{{ t('goals.taskName') }}">
         </div>
         @if(!$systemXp)
             <div class="gf-field gf-task-points">
                 <label for="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points">{{ t('goals.form.points') }}</label>
-                <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points" type="number" min="0" step="1"
+                <input id="gf-task-__MILESTONE_INDEX__-__TASK_INDEX__-points" type="number" min="0" max="100000" step="1"
                     name="milestones[__MILESTONE_INDEX__][tasks][__TASK_INDEX__][points]" value="0" required>
             </div>
         @else

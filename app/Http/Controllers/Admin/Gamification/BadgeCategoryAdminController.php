@@ -28,6 +28,7 @@ class BadgeCategoryAdminController extends Controller
         $data = $this->validated($request);
 
         $key = Str::slug($data['label'], '_');
+        \Illuminate\Support\Facades\Validator::make(['key' => $key], ['key' => 'required|string|max:255|unique:badge_categories,key'])->validate();
         $translationKey = "badge_category.$key";
 
         $category = BadgeCategory::create([

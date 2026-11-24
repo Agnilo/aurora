@@ -17,6 +17,7 @@ class TaskController extends Controller
 
     public function create(Request $request, string $locale)
     {
+        $request->validate(['goal' => 'nullable|integer']);
         $task = new Task(['goal_id' => $request->query('goal')]);
         if ($task->goal_id)
             abort_unless($request->user()->goals()->whereNotNull('category_id')->whereKey($task->goal_id)->exists(), 404);
@@ -68,7 +69,7 @@ class TaskController extends Controller
                 'description' => 'nullable|string|max:10000',
                 'scheduled_on' => 'nullable|date_format:Y-m-d',
                 'points' => [Rule::excludeIf($system || $done), 'required', 'integer', 'min:0', 'max:100000'],
-                'priority_id' => [Rule::excludeIf(!$system || $done), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
+                'priority_id' => [Rule::excludeIf(!$system || $done), 'required', 'integer', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
             ]);
             $oldGoal = $task->goal;
             $data += $this->activityAssignment($request, $task);

@@ -42,7 +42,7 @@ Route::group([
             ->name('create');
         Route::post('/', [TranslationAdminController::class, 'store'])
             ->name('store');
-        Route::delete('/{translationGroup}/{translationKey}',[TranslationAdminController::class, 'destroy'])
+        Route::delete('/{translationGroup}/{translationKey}', [TranslationAdminController::class, 'destroy'])
             ->name('destroy');
 
         Route::get('/export', [TranslationAdminController::class, 'export'])
@@ -52,7 +52,7 @@ Route::group([
 
     });
 
-    Route::resource('translation-groups', TranslationGroupController::class);
+    Route::resource('translation-groups', TranslationGroupController::class)->except(['show']);
 
     Route::prefix('users')->as('users.')->group(function () {
 
@@ -71,10 +71,9 @@ Route::group([
     });
 
     Route::prefix('lookups')->as('lookups.')->group(function () {
-        
+
         Route::get('/', [LookupAdminController::class, 'index'])->name('index');
 
-        Route::get('/{section}', [LookupAdminController::class, 'section'])->name('section');
 
         Route::get('/{section}/create/{type}', [LookupAdminController::class, 'create'])->name('create');
         Route::post('/{section}/create/{type}', [LookupAdminController::class, 'store'])->name('store');
@@ -89,7 +88,7 @@ Route::group([
 
     });
 
-    Route::resource('languages', LanguageController::class);
+    Route::resource('languages', LanguageController::class)->except(['show']);
 
     Route::prefix('preferences/questions')
         ->as('preferences.questions.')
@@ -112,10 +111,9 @@ Route::group([
             ->name('dashboard');
 
         Route::resource('levels', LevelAdminController::class)->except(['show']);
-        Route::resource('xp-rules', XpRuleAdminController::class)->except(['show']);
-        Route::resource('bonuses', BonusAdminController::class)->except(['show']);
+        Route::resource('xp-rules', XpRuleAdminController::class)->only(['index', 'edit', 'update']);
+        Route::resource('bonuses', BonusAdminController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::resource('badges', BadgeAdminController::class)->except(['show']);
-        Route::resource('goal-bonuses', GoalBonusAdminController::class)->except(['show']);
         Route::resource('bonus-contexts', BonusContextAdminController::class)
             ->except(['show', 'destroy']);
         Route::resource('badge-categories', BadgeCategoryAdminController::class)

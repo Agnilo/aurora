@@ -51,19 +51,21 @@ class UserAdminController extends Controller
 
     public function update(Request $request, $locale, User $user)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'roles' => 'array'
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'roles' => ['sometimes', 'array', 'max:20'],
+            'roles.*' => ['required', 'string', 'distinct', Rule::exists('roles', 'name')->where('guard_name', 'web')],
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-
-        // Assign roles
-        $user->syncRoles($request->roles ?? []);
+        DB::transaction(function () use ($user, $data) {
+            $user->fill(['name' => $data['name'], 'email' => $data['email']]);
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
+            $user->save();
+            $user->syncRoles($data['roles'] ?? []);
+        });
 
         return redirect()
             ->route('admin.users.index', $locale)
@@ -73,7 +75,7 @@ class UserAdminController extends Controller
     public function updatePreferences(Request $request, string $locale, User $user)
     {
         $data = $request->validate([
-            'answers' => ['required', 'array'],
+            'answers' => ['required', 'array', 'max:100'],
             'gamification_level' => ['required', Rule::in(['survey', 'hidden', 'subtle', 'prominent'])],
             'xp_mode' => ['required', Rule::in(['survey', 'manual', 'system'])],
             'show_streak' => ['required', Rule::in(['survey', 'show', 'hide'])],

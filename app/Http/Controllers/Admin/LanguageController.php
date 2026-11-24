@@ -25,7 +25,7 @@ class LanguageController extends Controller
     public function store(Request $request, $locale)
     {
         $data = $request->validate([
-            'code' => 'required|string|max:8|unique:languages,code',
+            'code' => 'required|string|max:8|regex:/^[a-z]{2,3}(?:-[A-Za-z]{2})?$/D|unique:languages,code',
             'name' => 'required|string|max:255',
             'is_default' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
@@ -53,7 +53,7 @@ class LanguageController extends Controller
     public function update(Request $request, $locale, Language $language)
     {
         $data = $request->validate([
-            'code' => 'required|string|max:8|unique:languages,code,' . $language->id,
+            'code' => 'required|string|max:8|regex:/^[a-z]{2,3}(?:-[A-Za-z]{2})?$/D|unique:languages,code,' . $language->id,
             'name' => 'required|string|max:255',
             'is_default' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',

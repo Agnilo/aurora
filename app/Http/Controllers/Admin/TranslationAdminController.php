@@ -14,6 +14,7 @@ class TranslationAdminController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate(['group' => 'nullable|string|max:255', 'search' => 'nullable|string|max:255', 'page' => 'sometimes|integer|min:1|max:1000000']);
         $group = $request->get('group');
         $search = $request->get('search');
         $languages = Language::where('is_active', true)->pluck('code');
@@ -74,10 +75,15 @@ class TranslationAdminController extends Controller
     public function store(Request $request, $locale)
     {
         $request->validate([
-            'group' => 'required|string',
-            'key' => 'required|string',
-            'value' => 'required|array'
+            'group' => 'required|string|max:255|exists:translation_groups,key',
+            'key' => 'required|string|max:255',
+            'value' => 'required|array',
+            'value.*' => 'nullable|string|max:10000',
         ]);
+
+        if (array_diff(array_keys($request->input('value')), Language::pluck('code')->all())) {
+            throw ValidationException::withMessages(['value' => t('admin.unknown_language')]);
+        }
 
         $groupKey = $request->group;
         $key = $request->key;
@@ -135,10 +141,10 @@ class TranslationAdminController extends Controller
     public function update(Request $request, $locale, $translationGroup, $translationKey)
     {
         $data = $request->validate([
-            'group' => 'required|string|exists:translation_groups,key',
+            'group' => 'required|string|max:255|exists:translation_groups,key',
             'key' => 'required|string|max:255',
             'value' => 'required|array',
-            'value.*' => 'nullable|string',
+            'value.*' => 'nullable|string|max:10000',
         ]);
 
         if (array_diff(array_keys($data['value']), Language::pluck('code')->all())) {
@@ -195,96 +201,75 @@ class TranslationAdminController extends Controller
 
     public function export()
     {
-        $filename = 'translations_' . date('Y_m_d') . '.csv';
-        $handle = fopen($filename, 'w+');
-
-        fputcsv($handle, ['group', 'key', 'language_code', 'value']);
-
-        foreach (Translation::all() as $t) {
-            fputcsv($handle, [
-                $t->group,
-                $t->key,
-                $t->language_code,
-                $t->value,
-            ]);
-        }
-
-        fclose($handle);
-
-        return response()->download($filename)->deleteFileAfterSend();
+        return response()->streamDownload(function () {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['group', 'key', 'language_code', 'value'], ',', '"', '');
+            foreach (Translation::orderBy('id')->cursor() as $translation) {
+                fputcsv($handle, [$translation->group, $translation->key, $translation->language_code, $translation->value], ',', '"', '');
+            }
+            fclose($handle);
+        }, 'translations_' . date('Y_m_d') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function import(Request $request, $locale)
     {
-        $request->validate([
-            'file' => 'required|mimes:csv,txt'
-        ]);
-
-        $file = $request->file('file');
-        $rows = array_map('str_getcsv', file($file->getRealPath()));
-        array_shift($rows);
-
-        $countAdded = 0;
-        $countSkipped = 0;
+        $request->validate(['file' => 'required|file|mimes:csv,txt|max:2048']);
+        $handle = fopen($request->file('file')->getRealPath(), 'r');
+        $rows = [];
         $countInvalid = 0;
-        $groupsCreated = 0;
-
-        foreach ($rows as $row) {
-
-            if (count($row) < 4) {
-                $countInvalid++;
-                continue;
+        $languages = Language::pluck('code')->all();
+        try {
+            $header = fgetcsv($handle, 0, ',', '"', '');
+            if (is_array($header)) {
+                $header[0] = ltrim($header[0] ?? '', "\xEF\xBB\xBF");
             }
-
-            [$group, $key, $language_code, $value] = $row;
-
-            if (!$group || !$key || !$language_code) {
-                $countInvalid++;
-                continue;
+            if ($header !== ['group', 'key', 'language_code', 'value']) {
+                throw ValidationException::withMessages(['file' => t('security.invalid_csv')]);
             }
-
-            $groupModel = \App\Models\Localization\TranslationGroup::firstOrCreate(
-                ['key' => $group],
-                ['name' => ucfirst(str_replace('_', ' ', $group))]
-            );
-
-            if ($groupModel->wasRecentlyCreated) {
-                $groupsCreated++;
+            $line = 0;
+            while (($row = fgetcsv($handle, 0, ',', '"', '')) !== false) {
+                if (++$line > 10000) {
+                    throw ValidationException::withMessages(['file' => __('validation.max.array', ['attribute' => 'CSV', 'max' => 10000])]);
+                }
+                if (count($row) !== 4 || !mb_check_encoding(implode('', $row), 'UTF-8')) {
+                    $countInvalid++;
+                    continue;
+                }
+                [$group, $key, $language, $value] = $row;
+                if (
+                    !$group || !$key || mb_strlen($group) > 255 || mb_strlen($key) > 255
+                    || mb_strlen($value ?? '') > 10000 || !in_array($language, $languages, true)
+                ) {
+                    $countInvalid++;
+                    continue;
+                }
+                $rows[] = [$group, $key, $language, $value ?? ''];
             }
-
-            $exists = Translation::where('group', $group)
-                ->where('key', $key)
-                ->where('language_code', $language_code)
-                ->exists();
-
-            if ($exists) {
-                $countSkipped++;
-                continue;
-            }
-
-            Translation::create([
-                'group' => $group,
-                'key' => $key,
-                'language_code' => $language_code,
-                'value' => $value
-            ]);
-
-            $countAdded++;
+        } finally {
+            fclose($handle);
         }
 
+        [$countAdded, $countSkipped, $groupsCreated] = DB::transaction(function () use ($rows) {
+            $added = $skipped = $groups = 0;
+            foreach ($rows as [$group, $key, $language, $value]) {
+                $groupModel = TranslationGroup::firstOrCreate(['key' => $group], ['name' => ucfirst(str_replace('_', ' ', $group))]);
+                $groups += (int) $groupModel->wasRecentlyCreated;
+                $translation = Translation::firstOrCreate([
+                    'group' => $group,
+                    'key' => $key,
+                    'language_code' => $language,
+                ], ['value' => $value]);
+                $translation->wasRecentlyCreated ? $added++ : $skipped++;
+            }
+            return [$added, $skipped, $groups];
+        });
         app('translation')->flushCache();
 
-        return back()->with(
-            'success',
-            t('admin.import_summary', [
-                'added' => $countAdded,
-                'skipped' => $countSkipped,
-                'invalid' => $countInvalid,
-                'groups' => $groupsCreated,
-            ])
-        );
+        return back()->with('success', t('admin.import_summary', [
+            'added' => $countAdded,
+            'skipped' => $countSkipped,
+            'invalid' => $countInvalid,
+            'groups' => $groupsCreated,
+        ]));
     }
-
-
-
 }

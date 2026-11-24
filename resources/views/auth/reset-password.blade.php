@@ -12,18 +12,10 @@
         {{ t('auth.new_password_description') }}
     </p>
 
-    <form
-        class="auth-form"
-        method="POST"
-        action="{{ route('password.store', ['locale' => app()->getLocale()]) }}"
-    >
+    <form class="auth-form" method="POST" action="{{ route('password.store', ['locale' => app()->getLocale()]) }}">
         @csrf
 
-        <input
-            type="hidden"
-            name="token"
-            value="{{ request()->route('token') }}"
-        >
+        <input type="hidden" name="token" value="{{ request()->route('token') }}">
 
         @error('token')
             <p class="auth-error" role="alert">
@@ -36,18 +28,9 @@
                 {{ t('auth.email') }}
             </label>
 
-            <input
-                id="email"
-                name="email"
-                type="email"
-                autocomplete="username"
-                value="{{ old('email', request()->query('email')) }}"
-                required
-                @error('email')
-                    aria-invalid="true"
-                    aria-describedby="email-error"
-                @enderror
-            >
+            <input id="email" name="email" type="email" autocomplete="username"
+                value="{{ old('email', request()->query('email')) }}" required @error('email') aria-invalid="true"
+                aria-describedby="email-error" @enderror>
 
             @error('email')
                 <p class="auth-error" id="email-error">
@@ -61,19 +44,10 @@
                 {{ t('auth.password') }}
             </label>
 
-            <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="new-password"
-                required
-                autofocus
-                @error('password')
-                    aria-invalid="true"
-                    aria-describedby="password-error"
-                @enderror
-            >
+            <input id="password" name="password" type="password" minlength="8" maxlength="72" autocomplete="new-password"
+                required autofocus @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
 
+            <p class="auth-description">{{ t('security.password_requirements') }}</p>
             @error('password')
                 <p class="auth-error" id="password-error">
                     {{ $message }}
@@ -86,17 +60,9 @@
                 {{ t('auth.password_confirmation') }}
             </label>
 
-            <input
-                id="password_confirmation"
-                name="password_confirmation"
-                type="password"
-                autocomplete="new-password"
-                required
-                @error('password_confirmation')
-                    aria-invalid="true"
-                    aria-describedby="password-confirmation-error"
-                @enderror
-            >
+            <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" maxlength="72"
+                autocomplete="new-password" required @error('password_confirmation') aria-invalid="true"
+                aria-describedby="password-confirmation-error" @enderror>
 
             @error('password_confirmation')
                 <p class="auth-error" id="password-confirmation-error">
@@ -107,7 +73,8 @@
 
         <button class="auth-submit" type="submit">
             {{ t('auth.new_password_submit') }}
-            <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
+            <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true"
+                    focusable="false" /></span>
         </button>
     </form>
 

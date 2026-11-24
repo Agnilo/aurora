@@ -32,7 +32,7 @@ class OnboardingController extends Controller
     public function store(Request $request, string $locale, OnboardingAssessmentService $service): RedirectResponse
     {
         $validated = $request->validate([
-            'answers' => ['required', 'array'],
+            'answers' => ['required', 'array', 'max:100'],
         ]);
         $service->validateAnswers($validated['answers'], false);
 

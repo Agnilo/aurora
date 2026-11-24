@@ -10,6 +10,7 @@ class PlansController extends Controller
 {
     public function index(Request $request, string $locale)
     {
+        $request->validate(['tab' => 'sometimes|string|in:goals,tasks,habits', 'status' => 'sometimes|string|in:active,planned,completed,archived,all', 'page' => 'sometimes|integer|min:1|max:1000000']);
         $tab = $request->query('tab', 'goals');
         if (!in_array($tab, ['goals', 'tasks', 'habits'], true))
             $tab = 'goals';

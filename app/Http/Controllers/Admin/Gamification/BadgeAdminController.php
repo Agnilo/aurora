@@ -107,19 +107,20 @@ class BadgeAdminController extends Controller
         $rules = [
             'badge_category_id' => 'required|exists:badge_categories,id',
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|image|max:2048',
+            'description' => 'nullable|string|max:10000',
+            'icon' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:max_width=4096,max_height=4096',
         ];
 
+        $request->validate(['badge_category_id' => 'required|integer|exists:badge_categories,id', 'condition' => 'required|array']);
         $category = BadgeCategory::find($request->badge_category_id);
 
         if ($category) {
             match ($category->key) {
-                'task' => $rules['condition.tasks_completed'] = 'required|integer|min:1',
-                'streak' => $rules['condition.days'] = 'required|integer|min:1',
-                'goals' => $rules['condition.goals_completed'] = 'required|integer|min:1',
-                'milestones' => $rules['condition.milestones_completed'] = 'required|integer|min:1',
-                'level' => $rules['condition.level'] = 'required|integer|min:1',
+                'task' => $rules['condition.tasks_completed'] = 'required|integer|min:1|max:1000000',
+                'streak' => $rules['condition.days'] = 'required|integer|min:1|max:1000000',
+                'goals' => $rules['condition.goals_completed'] = 'required|integer|min:1|max:1000000',
+                'milestones' => $rules['condition.milestones_completed'] = 'required|integer|min:1|max:1000000',
+                'level' => $rules['condition.level'] = 'required|integer|min:1|max:1000000',
                 default => abort(422, t('admin.unsupported_badge_category')),
             };
         }

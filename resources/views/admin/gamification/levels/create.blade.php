@@ -26,13 +26,11 @@
 
                     {{-- LEVEL TO --}}
                     <div class="mb-3">
-                        <label class="form-label">{{ t('admin.level_to_optional') }}</label>
+                        <label class="form-label">{{ t('admin.level_to') }}</label>
                         <input type="number" name="level_to" class="form-control @error('level_to') is-invalid @enderror"
-                            value="{{ old('level_to') }}" min="1">
+                            value="{{ old('level_to') }}" min="1" max="10000" required>
 
-                        <div class="form-text">
-                            {{ t('admin.last_level_hint') }}
-                        </div>
+
 
                         @error('level_to')
                             <div class="invalid-feedback">{{ $message }}</div>

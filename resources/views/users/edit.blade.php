@@ -25,6 +25,7 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">{{ t('profile.new_password_optional') }}</label>
                 <input type="password" name="password" class="form-control">
+                <p>{{ t('security.password_requirements') }}</p>
                 @error('password')
                 <div class="text-danger small">{{ $message }}</div> @enderror
             </div>

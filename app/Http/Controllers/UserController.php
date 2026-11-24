@@ -33,8 +33,8 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+            'password' => ['bail', 'required', 'string', new \App\Rules\PasswordBytes, new \App\Rules\PasswordRequirements, 'confirmed'],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -68,8 +68,8 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:6|confirmed',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email,' . $user->id,
+            'password' => ['bail', 'nullable', 'string', new \App\Rules\PasswordBytes, new \App\Rules\PasswordRequirements, 'confirmed'],
         ]);
 
         if (!empty($validated['password'])) {
@@ -87,7 +87,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $locale, User $user)
     {
         $user->delete();
         return redirect()->route('users.index', ['locale' => app()->getLocale()])

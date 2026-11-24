@@ -73,6 +73,9 @@ class ProfileController extends Controller
         if ($request->email) {
             $user->email = $request->email;
         }
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
         $user->save();
 
         $details = $user->details ?: new UserDetails();
@@ -96,7 +99,7 @@ class ProfileController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'max:4096', 'current_password'],
         ]);
 
         $user = $request->user();
@@ -150,8 +153,8 @@ class ProfileController extends Controller
     {
         $validated = $request->validate(
             [
-                'current_password' => ['required', 'string', 'current_password'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'current_password' => ['required', 'string', 'max:4096', 'current_password'],
+                'password' => ['bail', 'required', 'string', new \App\Rules\PasswordBytes, new \App\Rules\PasswordRequirements, 'confirmed'],
             ],
             [
                 'current_password.required' => t('profile.ui.current_password_required'),
@@ -214,6 +217,8 @@ class ProfileController extends Controller
             'avatar' => [
                 'nullable',
                 'image',
+                'mimes:jpg,jpeg,png,webp,gif',
+                'dimensions:max_width=4096,max_height=4096',
                 'max:2048',
                 'prohibited_if:remove_avatar,1',
             ],

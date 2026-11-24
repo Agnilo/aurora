@@ -28,10 +28,11 @@ class LevelAdminController extends Controller
     public function store($locale, Request $request)
     {
         $data = $request->validate([
-            'level_from' => 'required|integer|min:1',
-            'level_to' => 'nullable|integer|gt:level_from',
-            'xp_required' => 'required|integer|min:0',
-            'reward_coins' => 'required|integer|min:0',
+            'level_from' => 'required|integer|min:1|max:10000',
+            'level_to' => 'required|integer|gte:level_from|max:10000',
+            'xp_required' => 'required|integer|min:0|max:100000000',
+            'reward_coins' => 'required|integer|min:0|max:100000000',
+            'title' => 'required|string|max:255',
         ]);
 
         $overlap = Level::where(function ($q) use ($data) {
@@ -78,7 +79,7 @@ class LevelAdminController extends Controller
             'translation_key' => $translationKey,
         ]);
 
-        $defaultTitle = "Lygiai {$data['level_from']}–{$data['level_to']}";
+        $defaultTitle = $data['title'];
 
         Translation::create([
             'group' => 'gamification',
@@ -108,10 +109,10 @@ class LevelAdminController extends Controller
     public function update($locale, Request $request, Level $level)
     {
         $data = $request->validate([
-            'level_from' => 'required|integer|min:1',
-            'level_to' => 'required|integer|gte:level_from',
-            'xp_required' => 'required|integer|min:0',
-            'reward_coins' => 'required|integer|min:0',
+            'level_from' => 'required|integer|min:1|max:10000',
+            'level_to' => 'required|integer|gte:level_from|max:10000',
+            'xp_required' => 'required|integer|min:0|max:100000000',
+            'reward_coins' => 'required|integer|min:0|max:100000000',
             'title' => 'required|string|max:255',
         ]);
 

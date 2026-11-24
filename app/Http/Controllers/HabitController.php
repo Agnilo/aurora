@@ -17,6 +17,7 @@ class HabitController extends Controller
 
     public function create(Request $request, string $locale)
     {
+        $request->validate(['goal' => 'nullable|integer', 'source_task' => 'nullable|integer']);
         $habit = new Habit([
             'starts_on' => today('Europe/Vilnius'),
             'frequency' => 'daily',
@@ -58,6 +59,7 @@ class HabitController extends Controller
 
     public function store(Request $request, string $locale)
     {
+        $request->validate(['goal' => 'nullable|integer', 'source_task' => 'nullable|integer']);
         $habit = new Habit(['user_id' => $request->user()->id]);
         $this->saveHabit($request, $habit);
         if ($habit->goal_id && (string) $habit->goal_id === $request->query('goal')) {
@@ -81,14 +83,14 @@ class HabitController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:10000',
             'frequency' => 'required|in:daily,weekly',
-            'weekdays' => 'required_if:frequency,daily|array',
+            'weekdays' => 'required_if:frequency,daily|array|max:7',
             'weekdays.*' => 'required|integer|between:1,7|distinct',
             'timezone' => 'required|timezone',
             'starts_on' => 'required|date_format:Y-m-d',
-            'ends_on' => 'nullable|date_format:Y-m-d|after_or_equal:starts_on',
+            'ends_on' => ['nullable', 'date_format:Y-m-d', Rule::when(is_string($request->input('starts_on')), 'after_or_equal:starts_on')],
             'points' => [Rule::excludeIf($system), 'required', 'integer', 'min:0', 'max:100000'],
-            'priority_id' => [Rule::excludeIf(!$system), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
-            'source_task_id' => [Rule::excludeIf($habit->exists), 'nullable', Rule::exists('tasks', 'id')->where('user_id', $request->user()->id), 'unique:habits,source_task_id'],
+            'priority_id' => [Rule::excludeIf(!$system), 'required', 'integer', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
+            'source_task_id' => [Rule::excludeIf($habit->exists), 'nullable', 'integer', Rule::exists('tasks', 'id')->where('user_id', $request->user()->id), 'unique:habits,source_task_id'],
         ]);
         $data['weekdays'] = $data['frequency'] === 'daily' ? array_map('intval', $data['weekdays']) : [];
         if ($data['frequency'] === 'daily' && !$data['weekdays'])

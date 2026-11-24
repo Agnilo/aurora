@@ -32,6 +32,7 @@ class BonusContextAdminController extends Controller
         ]);
 
         $key = Str::slug($validated['label'], '_');
+        \Illuminate\Support\Facades\Validator::make(['key' => $key], ['key' => 'required|string|max:255|unique:bonus_contexts,key'])->validate();
 
         $context = BonusContext::create([
             'key' => $key,

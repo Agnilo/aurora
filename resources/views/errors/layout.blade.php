@@ -24,7 +24,10 @@
     ];
     $code = trim($__env->yieldContent('code', '500'));
     [$heading, $description] = $messages[$locale][$code] ?? $messages[$locale]['500'];
-    $home = url('/'.$locale);
+    if ($code === '429' && isset($message)) {
+        $description = $message;
+    }
+    $home = url('/' . $locale);
     $homeLabel = $locale === 'lt' ? 'Į pagrindinį' : 'Back to home';
     $background = 'images/welcome/eveling-salazar-5uu5Sa--Pcw-unsplash.jpg';
     if (!file_exists(public_path($background))) {
@@ -33,6 +36,7 @@
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $locale }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -189,8 +193,10 @@
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     @if (file_exists(public_path($background)))
         <img class="error-background" src="{{ asset($background) }}" alt="">
@@ -198,11 +204,7 @@
     <div class="error-shell">
         <header>
             <a class="error-wordmark" href="{{ $home }}">
-                <img
-                    class="error-logo"
-                    src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}"
-                    alt="Aurora"
-                >
+                <img class="error-logo" src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt="Aurora">
             </a>
         </header>
         <main>
@@ -212,24 +214,22 @@
                 <p class="error-description">{{ $description }}</p>
                 <a class="error-button" href="{{ $home }}">
                     {{ $homeLabel }}
-                    <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span>
+                    <span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20"
+                            aria-hidden="true" focusable="false" /></span>
                 </a>
             </section>
         </main>
         <footer>
             <span>
                 {{ $locale === 'lt'
-                    ? 'Maži darbai. Šviesesnės dienos.'
-                    : 'Small steps. Brighter days.' }}
+    ? 'Maži darbai. Šviesesnės dienos.'
+    : 'Small steps. Brighter days.' }}
             </span>
 
-            <img
-                class="error-footer-logo"
-                src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}"
-                alt=""
-                aria-hidden="true"
-            >
+            <img class="error-footer-logo" src="{{ asset('images/welcome/wordmark-1024-cropped.png') }}" alt=""
+                aria-hidden="true">
         </footer>
     </div>
 </body>
+
 </html>

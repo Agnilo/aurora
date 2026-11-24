@@ -15,18 +15,18 @@ class XpRuleAdminController extends Controller
         ]);
     }
 
-    public function edit(XpRule $xpRule)
+    public function edit(string $locale, XpRule $xpRule)
     {
         return view('admin.gamification.xp-rules.form', [
             'rule' => $xpRule,
         ]);
     }
 
-    public function update(Request $request, XpRule $xpRule)
+    public function update(Request $request, string $locale, XpRule $xpRule)
     {
         $validated = $request->validate([
             'label' => 'required|string|max:255',
-            'xp' => 'required|integer|min:0',
+            'xp' => 'required|integer|min:0|max:100000',
             'active' => 'boolean',
         ]);
 

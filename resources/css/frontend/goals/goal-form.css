@@ -439,3 +439,12 @@
         transition: none;
     }
 }
+
+.goal-form :is(input, textarea, select):user-invalid,
+.goal-form .gf-field:has(> .gf-error) :is(input, textarea, select) {
+    border-color: var(--color-danger);
+}
+
+.goal-form :is(.gf-error, .gf-error-summary) {
+    overflow-wrap: anywhere;
+}

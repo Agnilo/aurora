@@ -29,12 +29,12 @@ class BonusAdminController extends Controller
     public function store($locale, Request $request)
     {
         $validated = $request->validate([
-            'bonus_context_id' => 'required|exists:bonus_contexts,id',
+            'bonus_context_id' => 'required|integer|exists:bonus_contexts,id',
             'label' => 'required|string|max:255',
             'type' => 'required|in:flat,multiplier',
-            'value' => 'required|numeric|min:0',
+            'value' => 'required|numeric|min:0|max:999999.99',
             'active' => 'required|boolean',
-            'streak_days' => 'nullable|integer|min:1',
+            'streak_days' => 'nullable|integer|min:1|max:65535',
         ]);
 
         $context = BonusContext::findOrFail($validated['bonus_context_id']);
@@ -42,7 +42,7 @@ class BonusAdminController extends Controller
         if ($context->key === 'streak') {
 
             if (!isset($validated['streak_days'])) {
-                throw new \LogicException('Streak bonusui būtinas streak_days');
+                throw \Illuminate\Validation\ValidationException::withMessages(['streak_days' => t('security.streak_days_required')]);
             }
 
             $key = 'streak_' . $validated['streak_days'];
@@ -51,6 +51,7 @@ class BonusAdminController extends Controller
             $key = $context->key . '_' . Str::slug($validated['label'], '_');
         }
 
+        \Illuminate\Support\Facades\Validator::make(['key' => $key], ['key' => 'required|string|max:255|unique:bonuses,key'])->validate();
         $translationKey = 'bonus.' . $key;
 
         Bonus::create([
@@ -113,11 +114,11 @@ class BonusAdminController extends Controller
     public function update($locale, Request $request, Bonus $bonus)
     {
         $validated = $request->validate([
-            'bonus_context_id' => 'required|exists:bonus_contexts,id',
+            'bonus_context_id' => 'required|integer|exists:bonus_contexts,id',
             'label' => 'required|string|max:255',
-            'value' => 'required|numeric|min:0',
+            'value' => 'required|numeric|min:0|max:999999.99',
             'active' => 'required|boolean',
-            'streak_days' => 'nullable|integer|min:1',
+            'streak_days' => 'nullable|integer|min:1|max:65535',
         ]);
 
         $context = BonusContext::findOrFail($validated['bonus_context_id']);
@@ -126,12 +127,13 @@ class BonusAdminController extends Controller
 
         if ($context->key === 'streak') {
             if (!isset($validated['streak_days'])) {
-                throw new \LogicException('Streak bonusui būtinas streak_days');
+                throw \Illuminate\Validation\ValidationException::withMessages(['streak_days' => t('security.streak_days_required')]);
             }
 
             $newKey = 'streak_' . $validated['streak_days'];
         }
 
+        \Illuminate\Support\Facades\Validator::make(['key' => $newKey], ['key' => ['required', 'string', 'max:255', \Illuminate\Validation\Rule::unique('bonuses', 'key')->ignore($bonus->id)]])->validate();
         $bonus->update([
             'key' => $newKey,
             'bonus_context_id' => $context->id,

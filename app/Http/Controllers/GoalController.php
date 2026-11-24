@@ -30,6 +30,7 @@ class GoalController extends Controller
 {
     public function index($locale, Request $request)
     {
+        $request->validate(['category' => 'nullable|integer|exists:categories,id', 'status' => 'sometimes|string|in:active,planned,completed,all', 'page' => 'sometimes|integer|min:1|max:1000000']);
         app(TaskXpService::class)->syncOpenTasks($request->user());
 
         $categories = Category::all();
@@ -135,29 +136,33 @@ class GoalController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'color' => 'nullable|string|max:20',
-            'deadline' => 'nullable|date',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'description' => 'nullable|string|max:10000',
+            'category_id' => 'required|integer|exists:categories,id',
+            'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/D'],
+            'deadline' => ['nullable', 'date_format:Y-m-d', Rule::when(is_string($request->input('start_date')) && $request->filled('start_date'), 'after_or_equal:start_date')],
+            'start_date' => 'nullable|date_format:Y-m-d',
+            'end_date' => ['nullable', 'date_format:Y-m-d', Rule::when(is_string($request->input('start_date')) && $request->filled('start_date'), 'after_or_equal:start_date')],
             'is_favorite' => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
             'visibility' => 'nullable|string|in:private,shared,public',
-            'reminder_date' => 'nullable|date',
-            'tags' => 'nullable|string',
-            'priority_id' => 'nullable|exists:goal_priorities,id',
-            'status_id' => 'nullable|exists:goal_statuses,id',
-            'type_id' => 'nullable|exists:goal_types,id',
-            'milestones' => 'array',
-            'milestones.*.title' => 'nullable|string|max:255',
-            'milestones.*.deadline' => 'nullable|date',
-            'milestones.*.tasks' => 'array',
-            'milestones.*.tasks.*.title' => 'nullable|string|max:255',
-            'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'required', 'integer', 'min:0'],
-            'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
-            'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
-            'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'required', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
+            'reminder_date' => 'nullable|date_format:Y-m-d\\TH:i',
+            'tags' => 'nullable|string|max:1000',
+            'priority_id' => 'nullable|integer|exists:goal_priorities,id',
+            'status_id' => 'nullable|integer|exists:goal_statuses,id',
+            'type_id' => 'nullable|integer|exists:goal_types,id',
+            'milestones' => 'sometimes|array|max:100',
+            'milestones.*' => 'array:id,title,deadline,tasks',
+            'milestones.*.id' => 'prohibited',
+            'milestones.*.tasks.*.id' => 'prohibited',
+            'milestones.*.title' => 'required|string|max:255',
+            'milestones.*.deadline' => 'nullable|date_format:Y-m-d',
+            'milestones.*.tasks' => 'sometimes|array|max:100',
+            'milestones.*.tasks.*' => 'array:id,title,points,status_id,type_id,priority_id',
+            'milestones.*.tasks.*.title' => 'required|string|max:255',
+            'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'required', 'integer', 'min:0', 'max:100000'],
+            'milestones.*.tasks.*.status_id' => 'nullable|integer|exists:task_statuses,id',
+            'milestones.*.tasks.*.type_id' => 'nullable|integer|exists:task_types,id',
+            'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'required', 'integer', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
         ]);
 
         if (!empty($validated['tags'])) {
@@ -276,31 +281,34 @@ class GoalController extends Controller
 
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'category_id' => 'required|exists:categories,id',
-                'color' => 'nullable|string|max:20',
-                'deadline' => 'nullable|date',
-                'start_date' => 'nullable|date',
-                'end_date' => 'nullable|date',
+                'description' => 'nullable|string|max:10000',
+                'category_id' => 'required|integer|exists:categories,id',
+                'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/D'],
+                'deadline' => ['nullable', 'date_format:Y-m-d', Rule::when(is_string($request->input('start_date')) && $request->filled('start_date'), 'after_or_equal:start_date')],
+                'start_date' => 'nullable|date_format:Y-m-d',
+                'end_date' => ['nullable', 'date_format:Y-m-d', Rule::when(is_string($request->input('start_date')) && $request->filled('start_date'), 'after_or_equal:start_date')],
                 'is_favorite' => 'nullable|boolean',
                 'is_important' => 'nullable|boolean',
                 'visibility' => 'nullable|string|in:private,shared,public',
-                'reminder_date' => 'nullable|date',
-                'priority_id' => 'nullable|exists:goal_priorities,id',
-                'status_id' => 'nullable|exists:goal_statuses,id',
-                'type_id' => 'nullable|exists:goal_types,id',
+                'reminder_date' => 'nullable|date_format:Y-m-d\\TH:i',
+                'priority_id' => 'nullable|integer|exists:goal_priorities,id',
+                'status_id' => 'nullable|integer|exists:goal_statuses,id',
+                'type_id' => 'nullable|integer|exists:goal_types,id',
+                'tags' => 'nullable|string|max:1000',
 
-                'milestones' => 'array',
+                'milestones' => 'sometimes|array|max:100',
+                'milestones.*' => 'array:id,title,deadline,tasks',
                 'milestones.*.id' => [
                     'nullable',
                     'integer',
                     'distinct',
                     Rule::exists('milestones', 'id')->where('goal_id', $goal->id),
                 ],
-                'milestones.*.title' => 'nullable|string|max:255',
-                'milestones.*.deadline' => 'nullable|date',
+                'milestones.*.title' => 'required|string|max:255',
+                'milestones.*.deadline' => 'nullable|date_format:Y-m-d',
 
-                'milestones.*.tasks' => 'array',
+                'milestones.*.tasks' => 'sometimes|array|max:100',
+                'milestones.*.tasks.*' => 'array:id,title,points,status_id,type_id,priority_id',
                 'milestones.*.tasks.*.id' => [
                     'nullable',
                     'integer',
@@ -308,11 +316,11 @@ class GoalController extends Controller
                     Rule::exists('tasks', 'id')
                         ->whereIn('milestone_id', $goal->milestones->modelKeys()),
                 ],
-                'milestones.*.tasks.*.title' => 'nullable|string|max:255',
-                'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'nullable', 'integer', 'min:0'],
-                'milestones.*.tasks.*.status_id' => 'nullable|exists:task_statuses,id',
-                'milestones.*.tasks.*.type_id' => 'nullable|exists:task_types,id',
-                'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'nullable', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
+                'milestones.*.tasks.*.title' => 'required|string|max:255',
+                'milestones.*.tasks.*.points' => [Rule::excludeIf($systemXp), 'nullable', 'integer', 'min:0', 'max:100000'],
+                'milestones.*.tasks.*.status_id' => 'nullable|integer|exists:task_statuses,id',
+                'milestones.*.tasks.*.type_id' => 'nullable|integer|exists:task_types,id',
+                'milestones.*.tasks.*.priority_id' => [Rule::excludeIf(!$systemXp), 'nullable', 'integer', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
             ]);
 
             // A task must also belong to its submitted milestone, not just this goal.
@@ -323,7 +331,7 @@ class GoalController extends Controller
                             "milestones.$mIndex.tasks.$tIndex.priority_id" => t('goals.missing_priority'),
                         ]);
                     }
-                    if (!$systemXp && empty($taskData['id']) && !array_key_exists('points', $taskData)) {
+                    if (!$systemXp && empty($taskData['id']) && !isset($taskData['points'])) {
                         throw ValidationException::withMessages([
                             "milestones.$mIndex.tasks.$tIndex.points" => t('goals.missing_points'),
                         ]);
@@ -337,6 +345,10 @@ class GoalController extends Controller
                         ]);
                     }
                 }
+            }
+
+            if (array_key_exists('tags', $validated)) {
+                $validated['tags'] = $validated['tags'] ? array_map('trim', explode(',', $validated['tags'])) : [];
             }
 
             $goal->update(collect($validated)->except('milestones')->all());

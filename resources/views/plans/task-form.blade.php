@@ -68,7 +68,7 @@
                 <div class="pl-more-content">
                     <label>
                         {{ t('plans.description') }}
-                        <textarea name="description" rows="3"
+                        <textarea name="description" maxlength="10000" rows="3"
                             maxlength="10000">{{ old('description', $task->description) }}</textarea>
                     </label>
 

@@ -25,7 +25,7 @@ Route::get('{locale}/lang', function ($locale) {
 
     $previous = url()->previous();
     $parsed = parse_url($previous);
-    $segments = collect(explode('/', $parsed['path']))->filter()->values();
+    $segments = collect(explode('/', $parsed['path'] ?? ''))->filter()->values();
 
     if ($segments->count() && in_array($segments[0], $available)) {
         $segments->shift();
@@ -88,10 +88,12 @@ Route::group([
             Route::patch('/', [ProfileController::class, 'update'])
                 ->name('update');
             Route::delete('/', [ProfileController::class, 'destroy'])
+                ->middleware('throttle:password-check')
                 ->name('destroy');
             Route::get('/password', [ProfileController::class, 'passwordForm'])
                 ->name('password.form');
             Route::put('/password', [ProfileController::class, 'updatePassword'])
+                ->middleware('throttle:password-check')
                 ->name('password.update');
             Route::get('/avatar', [ProfileController::class, 'avatar'])
                 ->name('avatar');
@@ -105,11 +107,11 @@ Route::group([
 
     Route::middleware('auth')->prefix('motivation')->name('preferences.motivation.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Preferences\MotivationController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Preferences\MotivationController::class, 'store'])->name('store');
+        Route::post('/', [\App\Http\Controllers\Preferences\MotivationController::class, 'store'])->middleware('throttle:survey')->name('store');
         Route::post('/later', [\App\Http\Controllers\Preferences\MotivationController::class, 'later'])->name('later');
     });
 
-    Route::resource('users', UserController::class)
+    Route::resource('users', UserController::class)->except(['show'])
         ->middleware(['auth', 'role:admin']);
     Route::resource('goals', GoalController::class)
         ->middleware('auth');
@@ -119,6 +121,7 @@ Route::group([
             ->name('create');
 
         Route::post('/onboarding', [OnboardingController::class, 'store'])
+            ->middleware('throttle:survey')
             ->name('store');
 
         Route::get('/onboarding/result/{assessment}', [OnboardingController::class, 'result'])

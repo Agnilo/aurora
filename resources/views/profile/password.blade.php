@@ -33,6 +33,7 @@
                 placeholder="{{ t('profile.password_new_placeholder') }}" @error('password') aria-invalid="true"
                 aria-describedby="pr-password-error" @enderror>
 
+            <p class="pr-hint">{{ t('security.password_requirements') }}</p>
             @error('password')
                 <p id="pr-password-error" class="pr-error">
                     {{ $message }}

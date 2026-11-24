@@ -12,30 +12,31 @@
         @csrf
         <div class="auth-field">
             <label for="email">{{ t('auth.email') }}</label>
-            <input id="email" name="email" type="email" autocomplete="username" value="{{ old('email') }}" required autofocus
-                   @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+            <input id="email" name="email" type="email" maxlength="255" autocomplete="username" value="{{ old('email') }}"
+                required autofocus @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
             @error('email')
                 <p class="auth-error" id="email-error">{{ $message }}</p>
             @enderror
         </div>
         <div class="auth-field">
             <label for="password">{{ t('auth.password') }}</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" required
-                   @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
+            <input id="password" name="password" type="password" autocomplete="current-password" required @error('password')
+            aria-invalid="true" aria-describedby="password-error" @enderror>
             @error('password')
                 <p class="auth-error" id="password-error">{{ $message }}</p>
             @enderror
         </div>
         <div class="auth-options">
             <label class="auth-remember" for="remember">
-                <input type="checkbox" name="remember" id="remember" @checked(old('remember'))>
+                <input type="checkbox" name="remember" value="1" id="remember" @checked(old('remember'))>
                 <span>{{ t('auth.remember') }}</span>
             </label>
             @if (Route::has('password.request'))
                 <a href="{{ route('password.request', ['locale' => app()->getLocale()]) }}">{{ t('auth.forgot') }}</a>
             @endif
         </div>
-        <button class="auth-submit" type="submit">{{ t('auth.login_submit') }}<span aria-hidden="true"><x-lucide-arrow-right class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></button>
+        <button class="auth-submit" type="submit">{{ t('auth.login_submit') }}<span aria-hidden="true"><x-lucide-arrow-right
+                    class="aurora-icon" width="20" height="20" aria-hidden="true" focusable="false" /></span></button>
     </form>
     <p class="auth-switch">
         {{ t('auth.login_switch') }}

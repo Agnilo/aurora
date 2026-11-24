@@ -17,6 +17,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request, StreakVisibilityService $streakVisibility): View
     {
+        $request->validate(['month' => 'sometimes|date_format:Y-m', 'tasks' => 'sometimes|string|in:active,completed']);
         $user = $request->user();
         app(TaskXpService::class)->syncOpenTasks($user);
         $showStreak = $streakVisibility->visible($user);

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class LookupAdminController extends Controller
 {
@@ -112,6 +113,7 @@ class LookupAdminController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate(['section' => ['sometimes', 'string', Rule::in(array_keys($this->sections))]]);
         $section = $request->get('section', 'goals');
 
         if (!isset($this->sections[$section])) {
@@ -172,9 +174,7 @@ class LookupAdminController extends Controller
     {
         $def = $this->resolveBlock($section, $type);
 
-        $request->validate([
-            'value' => 'required|array',
-        ]);
+        $this->validateInput($request);
 
         $languages = Language::where('is_active', true)->pluck('code');
 
@@ -198,9 +198,9 @@ class LookupAdminController extends Controller
                 if (!str_starts_with($rawHex, '#')) {
                     $rawHex = '#' . $rawHex;
                 }
-                $update['color'] = $rawHex;
+                $insert['color'] = $rawHex;
             } else {
-                $update['color'] = $rawPicker ?: null;
+                $insert['color'] = $rawPicker ?: null;
             }
         }
 
@@ -288,15 +288,13 @@ class LookupAdminController extends Controller
         $slug = Str::slug($item->name, '_');
         $keyWithoutGroup = "$section.$type.$slug";
 
-        $request->validate([
-            'value' => 'required|array',
-        ]);
+        $this->validateInput($request);
 
         $update = [];
 
         if (($def['has_color'] ?? false)) {
             $colorHex = $request->input('color_hex') ?: $request->input('color');
-            $update['color'] = $colorHex ?: null;
+            $update['color'] = $colorHex ? '#' . ltrim($colorHex, '#') : null;
         }
 
         if (($def['has_icon'] ?? false)) {
@@ -321,7 +319,7 @@ class LookupAdminController extends Controller
                 \Storage::disk('public')->delete('categories/' . $item->image);
             }
 
-            $filename = Str::slug($item->name) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = Str::slug($item->name) . '_' . time() . '.' . $file->extension();
 
             $file->storeAs('categories', $filename, 'public');
 
@@ -400,6 +398,20 @@ class LookupAdminController extends Controller
     }
 
 
+    private function validateInput(Request $request): void
+    {
+        $languages = Language::where('is_active', true)->pluck('code')->all();
+        $request->validate([
+            'value' => ['required', 'array:' . implode(',', $languages)],
+            'value.*' => ['nullable', 'string', 'max:255'],
+            'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/D'],
+            'color_hex' => ['nullable', 'string', 'regex:/^#?[0-9a-fA-F]{6}$/D'],
+            'icon' => ['nullable', 'string', 'max:80', 'regex:/^(?:_custom|[a-z][a-z0-9-]*)$/D'],
+            'icon_custom' => ['required_if:icon,_custom', 'nullable', 'string', 'max:80', 'regex:/^[a-z][a-z0-9-]*$/D'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048', 'dimensions:max_width=4096,max_height=4096'],
+        ]);
+    }
+
     protected function resolveBlock(string $section, string $type): array
     {
         if (!isset($this->sections[$section]['blocks'][$type])) {
@@ -416,10 +428,17 @@ class LookupAdminController extends Controller
     {
         $def = $this->resolveBlock($section, $type);
 
-        foreach ($request->order as $row) {
-            DB::table($def['table'])->where('id', $row['id'])
-                ->update(['order' => $row['order']]);
-        }
+        $data = $request->validate([
+            'order' => ['required', 'array', 'max:1000'],
+            'order.*' => ['required', 'array:id,order'],
+            'order.*.id' => ['required', 'integer', 'distinct', Rule::exists($def['table'], 'id')],
+            'order.*.order' => ['required', 'integer', 'min:0', 'max:65535', 'distinct'],
+        ]);
+        DB::transaction(function () use ($data, $def) {
+            foreach ($data['order'] as $row) {
+                DB::table($def['table'])->where('id', $row['id'])->update(['order' => $row['order']]);
+            }
+        });
 
         return response()->json(['success' => true]);
     }

@@ -26,9 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       App::setLocale(Session::get('locale', config('app.locale')));
+        $this->configureRateLimits();
+        App::setLocale(Session::get('locale', config('app.locale')));
 
-       ResetPassword::createUrlUsing(function ($user, string $token) {
+        ResetPassword::createUrlUsing(function ($user, string $token) {
             return route('password.reset', [
                 'locale' => app()->getLocale(),
                 'token' => $token,
@@ -49,5 +50,26 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
+    }
+
+    private function configureRateLimits(): void
+    {
+        foreach (['registration' => [5, 20], 'login-ip' => [30, 300], 'recovery' => [5, 20], 'survey' => [20, 120], 'password-check' => [10, 60]] as $name => [$minute, $hour]) {
+            \Illuminate\Support\Facades\RateLimiter::for($name, function ($request) use ($name, $minute, $hour) {
+                $response = function ($request, array $headers) {
+                    $seconds = (int) ($headers['Retry-After'] ?? 60);
+                    $message = t('security.too_many_attempts', ['seconds' => $seconds]);
+
+                    return $request->expectsJson()
+                        ? response()->json(['message' => $message], 429, $headers)
+                        : response()->view('errors.429', compact('message'), 429, $headers);
+                };
+
+                return [
+                    \Illuminate\Cache\RateLimiting\Limit::perMinute($minute)->by($name . ':minute:' . $request->ip())->response($response),
+                    \Illuminate\Cache\RateLimiting\Limit::perHour($hour)->by($name . ':hour:' . $request->ip())->response($response),
+                ];
+            });
+        }
     }
 }

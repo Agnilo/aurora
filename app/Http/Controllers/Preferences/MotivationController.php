@@ -37,7 +37,7 @@ class MotivationController extends Controller
 
     public function store(Request $request, string $locale, OnboardingAssessmentService $service): RedirectResponse
     {
-        $data = $request->validate(['answers' => ['required', 'array']]);
+        $data = $request->validate(['answers' => ['required', 'array', 'max:100']]);
         $assessment = $service->completeMotivation($request->user(), $data['answers']);
         $request->user()->preferences()->update(['motivation_remind_at' => null]);
 

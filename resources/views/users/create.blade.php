@@ -24,6 +24,7 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">{{ t('auth.password') }}</label>
                 <input type="password" name="password" class="form-control" required>
+                <p>{{ t('security.password_requirements') }}</p>
                 @error('password')
                 <div class="text-danger small">{{ $message }}</div> @enderror
             </div>

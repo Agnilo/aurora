@@ -30,6 +30,7 @@ class TranslationGroupController extends Controller
         ]);
 
         $key = Str::slug($request->name, '_');
+        \Illuminate\Support\Facades\Validator::make(['key' => $key], ['key' => 'required|string|max:255|unique:translation_groups,key'])->validate();
 
         $group = TranslationGroup::create([
             'name' => $request->name,
