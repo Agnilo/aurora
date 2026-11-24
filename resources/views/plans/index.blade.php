@@ -37,7 +37,7 @@
 
             @forelse ($items as $item)
                 @if ($tab === 'tasks')
-                    @include('plans.task-row', ['task' => $item])
+                    @include('plans.task-expandable-row', ['task' => $item])
                 @else
                     @include('plans.habit-row', ['habit' => $item])
                 @endif

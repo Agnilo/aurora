@@ -1,0 +1,133 @@
+.pl-task-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border-muted);
+}
+
+.pl-task-preview:last-child {
+    border-bottom: 0;
+}
+
+.pl-task-preview-check {
+    flex: 0 0 40px;
+    margin: 17px 0 0;
+}
+
+.pl-task-preview-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.pl-task-preview-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 80px;
+    padding-block: 17px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.pl-task-preview-summary::-webkit-details-marker {
+    display: none;
+}
+
+.pl-task-preview-copy {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.pl-task-preview-title {
+    display: block;
+    font-weight: 500;
+}
+
+.pl-task-preview-meta {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.pl-task-preview.is-done .pl-task-preview-title {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+}
+
+.pl-task-preview-chevron {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform var(--transition-fast, 160ms ease);
+}
+
+.pl-task-preview-details[open]>.pl-task-preview-summary .pl-task-preview-chevron {
+    transform: rotate(180deg);
+}
+
+.pl-task-preview-summary:hover .pl-task-preview-title {
+    color: var(--color-pink-deep);
+}
+
+.pl-task-preview-body {
+    display: grid;
+    gap: 16px;
+    padding: 4px 0 20px;
+    overflow-wrap: anywhere;
+}
+
+.pl-task-preview-description {
+    padding: 16px 18px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-sm, 9px);
+    min-width: 0;
+}
+
+.pl-task-preview-description h3 {
+    margin: 0 0 10px;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pl-task-preview-description .aurora-rich-content {
+    font-size: 14px;
+}
+
+.pl-task-preview-actions {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pl-task-preview-actions .pl-secondary {
+    gap: 7px;
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 13px;
+}
+
+.pl-task-preview-actions .pl-secondary:hover {
+    background: var(--color-bg-muted);
+    color: var(--color-ink);
+}
+
+@media (max-width: 700px) {
+
+    .pl-task-preview,
+    .pl-task-preview-summary {
+        gap: 10px;
+    }
+
+    .pl-task-preview-description {
+        padding: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pl-task-preview-chevron {
+        transition: none;
+    }
+}
