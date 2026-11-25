@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', t('plans.habit') . ' · Aurora')
+@section('title', t('plans.habit') . ' | Aurora')
 
 @section('content')
     <div class="container pl-page pl-form-page">

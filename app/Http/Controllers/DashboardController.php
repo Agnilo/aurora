@@ -7,6 +7,7 @@ use App\Services\Preferences\CategoryVisibilityService;
 use App\Models\Habit;
 use App\Models\HabitCompletion;
 use App\Models\Task;
+use App\Models\PointsLog;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use App\Services\Preferences\StreakVisibilityService;
@@ -27,44 +28,68 @@ class DashboardController extends Controller
         $user->load('gameDetails');
 
         $filter = $request->query('tasks') === 'completed' ? 'completed' : 'active';
-        $tasks = Task::ownedBy($user)
-            ->whereNull('archived_at')
-            ->whereIn('category_id', $visibleCategoryIds)
-            ->with(['goal.category', 'category'])
-            ->when(
-                $filter === 'completed',
-                fn($query) => $query->whereNotNull('completed_at')->orderByDesc('completed_at'),
-                fn($query) => $query->whereNull('completed_at')
-                    ->where(fn($q) => $q->whereNull('scheduled_on')
-                        ->orWhereDate('scheduled_on', '<=', today('Europe/Vilnius')))
-                    ->orderByDesc('is_important')
-                    ->orderBy('scheduled_on')
-            )->orderBy('id')->paginate(6)->withQueryString();
-
         $today = today('Europe/Vilnius');
         $storageZone = config('app.timezone');
-        $completedToday = Task::ownedBy($user)
+        $todayFrom = $today->copy()->setTimezone($storageZone);
+        $todayUntil = $today->copy()->addDay()->setTimezone($storageZone);
+        $taskQuery = Task::ownedBy($user)
+            ->whereNull('archived_at')
             ->whereIn('category_id', $visibleCategoryIds)
-            ->where('completed_at', '>=', $today->copy()->setTimezone($storageZone))
-            ->where('completed_at', '<', $today->copy()->addDay()->setTimezone($storageZone))->count();
+            ->with(['goal.category', 'category', 'milestone.goal.category']);
+
+        $activeTasksQuery = (clone $taskQuery)->whereNull('completed_at')
+            ->where(fn($q) => $q->whereNull('scheduled_on')
+                ->orWhereDate('scheduled_on', '<=', $today->toDateString())
+                ->orWhere('is_important', true)
+                ->orWhere('is_favorite', true));
+        $todayCompletedQuery = (clone $taskQuery)
+            ->where('completed_at', '>=', $todayFrom)
+            ->where('completed_at', '<', $todayUntil);
+        $activeTaskCount = (clone $activeTasksQuery)->count();
+        $completedToday = (clone $todayCompletedQuery)->count();
+        $tasks = $filter === 'completed'
+            ? $todayCompletedQuery->orderByDesc('completed_at')->orderBy('id')->limit(4)->get()
+            : $activeTasksQuery
+                ->orderByDesc('is_important')
+                ->orderByRaw('CASE WHEN scheduled_on IS NOT NULL AND DATE(scheduled_on) < ? THEN 0 WHEN DATE(scheduled_on) = ? THEN 1 ELSE 2 END', [$today->toDateString(), $today->toDateString()])
+                ->orderByDesc('is_favorite')
+                ->orderByRaw('CASE WHEN scheduled_on IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('scheduled_on')->orderBy('id')->limit(4)->get();
 
         $activeHabits = Habit::where('user_id', $user->id)
             ->whereIn('category_id', $visibleCategoryIds)
             ->with('category', 'latestCompletion')->whereNull('archived_at')->get();
         $todayHabits = $activeHabits->filter(fn($habit) => $habit->dueToday());
 
+        $dailyTaskQuery = (clone $taskQuery)->whereDate('scheduled_on', $today->toDateString());
+        $dailyTaskTotal = (clone $dailyTaskQuery)->count();
+        $dailyTaskDone = (clone $dailyTaskQuery)->whereNotNull('completed_at')->count();
+        $dailyHabitTotal = $todayHabits->count();
+        $dailyHabitDone = $todayHabits->filter(fn($habit) => (bool) $habit->currentCompletion?->completed_at)->count();
+        $dailyTotal = $dailyTaskTotal + $dailyHabitTotal;
+        $dailyDone = $dailyTaskDone + $dailyHabitDone;
+        $dailyPercent = $dailyTotal ? (int) round(100 * $dailyDone / $dailyTotal) : 0;
+        $dailyXp = PointsLog::where('user_id', $user->id)
+            ->whereIn('category_id', $visibleCategoryIds)
+            ->where('created_at', '>=', $todayFrom)
+            ->where('created_at', '<', $todayUntil)->sum('points');
+        $todayHabits = $todayHabits->sortBy(fn($habit) => (bool) $habit->currentCompletion?->completed_at)->take(4);
+
         $activeGoals = $user->goals()->where('is_completed', false)
             ->whereIn('category_id', $visibleCategoryIds)
             ->with('category')
             ->withCount([
                 'milestones',
+                'tasks as remaining_tasks_count' => fn($query) => $query->whereNull('archived_at')->whereNull('completed_at'),
+                'tasks as visible_tasks_count' => fn($query) => $query->whereNull('archived_at'),
                 'milestones as completed_milestones_count' =>
                     fn($query) => $query->where('is_completed', true),
             ])
             ->orderByDesc('is_important')
+            ->orderByDesc('is_favorite')
             ->orderByDesc('updated_at')
             ->orderBy('id')
-            ->limit(2)
+            ->limit(3)
             ->get();
 
         $activeGoalCount = $user->goals()->whereIn('category_id', $visibleCategoryIds)->where('is_completed', false)->count();
@@ -137,6 +162,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'user',
             'tasks',
+            'activeTaskCount',
             'filter',
             'completedToday',
             'activitiesToday',
@@ -144,6 +170,14 @@ class DashboardController extends Controller
             'categoryLevels',
             'showStreak',
             'todayHabits',
+            'dailyTaskTotal',
+            'dailyTaskDone',
+            'dailyHabitTotal',
+            'dailyHabitDone',
+            'dailyTotal',
+            'dailyDone',
+            'dailyPercent',
+            'dailyXp',
             'activeGoalCount',
             'weeklyActivity',
             'currentWeeklyTotal',

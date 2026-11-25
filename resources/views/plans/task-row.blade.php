@@ -15,9 +15,9 @@
         <small>
             @if($task->goal)<a
                 href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $task->goal]) }}">{{ $task->goal->title }}</a>
-            · @endif
+            | @endif
             {{ $task->category?->translated_name }}
-            @if($task->scheduled_on) · {{ $task->scheduled_on->format('Y-m-d') }} @endif
+            @if($task->scheduled_on) | {{ $task->scheduled_on->format('Y-m-d') }} @endif
         </small>
     </div>
     <span class="pl-number aurora-reward">{{ $task->points }} XP</span>

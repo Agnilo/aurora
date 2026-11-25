@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', t('preferences.ui.result_title').' · Aurora')
+@section('title', t('preferences.ui.result_title').' | Aurora')
 
 @section('content')
 <div class="container pref-page">

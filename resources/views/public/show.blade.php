@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $user->name . ' · Aurora')
+@section('title', $user->name . ' | Aurora')
 
 @section('content')
     @php

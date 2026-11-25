@@ -68,6 +68,8 @@ class TaskController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string|max:10000',
                 'scheduled_on' => 'nullable|date_format:Y-m-d',
+                'is_favorite' => 'sometimes|boolean',
+                'is_important' => 'sometimes|boolean',
                 'points' => [Rule::excludeIf($system || $done), 'required', 'integer', 'min:0', 'max:100000'],
                 'priority_id' => [Rule::excludeIf(!$system || $done), 'required', 'integer', Rule::exists('task_priorities', 'id')->whereIn('name', ['Low', 'Medium', 'High'])],
             ]);
@@ -111,7 +113,6 @@ class TaskController extends Controller
             abort_if($task->archived_at, 422, t('plans.archived'));
             $user = $task->user;
             $wasDone = (bool) $task->completed_at;
-            // New forms submit the desired state, making retries idempotent.
             $done = $request->has('completed') ? $request->boolean('completed') : !$wasDone;
             if ($done !== $wasDone) {
                 if (!$wasDone && app(TaskXpService::class)->mode($user) === UserPreference::XP_SYSTEM) {

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Aurora')</title>
+    <link rel="icon" type="image/x-icon" href="data:,">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @include('layouts.partials.date-picker-labels')
 
@@ -18,7 +19,7 @@
             }
         } catch { }
     </script>
-    @vite(['resources/css/frontend/app.css', 'resources/js/app.js', 'resources/js/aurora-rich-text-editor.js'])
+    @vite(['resources/css/frontend/app.css', 'resources/js/app.js', 'resources/js/aurora-date-picker.js', 'resources/js/aurora-rich-text-editor.js', 'resources/js/aurora-goal-settings.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,6 +89,7 @@
     </main>
 
     @include('components.rich-text-editor-template')
+    @include('components.goal-settings-template')
 
     <div class="page-fade-overlay"></div>
 

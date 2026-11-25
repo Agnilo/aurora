@@ -56,7 +56,7 @@
 
                     {{-- LEVEL LABEL --}}
                     <div class="life-area-level">
-                        {{ t('profile.level') }} {{ $level->level }} · {{ $level->level_name }}
+                        {{ t('profile.level') }} {{ $level->level }} | {{ $level->level_name }}
                     </div>
 
                 </div>

@@ -4,7 +4,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
     <div>
         <h1 class="admin-title">{{ t('preferences.admin.edit_title') }}</h1>
-        <p class="admin-subtitle mb-0"><code>{{ $question->code }}</code> · {{ t('preferences.admin.version') }} {{ $question->questionnaire_version }}</p>
+        <p class="admin-subtitle mb-0"><code>{{ $question->code }}</code> | {{ t('preferences.admin.version') }} {{ $question->questionnaire_version }}</p>
     </div>
     <a class="btn btn-outline-secondary" href="{{ route('admin.preferences.questions.index', ['locale' => app()->getLocale()]) }}">{{ t('preferences.admin.back') }}</a>
 </div>
@@ -52,7 +52,7 @@
                     <label class="form-label" for="question-{{ $language->code }}">
                         {{ $language->name }} ({{ strtoupper($language->code) }})
                         @if ($language->code === $question->locale)
-                            <span class="text-muted small">· {{ t('preferences.admin.base_language') }}</span>
+                            <span class="text-muted small">| {{ t('preferences.admin.base_language') }}</span>
                         @endif
                     </label>
                     <textarea id="question-{{ $language->code }}" name="question_translations[{{ $language->code }}]"

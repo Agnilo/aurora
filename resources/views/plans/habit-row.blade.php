@@ -12,9 +12,9 @@
     <div class="pl-row-copy">
         <a
             href="{{ route('habits.edit', ['locale' => app()->getLocale(), 'habit' => $habit]) }}">{{ $habit->title }}</a>
-        <small>{{ t('plans.' . $habit->frequency) }} · {{ $habit->category?->translated_name }}
-            @if($habit->archived_at) · {{ t('plans.archived') }}
-            @elseif(!$habit->dueToday()) · {{ t('plans.not_today') }} @endif
+        <small>{{ t('plans.' . $habit->frequency) }} | {{ $habit->category?->translated_name }}
+            @if($habit->archived_at) | {{ t('plans.archived') }}
+            @elseif(!$habit->dueToday()) | {{ t('plans.not_today') }} @endif
         </small>
     </div>
     <span class="pl-number aurora-reward">{{ $habit->currentCompletion?->awarded_xp ?? $habit->points }} XP</span>

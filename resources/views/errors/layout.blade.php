@@ -41,7 +41,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <title>{{ $code }} · {{ $heading }} · Aurora</title>
+    <title>{{ $code }} | {{ $heading }} | Aurora</title>
     <style>
         * {
             box-sizing: border-box;

@@ -60,9 +60,9 @@
                                             <span class="onb-preview onb-{{ $color }}">
                                                 @if($question->code === 'gamification_level')
                                                     <strong>{{ t('preferences.onboarding.ui.today') }}</strong>
-                                                    <span class="onb-mini-meta">{{ $value === 'hidden' ? t('preferences.onboarding.ui.one_task') : t('preferences.onboarding.ui.level').' · 30 / 182 XP' }}</span>
+                                                    <span class="onb-mini-meta">{{ $value === 'hidden' ? t('preferences.onboarding.ui.one_task') : t('preferences.onboarding.ui.level').' | 30 / 182 XP' }}</span>
                                                     <span class="onb-mini-task"><span>{{ t('preferences.onboarding.ui.today_tasks') }}</span><strong>✓ &nbsp;{{ t('preferences.onboarding.ui.example_task') }}</strong>@if($value !== 'hidden')<small>+10 XP</small>@endif</span>
-                                                    @if($value === 'prominent')<span class="onb-mini-toast">{{ t('preferences.onboarding.ui.task_done') }} · +10 XP</span>@endif
+                                                    @if($value === 'prominent')<span class="onb-mini-toast">{{ t('preferences.onboarding.ui.task_done') }} | +10 XP</span>@endif
                                                 @elseif($question->code === 'xp_mode')
                                                     <strong>{{ $value === 'system' ? t('preferences.onboarding.ui.system') : t('preferences.onboarding.ui.manual') }}</strong>
                                                     <span class="onb-mini-task"><span>{{ $value === 'system' ? t('preferences.onboarding.ui.difficulty') : t('preferences.onboarding.ui.task_xp') }}</span><strong>{{ $value === 'system' ? t('preferences.onboarding.ui.medium') : t('preferences.onboarding.ui.enter_value') }}</strong></span>

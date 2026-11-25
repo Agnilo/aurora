@@ -1,0 +1,197 @@
+.aurora-color-control,
+.aurora-tags-control {
+    min-width: 0;
+    width: 100%;
+}
+
+.aurora-color-trigger {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 46px;
+    padding: 8px 11px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font: 13px var(--font-mono);
+}
+
+.aurora-color-trigger>.aurora-icon {
+    margin-inline-start: auto;
+}
+
+.aurora-color-swatch {
+    width: 25px;
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid var(--color-rule-soft);
+}
+
+.aurora-color-panel {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: 14px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-muted);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-medium);
+    color: var(--color-ink);
+    font: 13px var(--font-ui);
+}
+
+.aurora-color-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.aurora-color-palette {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.aurora-color-option {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-rule-soft);
+    border-radius: 4px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.aurora-color-option[aria-pressed='true']::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 2px solid white;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px var(--color-ink);
+}
+
+.aurora-color-option:hover {
+    outline: 2px solid var(--color-pink-deep);
+    outline-offset: 1px;
+}
+
+.aurora-color-reset {
+    width: 100%;
+    margin-top: 12px;
+    padding: 7px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--color-ink);
+    font: inherit;
+}
+
+.aurora-flag-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+}
+
+.goal-form .gf-check.aurora-flag,
+.pl-form .aurora-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    position: relative;
+    font: 500 13px var(--font-ui);
+}
+
+.aurora-flag input[type='checkbox'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.aurora-flag:has(input:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+.aurora-flag--is_favorite:has(input:checked) {
+    background: color-mix(in srgb, var(--color-yellow) 25%, var(--color-bg-card));
+    color: #795800;
+    border-color: var(--color-yellow);
+}
+
+.aurora-flag--is_important:has(input:checked) {
+    background: var(--color-pink-soft);
+    color: var(--color-danger);
+    border-color: var(--color-pink-deep);
+}
+
+.aurora-tags-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+    padding: 8px;
+}
+
+.aurora-tags-list {
+    display: contents;
+}
+
+.aurora-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-radius: var(--radius-xs);
+    background: var(--color-bg-muted);
+    font: 12px var(--font-ui);
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+.aurora-tag-chip button {
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 17px;
+    line-height: 1;
+}
+
+.goal-form .gf-field .aurora-tag-entry {
+    flex: 1 1 120px;
+    min-width: 80px;
+    width: auto;
+    padding: 5px;
+    min-height: 29px;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    font-size: 13px;
+}
+
+#goal-form input[data-aurora-color-ready][hidden],
+#goal-form input[data-aurora-tags-ready][hidden] {
+    display: none !important;
+}
+
+.aurora-progress-hint {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+#goal-form #gf-progress[readonly] {
+    background: var(--color-bg-muted);
+}

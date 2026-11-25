@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', t('leaderboard.title').' · Aurora')
+@section('title', t('leaderboard.title').' | Aurora')
 
 @section('content')
 <div class="container leaderboard-page">

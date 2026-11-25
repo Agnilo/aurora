@@ -26,3 +26,5 @@
 @import "./goals/goal-form.css";
 @import "./pages/plans.css";
 @import "./components/task-preview.css";
+@import "./components/dashboard-focus.css";
+@import "./components/aurora-goal-settings.css";

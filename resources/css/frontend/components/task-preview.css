@@ -107,6 +107,7 @@
     min-height: 36px;
     padding: 7px 12px;
     font-size: 13px;
+    background: var(--color-bg-card);
 }
 
 .pl-task-preview-actions .pl-secondary:hover {

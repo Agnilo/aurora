@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', t('plans.task') . ' · Aurora')
+@section('title', t('plans.task') . ' | Aurora')
 
 @section('content')
     <div class="container pl-page pl-form-page">
@@ -37,6 +37,21 @@
                 </label>
 
                 @include('plans.assignment-fields', ['record' => $task, 'assignmentLocked' => (bool) ($task->milestone_id || $task->completed_at)])
+
+                <div class="aurora-flag-group">
+                    <input type="hidden" name="is_favorite" value="0">
+                    <label class="aurora-flag aurora-flag--is_favorite">
+                        <input type="checkbox" name="is_favorite" value="1" @checked(old('is_favorite', $task->is_favorite ?? false))>
+                        <x-lucide-star class="aurora-icon" width="17" height="17" aria-hidden="true" />
+                        <span>{{ t('goals.favorite') }}</span>
+                    </label>
+                    <input type="hidden" name="is_important" value="0">
+                    <label class="aurora-flag aurora-flag--is_important">
+                        <input type="checkbox" name="is_important" value="1" @checked(old('is_important', $task->is_important ?? false))>
+                        <x-lucide-circle-alert class="aurora-icon" width="17" height="17" aria-hidden="true" />
+                        <span>{{ t('goals.important') }}</span>
+                    </label>
+                </div>
             </div>
 
             <section class="pl-editor-section" aria-labelledby="task-schedule-heading">
@@ -68,10 +83,9 @@
                 <div class="pl-more-content">
                     <label>
                         {{ t('plans.description') }}
-                        <textarea name="description" maxlength="10000" rows="3"
-                            maxlength="10000">{{ old('description', $task->description) }}</textarea>
+                        <textarea name="description" maxlength="10000"
+                            rows="3">{{ old('description', $task->description) }}</textarea>
                     </label>
-
                 </div>
             </details>
 

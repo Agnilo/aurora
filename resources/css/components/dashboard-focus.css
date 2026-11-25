@@ -1,0 +1,161 @@
+.dashboard-ui-content-grid .dashboard-focus-card {
+    min-height: 0;
+    align-self: stretch;
+    min-width: 0;
+}
+
+.dashboard-focus-card .dashboard-ui-panel-header {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dashboard-focus-card .dashboard-ui-task-tabs {
+    margin-bottom: 8px;
+}
+
+.dashboard-focus-card .dashboard-focus-task {
+    min-height: 48px;
+    gap: 9px;
+    padding: 8px 0;
+}
+
+.dashboard-focus-card .dashboard-focus-task:last-child {
+    border-bottom: 0;
+}
+
+.dashboard-focus-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.dashboard-focus-title strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-focus-title .aurora-icon {
+    flex: none;
+}
+
+.dashboard-focus-star {
+    color: #a57516;
+    fill: #ffdb8655;
+}
+
+.dashboard-focus-alert {
+    color: var(--color-danger, #b94f62);
+}
+
+.dashboard-focus-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.dashboard-focus-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--area-accent);
+    border-radius: 50%;
+    flex: none;
+}
+
+.dashboard-focus-xp {
+    font: 11px var(--font-mono);
+    white-space: nowrap;
+    color: var(--color-text-muted);
+}
+
+.dashboard-focus-card .dashboard-ui-goals-list {
+    gap: 0;
+}
+
+.dashboard-focus-card .dashboard-focus-goal {
+    padding: 10px 0;
+    gap: 10px;
+    border: 0;
+    border-bottom: 1px solid var(--dashboard-ui-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.dashboard-focus-card .dashboard-focus-goal:last-child {
+    border-bottom: 0;
+}
+
+.dashboard-focus-card .dashboard-focus-goal:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.dashboard-focus-card .dashboard-focus-goal:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.dashboard-focus-card .dashboard-ui-goal-icon {
+    width: 34px;
+    height: 34px;
+}
+
+.dashboard-focus-card .dashboard-ui-goal-details {
+    gap: 3px;
+}
+
+.dashboard-focus-goal-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.dashboard-focus-goal-heading strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-focus-flags {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: none;
+}
+
+.dashboard-focus-flags>span {
+    display: inline-flex;
+}
+
+.dashboard-focus-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashboard-focus-card .dashboard-focus-progress .dashboard-ui-meter {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    height: 5px;
+}
+
+.dashboard-focus-progress .dashboard-ui-percent {
+    flex: none;
+    min-width: 32px;
+    text-align: end;
+}
+
+.dashboard-focus-search-empty {
+    grid-column: 1 / -1;
+}
+
+.dashboard-focus-search-empty[hidden] {
+    display: none !important;
+}

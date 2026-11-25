@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', t('tasks.title') . ' · Aurora')
+@section('title', t('tasks.title') . ' | Aurora')
 
 @section('content')
     <div class="container goals-page pl-page">

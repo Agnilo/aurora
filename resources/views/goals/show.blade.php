@@ -1,8 +1,8 @@
 @extends('layouts.app')
-@section('title', $goal->title . ' · Aurora')
+@section('title', $goal->title . ' | Aurora')
 @section('content')
     <div class="container pl-page">
-        <a href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"><x-lucide-arrow-left class="aurora-icon"
+        <a class="pl-back" href="{{ route('plans.index', ['locale' => app()->getLocale()]) }}"><x-lucide-arrow-left class="aurora-icon"
                 width="20" height="20" aria-hidden="true" focusable="false" /> {{ t('plans.goals') }}</a>
         <header class="pl-heading mt-4">
             <div>
@@ -15,7 +15,15 @@
         @if($goal->description)
             <x-rich-text-content :value="$goal->description" class="mb-3" />
         @endif
-        <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} · {{ $goal->progress }}%</p>
+        <p class="pl-number">{{ $doneTasksCount }} / {{ $tasksCount }} | {{ $goal->progress }}%</p>
+        @foreach($goal->milestones as $milestone)
+            <section class="pl-panel mb-4">
+                <header class="pl-heading">
+                    <h2>{{ $milestone->title }}</h2><span class="pl-number">{{ $milestone->progress }}%</span>
+                </header>
+                @foreach($milestone->tasks->whereNull('archived_at') as $task) @include('plans.task-row') @endforeach
+            </section>
+        @endforeach
         <section class="pl-panel mb-4">
             <header class="pl-heading">
                 <h2>{{ t('plans.tasks') }}</h2><a class="pl-primary"
@@ -26,14 +34,6 @@
             @forelse($goal->directTasks->whereNull('archived_at') as $task) @include('plans.task-row')
             @empty<p class="pl-hint">{{ t('plans.direct_hint') }}</p>@endforelse
         </section>
-        @foreach($goal->milestones as $milestone)
-            <section class="pl-panel mb-4">
-                <header class="pl-heading">
-                    <h2>{{ $milestone->title }}</h2><span class="pl-number">{{ $milestone->progress }}%</span>
-                </header>
-                @foreach($milestone->tasks->whereNull('archived_at') as $task) @include('plans.task-row') @endforeach
-            </section>
-        @endforeach
         <section class="pl-panel mb-4">
             <header class="pl-heading">
                 <h2>{{ t('plans.linked_habits') }}</h2>

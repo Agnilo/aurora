@@ -73,6 +73,11 @@
     background: transparent;
     color: inherit;
     border-color: #d6d3d1;
+    background: var(--color-bg-card);
+}
+
+.pl-secondary:hover{
+    background: var(--color-bg-muted);
 }
 
 .pl-tabs,
@@ -166,10 +171,10 @@
 .pl-check {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     padding: 0;
-    border: 1px solid #ccc8c4;
+    border: 1px solid #6f737a;
     background: transparent;
     border-radius: 50%;
     color: #444;
@@ -403,7 +408,7 @@
     margin-inline: auto;
 }
 
-.pl-form-page .pl-back {
+.pl-page .pl-back {
     color: #606963;
     font-size: 14px;
     text-decoration: none;

@@ -20,9 +20,9 @@
             <span class="pl-task-preview-copy">
                 <span class="pl-task-preview-title">{{ $task->title }}</span>
                 <small class="pl-task-preview-meta">
-                    @if ($task->goal) {{ $task->goal->title }} · @endif
+                    @if ($task->goal) {{ $task->goal->title }} | @endif
                     {{ $task->category?->translated_name }}
-                    @if ($task->scheduled_on) · {{ $task->scheduled_on->format('Y-m-d') }} @endif
+                    @if ($task->scheduled_on) | {{ $task->scheduled_on->format('Y-m-d') }} @endif
                 </small>
             </span>
             <span class="pl-number aurora-reward">{{ $task->points }} XP</span>
