@@ -44,6 +44,8 @@ Route::group([
             ->name('store');
         Route::delete('/{translationGroup}/{translationKey}', [TranslationAdminController::class, 'destroy'])
             ->name('destroy');
+        Route::delete('/bulk', [TranslationAdminController::class, 'bulkDestroy'])
+            ->name('bulk-destroy');
 
         Route::get('/export', [TranslationAdminController::class, 'export'])
             ->name('export');

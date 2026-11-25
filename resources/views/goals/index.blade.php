@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', t('plans.title') . ' · Aurora')
+@section('title', t('goals.title') . ' · Aurora')
 
 @section('content')
     <div class="container goals-page">
         <header class="gp-heading">
             <div>
-                <h1>{{ t('plans.title') }}</h1>
+                <h1>{{ t('goals.title') }}</h1>
                 <p class="gp-description">{{ t('goals.description') }}</p>
             </div>
             <button class="pl-primary" data-plan-create><x-lucide-plus class="aurora-icon" width="16" height="16"

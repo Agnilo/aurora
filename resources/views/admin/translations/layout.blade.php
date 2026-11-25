@@ -1,10 +1,6 @@
 @extends('layouts.admin')
 
 @section('content')
-    @php
-        $groups = $groups ?? collect();
-        $group = $group ?? null;
-    @endphp
     <section aria-labelledby="translations-title">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <h1 class="admin-title mb-0" id="translations-title">{{ t('header.translations') }}</h1>
@@ -27,28 +23,31 @@
             </div>
         </div>
 
-        <nav class="admin-tabs" aria-label="{{ t('admin.ui.translation_groups') }}">
-            <a href="{{ route('admin.translations.index', ['locale' => app()->getLocale()]) }}"
-                class="admin-tab {{ empty($group) ? 'is-active' : '' }}" @if(empty($group)) aria-current="page"
-                @endif>{{ t('admin.ui.all') }}</a>
-            @foreach($groups as $grp)
-                <a href="{{ route('admin.translations.index', ['locale' => app()->getLocale(), 'group' => $grp->key]) }}"
-                    class="admin-tab {{ $group === $grp->key ? 'is-active' : '' }}" @if($group === $grp->key) aria-current="page"
-                    @endif>{{ $grp->label() }}</a>
-            @endforeach
-        </nav>
-
-        <form method="GET" action="{{ route('admin.translations.index', ['locale' => app()->getLocale()]) }}" class="mb-4">
-            @if($group)
-                <input type="hidden" name="group" value="{{ $group }}">
-            @endif
-            <div class="input-group" style="max-width: 400px;">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                    aria-label="{{ t('header.search') }}" placeholder="{{ t('header.search') }}">
-                <button type="submit" class="btn btn-outline-secondary">{{ t('button.search') }}</button>
-            </div>
-        </form>
-
+        @if(request()->routeIs('admin.translations.index'))
+            <form method="GET" action="{{ route('admin.translations.index', ['locale' => app()->getLocale()]) }}"
+                class="d-flex flex-wrap align-items-end gap-3 mb-4">
+                <input type="hidden" name="sort" value="{{ $sort }}">
+                <input type="hidden" name="direction" value="{{ $direction }}">
+                <div style="width: min(100%, 280px);">
+                    <label for="translation-group-filter" class="form-label">{{ t('admin.ui.translation_groups') }}</label>
+                    <select id="translation-group-filter" name="group" class="form-select" onchange="this.form.requestSubmit()">
+                        <option value="">{{ t('admin.ui.all') }}</option>
+                        @foreach($groups as $grp)
+                            <option value="{{ $grp->key }}" @selected($group === $grp->key)>{{ $grp->display_label ?? $grp->label() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="width: min(100%, 400px);">
+                    <label for="translation-search" class="form-label">{{ t('header.search') }}</label>
+                    <div class="input-group">
+                        <input id="translation-search" type="text" name="search" value="{{ request('search') }}" maxlength="255"
+                            class="form-control" placeholder="{{ t('header.search') }}">
+                        <button type="submit" class="btn btn-outline-secondary">{{ t('button.search') }}</button>
+                    </div>
+                </div>
+            </form>
+        @endif
         @yield('translations-content')
     </section>
 @endsection

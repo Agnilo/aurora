@@ -35,6 +35,6 @@ class PlansController extends Controller
             }
         }
         $items = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(15)->withQueryString();
-        return view('plans.index', compact('tab', 'status', 'items'));
+        return view($tab === 'tasks' ? 'tasks.index' : 'habits.index', compact('status', 'items'));
     }
 }
