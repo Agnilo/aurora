@@ -136,10 +136,7 @@
                         </div>
                     </div>
                     <div class="dashboard-ui-companion-art">
-                        @if (file_exists(public_path('images/welcome/main2.png')))
-                            <img class="dashboard-ui-mascot" src="{{ asset('images/welcome/main2.png') }}" alt=""
-                                loading="eager" />
-                        @endif
+                        <x-mascot />
                     </div>
                     <div class="dashboard-ui-companion-stats">
                         <div class="dashboard-ui-companion-stat">
@@ -171,10 +168,12 @@
             </div>
 
             <div class="dashboard-ui-content-grid">
-                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-habits dashboard-focus-card" aria-labelledby="dashboard-ui-habits-heading">
+                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-habits dashboard-focus-card"
+                    aria-labelledby="dashboard-ui-habits-heading">
                     <div class="dashboard-ui-panel-header">
                         <h2 id="dashboard-ui-habits-heading">{{ t('plans.today_habits') }}</h2>
-                        <a class="dashboard-ui-panel-link" href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">{{ t('dashboard.ui.all_habits') }}</a>
+                        <a class="dashboard-ui-panel-link"
+                            href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'habits']) }}">{{ t('dashboard.ui.all_habits') }}</a>
                     </div>
                     <div class="dashboard-ui-habit-list">
                         @forelse($todayHabits as $habit)
@@ -184,7 +183,8 @@
                         @endforelse
                     </div>
                 </section>
-                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-wins dashboard-focus-card" aria-labelledby="dashboard-ui-wins-heading">
+                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-wins dashboard-focus-card"
+                    aria-labelledby="dashboard-ui-wins-heading">
                     <div class="dashboard-ui-panel-header">
                         <h2 id="dashboard-ui-wins-heading">{{ t('dashboard.ui.daily_progress') }}</h2>
                     </div>
@@ -192,79 +192,106 @@
                         <strong class="dashboard-daily-percent">{{ $dailyPercent }}%</strong>
                         <div class="dashboard-daily-summary-copy">
                             <small>{{ $dailyTotal ? t('dashboard.ui.daily_activity_count', ['done' => $dailyDone, 'total' => $dailyTotal]) : t('dashboard.ui.no_daily_plan') }}</small>
-                            <span class="dashboard-daily-meter" role="progressbar" aria-label="{{ t('dashboard.ui.daily_progress') }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $dailyPercent }}"><span style="width: {{ $dailyPercent }}%"></span></span>
+                            <span class="dashboard-daily-meter" role="progressbar"
+                                aria-label="{{ t('dashboard.ui.daily_progress') }}" aria-valuemin="0"
+                                aria-valuemax="100" aria-valuenow="{{ $dailyPercent }}"><span
+                                    style="width: {{ $dailyPercent }}%"></span></span>
                         </div>
                     </div>
                     <div class="dashboard-daily-breakdown">
-                        <div><span>{{ t('plans.tasks') }}</span><strong>{{ $dailyTaskDone }} / {{ $dailyTaskTotal }}</strong></div>
-                        <div><span>{{ t('plans.habits') }}</span><strong>{{ $dailyHabitDone }} / {{ $dailyHabitTotal }}</strong></div>
-                        <div class="aurora-reward dashboard-daily-xp"><span>{{ t('dashboard.ui.daily_xp') }}</span><strong>{{ $dailyXp > 0 ? '+' : '' }}{{ $dailyXp }} XP</strong></div>
+                        <div><span>{{ t('plans.tasks') }}</span><strong>{{ $dailyTaskDone }} /
+                                {{ $dailyTaskTotal }}</strong></div>
+                        <div><span>{{ t('plans.habits') }}</span><strong>{{ $dailyHabitDone }} /
+                                {{ $dailyHabitTotal }}</strong></div>
+                        <div class="aurora-reward dashboard-daily-xp">
+                            <span>{{ t('dashboard.ui.daily_xp') }}</span><strong>{{ $dailyXp > 0 ? '+' : '' }}{{ $dailyXp }}
+                                XP</strong></div>
                     </div>
                 </section>
-                <section id="dashboard-ui-tasks" class="dashboard-ui-card dashboard-ui-panel dashboard-ui-tasks dashboard-focus-card"
+                <section id="dashboard-ui-tasks"
+                    class="dashboard-ui-card dashboard-ui-panel dashboard-ui-tasks dashboard-focus-card"
                     aria-labelledby="dashboard-ui-task-heading" data-dashboard-tasks>
                     <div class="dashboard-ui-panel-header">
                         <h2 id="dashboard-ui-task-heading">{{ t('plans.tasks') }}</h2>
-                        <a class="dashboard-ui-panel-link" href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'tasks']) }}">
+                        <a class="dashboard-ui-panel-link"
+                            href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'tasks']) }}">
                             {{ t('dashboard.ui.all_tasks') }}
                         </a>
                     </div>
                     <nav class="dashboard-ui-task-tabs" aria-label="{{ t('dashboard.ui.task_filters') }}">
                         @foreach(['active' => $activeTaskCount, 'completed' => $completedToday] as $taskFilter => $total)
                             <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'tasks' => $taskFilter, 'month' => $calendarMonth->format('Y-m'), 'week' => $weekStart->toDateString()]) }}#dashboard-ui-tasks"
-                                @if($filter === $taskFilter) aria-current="page" @endif>{{ t('dashboard.ui.' . $taskFilter) }} ({{ $total }})</a>
+                                @if($filter === $taskFilter) aria-current="page" @endif>{{ t('dashboard.ui.' . $taskFilter) }}
+                                ({{ $total }})</a>
                         @endforeach
                     </nav>
-                    <p class="dashboard-ui-error" role="alert" data-task-error hidden>{{ t('dashboard.ui.save_error') }}</p>
+                    <p class="dashboard-ui-error" role="alert" data-task-error hidden>{{ t('dashboard.ui.save_error') }}
+                    </p>
                     <div class="dashboard-ui-task-list">
                         @forelse($tasks as $task)
                             @include('dashboard.focus-task-row')
                         @empty
-                            <p class="dashboard-ui-empty">{{ t($filter === 'completed' ? 'dashboard.ui.no_completed' : 'dashboard.ui.no_tasks') }}</p>
+                            <p class="dashboard-ui-empty">
+                                {{ t($filter === 'completed' ? 'dashboard.ui.no_completed' : 'dashboard.ui.no_tasks') }}</p>
                         @endforelse
                     </div>
                 </section>
-                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-goals dashboard-focus-card" aria-labelledby="dashboard-ui-goals-heading">
+                <section class="dashboard-ui-card dashboard-ui-panel dashboard-ui-goals dashboard-focus-card"
+                    aria-labelledby="dashboard-ui-goals-heading">
                     <div class="dashboard-ui-panel-header">
                         <h2 id="dashboard-ui-goals-heading">{{ t('dashboard.ui.my_goals') }}</h2>
-                        <a class="dashboard-ui-panel-link" href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'goals']) }}">
+                        <a class="dashboard-ui-panel-link"
+                            href="{{ route('plans.index', ['locale' => app()->getLocale(), 'tab' => 'goals']) }}">
                             {{ t('dashboard.ui.all_goals') }}
                         </a>
                     </div>
                     <div class="dashboard-ui-goals-list">
                         @forelse($activeGoals as $goal)
-                            @php($progress = max(0, min(100, (float) $goal->progress)))
-                            <a class="dashboard-ui-goal dashboard-focus-goal" style="--area-accent: {{ $colorFor($goal->category) }}"
-                                href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
-                                <span class="dashboard-ui-goal-details">
-                                    <span class="dashboard-focus-goal-heading">
-                                        <strong>{{ $goal->title }}</strong>
-                                        <span class="dashboard-focus-flags">
-                                            @if($goal->is_important)
-                                                <span title="{{ t('goals.important') }}"><x-lucide-circle-alert class="aurora-icon dashboard-focus-alert" width="16" height="16" aria-hidden="true" /><span class="visually-hidden">{{ t('goals.important') }}</span></span>
-                                            @endif
-                                            @if($goal->is_favorite)
-                                                <span title="{{ t('goals.favorite') }}"><x-lucide-star class="aurora-icon dashboard-focus-star" width="16" height="16" aria-hidden="true" /><span class="visually-hidden">{{ t('goals.favorite') }}</span></span>
-                                            @endif
-                                        </span>
+                        @php($progress = max(0, min(100, (float) $goal->progress)))
+                        <a class="dashboard-ui-goal dashboard-focus-goal"
+                            style="--area-accent: {{ $colorFor($goal->category) }}"
+                            href="{{ route('goals.show', ['locale' => app()->getLocale(), 'goal' => $goal->id]) }}">
+                            <span class="dashboard-ui-goal-details">
+                                <span class="dashboard-focus-goal-heading">
+                                    <strong>{{ $goal->title }}</strong>
+                                    <span class="dashboard-focus-flags">
+                                        @if($goal->is_important)
+                                            <span title="{{ t('goals.important') }}"><x-lucide-circle-alert
+                                                    class="aurora-icon dashboard-focus-alert" width="16" height="16"
+                                                    aria-hidden="true" /><span
+                                                    class="visually-hidden">{{ t('goals.important') }}</span></span>
+                                        @endif
+                                        @if($goal->is_favorite)
+                                            <span title="{{ t('goals.favorite') }}"><x-lucide-star
+                                                    class="aurora-icon dashboard-focus-star" width="16" height="16"
+                                                    aria-hidden="true" /><span
+                                                    class="visually-hidden">{{ t('goals.favorite') }}</span></span>
+                                        @endif
                                     </span>
-                                    <small class="dashboard-focus-meta"><span class="dashboard-focus-dot" aria-hidden="true"></span>{{ $goal->category?->translated_name ?? t('plans.goals') }}</small>
-                                    <span class="dashboard-focus-progress"><span class="dashboard-ui-meter"><span style="width: {{ $progress }}%; background: var(--area-accent)"></span></span><span class="dashboard-ui-percent">{{ round($progress) }}%</span></span>
-                                    @if($goal->visible_tasks_count > 0)<small>{{ t('dashboard.ui.remaining_tasks', ['count' => $goal->remaining_tasks_count]) }}</small>@endif
                                 </span>
-                            </a>
+                                <small class="dashboard-focus-meta"><span class="dashboard-focus-dot"
+                                        aria-hidden="true"></span>{{ $goal->category?->translated_name ?? t('plans.goals') }}</small>
+                                <span class="dashboard-focus-progress"><span class="dashboard-ui-meter"><span
+                                            style="width: {{ $progress }}%; background: var(--area-accent)"></span></span><span
+                                        class="dashboard-ui-percent">{{ round($progress) }}%</span></span>
+                                @if($goal->visible_tasks_count > 0)<small>{{ t('dashboard.ui.remaining_tasks', ['count' => $goal->remaining_tasks_count]) }}</small>@endif
+                            </span>
+                        </a>
                         @empty
-                            <p class="dashboard-ui-empty">{{ t('dashboard.ui.no_goals') }}</p>
+                        <p class="dashboard-ui-empty">{{ t('dashboard.ui.no_goals') }}</p>
                         @endforelse
                     </div>
                 </section>
-                <p class="dashboard-ui-empty dashboard-focus-search-empty" data-dashboard-ui-search-empty hidden>{{ t('dashboard.ui.search_empty') }}</p>
+                <p class="dashboard-ui-empty dashboard-focus-search-empty" data-dashboard-ui-search-empty hidden>
+                    {{ t('dashboard.ui.search_empty') }}</p>
                 <section id="dashboard-ui-weekly" class="dashboard-ui-card dashboard-ui-panel dashboard-ui-weekly"
                     aria-labelledby="dashboard-ui-week-heading">
                     <div class="dashboard-ui-panel-header">
                         <div>
                             <h2 id="dashboard-ui-week-heading">{{ t('dashboard.ui.weekly_rhythm') }}</h2>
-                        </div><nav class="dashboard-ui-calendar-navigation" aria-label="{{ t('dashboard.ui.weekly_rhythm') }}">
+                        </div>
+                        <nav class="dashboard-ui-calendar-navigation"
+                            aria-label="{{ t('dashboard.ui.weekly_rhythm') }}">
                             <a href="{{ route('dashboard', ['locale' => app()->getLocale(), 'week' => $weekPrev, 'month' => $calendarMonth->format('Y-m'), 'tasks' => $filter]) }}#dashboard-ui-weekly"
                                 aria-label="{{ t('dashboard.ui.previous') }}">
                                 <x-lucide-chevron-left class="aurora-icon" width="16" height="16" aria-hidden="true" />
@@ -282,7 +309,8 @@
                                     <x-lucide-chevron-right class="aurora-icon" width="16" height="16" aria-hidden="true" />
                                 </a>
                             @else
-                                <span aria-disabled="true" style="display: grid; place-items: center; width: 28px; height: 28px; opacity: .35;">
+                                <span aria-disabled="true"
+                                    style="display: grid; place-items: center; width: 28px; height: 28px; opacity: .35;">
                                     <x-lucide-chevron-right class="aurora-icon" width="16" height="16" aria-hidden="true" />
                                 </span>
                             @endif
@@ -336,12 +364,46 @@
     </div>
 </div>
 <style>
-    .dashboard-week-picker { position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; padding: 4px; white-space: nowrap; }
-    .dashboard-week-picker:hover { background: rgba(25, 30, 40, 0.05); }
-    .dashboard-week-picker:focus-within { outline: 2px solid var(--app-rose-deep, #bc8392); outline-offset: 2px; }
-    .dashboard-week-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-    .dashboard-week-picker input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: auto; height: auto; cursor: pointer; }
-    .dashboard-week-picker:has(input:disabled) { opacity: .5; }
+    .dashboard-week-picker {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 4px;
+        white-space: nowrap;
+    }
+
+    .dashboard-week-picker:hover {
+        background: rgba(25, 30, 40, 0.05);
+    }
+
+    .dashboard-week-picker:focus-within {
+        outline: 2px solid var(--app-rose-deep, #bc8392);
+        outline-offset: 2px;
+    }
+
+    .dashboard-week-picker input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .dashboard-week-picker input::-webkit-calendar-picker-indicator {
+        position: absolute;
+        inset: 0;
+        width: auto;
+        height: auto;
+        cursor: pointer;
+    }
+
+    .dashboard-week-picker:has(input:disabled) {
+        opacity: .5;
+    }
 </style>
 <script>
     (() => {

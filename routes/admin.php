@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\Gamification\GoalBonusAdminController;
 use App\Http\Controllers\Admin\Gamification\LevelAdminController;
 use App\Http\Controllers\Admin\Gamification\XpRuleAdminController;
 use App\Http\Controllers\Admin\Preferences\AssessmentQuestionAdminController;
+use App\Http\Controllers\Admin\Gamification\MascotItemAdminController;
 
 use App\Http\Middleware\SetAppLocale;
 
@@ -120,6 +121,8 @@ Route::group([
             ->except(['show', 'destroy']);
         Route::resource('badge-categories', BadgeCategoryAdminController::class)
             ->except(['show', 'destroy']);
+        Route::resource('mascot-items', MascotItemAdminController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
 
     });
 

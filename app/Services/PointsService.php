@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-
 use App\Models\Category;
 use App\Models\Task;
 use App\Models\PointsLog;
@@ -11,8 +10,6 @@ use App\Models\User;
 
 class PointsService
 {
-
-    
     public static function calculateXp(Task $task): int
     {
         $task->loadMissing(['priority', 'user']);
@@ -32,7 +29,6 @@ class PointsService
         }
 
         $task->loadMissing(['priority', 'milestone.goal']);
-
         $xp = self::calculateXp($task);
 
         $log = PointsLog::where('task_id', $task->id)
@@ -40,14 +36,17 @@ class PointsService
             ->first();
 
         if (!$log) {
-            PointsLog::create([
-                'user_id' => $task->user_id,
-                'task_id' => $task->id,
-                'category_id' => $task->category_id,
-                'points' => $xp,
-                'amount' => $xp,
-                'type' => 'task_completed',
-            ]);
+            DB::transaction(function () use ($task, $xp) {
+                PointsLog::create([
+                    'user_id' => $task->user_id,
+                    'task_id' => $task->id,
+                    'category_id' => $task->category_id,
+                    'points' => $xp,
+                    'amount' => $xp,
+                    'type' => 'task_completed',
+                ]);
+                CoinRewardService::awardActivity($task->user, 'task_completed', $task->id);
+            });
             return;
         }
 
@@ -65,7 +64,6 @@ class PointsService
     public static function syncUserGamification(User $user): void
     {
         DB::transaction(function () use ($user) {
-            // Rebuild from the current ledger, retaining levels already reached.
             $game = $user->gameDetails()->lockForUpdate()->firstOrCreate([]);
             $totals = PointsLog::where('user_id', $user->id)
                 ->selectRaw('category_id, SUM(COALESCE(amount, 0)) AS total_xp')
@@ -79,7 +77,6 @@ class PointsService
                 ->merge($categoryTotals->keys())
                 ->unique();
 
-            // Ignore logs whose category was deleted; they still count globally.
             foreach (Category::whereIn('id', $categoryIds)->pluck('id') as $categoryId) {
                 $categoryLevel = $user->categoryLevels()->lockForUpdate()->firstOrCreate(
                     ['category_id' => $categoryId],
@@ -95,7 +92,6 @@ class PointsService
                 while ($level < $retainedLevel || $totalXp >= $levelStartXp + $xpForNextLevel) {
                     $levelStartXp += $xpForNextLevel;
                     $level++;
-                    // Integer arithmetic keeps the intended 15% growth deterministic.
                     $xpForNextLevel = intdiv($xpForNextLevel * 115, 100);
                 }
 
@@ -120,5 +116,4 @@ class PointsService
             self::deleteTaskLog($task);
         }
     }
-
 }

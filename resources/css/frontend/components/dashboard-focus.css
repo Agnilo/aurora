@@ -214,3 +214,20 @@
 .dashboard-daily-breakdown strong {
     font: 12px var(--font-mono, monospace);
 }
+
+.dashboard-ui-companion .aurora-mascot-stack {
+    position: relative;
+    isolation: isolate;
+    pointer-events: none;
+}
+
+.aurora-mascot-stack .aurora-mascot-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    image-rendering: pixelated;
+    display: block;
+}

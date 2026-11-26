@@ -57,6 +57,16 @@
                     {{ t('admin.ui.levels') }}
                 </a>
                 <span class="sidebar-sublink disabled" aria-disabled="true">{{ t('admin.ui.xp_rules') }}</span>
+                <a href="{{ route('admin.gamification.coin-rewards.edit', ['locale' => app()->getLocale()]) }}"
+                    class="sidebar-sublink {{ request()->routeIs('admin.gamification.coin-rewards.*') ? 'active' : '' }}"
+                    @if(request()->routeIs('admin.gamification.coin-rewards.*')) aria-current="page" @endif>
+                    {{ t('gamification.coin_rewards.title') }}
+                </a>
+                <a href="{{ route('admin.gamification.mascot-items.index', ['locale' => app()->getLocale()]) }}"
+                    class="sidebar-sublink {{ request()->routeIs('admin.gamification.mascot-items.*') ? 'active' : '' }}"
+                    @if(request()->routeIs('admin.gamification.mascot-items.*')) aria-current="page" @endif>
+                    {{ t('mascot.admin.title') }}
+                </a>
                 <a href="{{ route('admin.gamification.bonuses.index', ['locale' => app()->getLocale()]) }}"
                     class="sidebar-sublink {{ request()->routeIs('admin.gamification.bonuses.*') ? 'active' : '' }}"
                     @if(request()->routeIs('admin.gamification.bonuses.*')) aria-current="page" @endif>

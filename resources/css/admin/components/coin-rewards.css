@@ -1,0 +1,88 @@
+.admin-body .admin-coin-rewards>.admin-game__panel {
+    max-width: 860px;
+}
+
+.admin-body .admin-container .admin-coin-rewards .table-responsive,
+.admin-body .admin-container .admin-coin-rewards table.table {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+}
+
+.admin-body .admin-container .admin-coin-rewards .admin-game__table thead th {
+    border-top: 0;
+}
+
+.admin-body .admin-container .admin-coin-rewards .admin-game__table tbody td,
+.admin-body .admin-container .admin-coin-rewards .admin-game__table thead th {
+    padding-inline: var(--space-6) !important;
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__amount {
+    width: 184px;
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__input {
+    width: 136px;
+    max-width: 100%;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-body .admin-coin-rewards .admin-game__table label {
+    margin: 0;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+}
+
+.admin-body .admin-container .admin-coin-rewards .admin-game__table tbody tr:hover td {
+    background: var(--color-bg-card);
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__footer {
+    padding: var(--space-4) var(--space-6);
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__footer p {
+    margin: 0;
+    flex: 1 1 200px;
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__footer .btn {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__message {
+    padding: var(--space-4) var(--space-6);
+    margin: 0;
+    border-bottom: 1px solid var(--color-border-muted);
+}
+
+.admin-body .admin-coin-rewards .admin-coin-rewards__links {
+    margin-top: var(--space-4);
+}
+
+@media (max-width: 680px) {
+
+    .admin-body .admin-container .admin-coin-rewards .admin-game__table tbody td,
+    .admin-body .admin-container .admin-coin-rewards .admin-game__table thead th {
+        padding-inline: var(--space-4) !important;
+    }
+
+    .admin-body .admin-coin-rewards .admin-coin-rewards__amount {
+        width: 116px;
+    }
+
+    .admin-body .admin-coin-rewards .admin-coin-rewards__input {
+        width: 84px;
+    }
+
+    .admin-body .admin-coin-rewards .admin-coin-rewards__footer,
+    .admin-body .admin-coin-rewards .admin-coin-rewards__message {
+        padding-inline: var(--space-4);
+    }
+}

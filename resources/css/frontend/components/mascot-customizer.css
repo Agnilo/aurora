@@ -1,0 +1,383 @@
+.dashboard-ui-companion .aurora-mascot-stack.aurora-mascot-link {
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+    transition: filter var(--transition-fast);
+}
+
+.dashboard-ui-companion .aurora-mascot-link:hover {
+    filter: drop-shadow(0 5px 9px var(--color-pink-deep));
+}
+
+.aurora-mascot-link:focus-visible,
+.mascot-choice input:focus-visible+span,
+.mascot-actions button:focus-visible,
+.mascot-back:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+.aurora-app .mascot-customizer {
+    max-width: 1040px;
+    padding-top: 32px;
+    padding-bottom: 48px;
+    color: var(--color-text-main);
+    font-family: var(--font-ui);
+}
+
+.mascot-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.mascot-back:hover {
+    color: var(--color-pink-deep);
+}
+
+.mascot-customizer h1 {
+    font-size: clamp(26px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -.045em;
+}
+
+.mascot-description {
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+}
+
+.mascot-customizer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: 16px;
+    align-items: stretch;
+}
+
+.mascot-panel {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    min-width: 0;
+}
+
+.mascot-preview-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+}
+
+.mascot-customizer .mascot-customizer-preview {
+    position: relative;
+    inset: auto;
+    transform: none;
+    isolation: isolate;
+    display: block;
+    width: min(100%, 340px);
+    aspect-ratio: 1;
+    height: auto;
+}
+
+.mascot-preview-panel p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.mascot-options {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.mascot-options fieldset {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+
+.mascot-options legend {
+    float: none;
+    width: auto;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.mascot-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+    gap: 8px;
+}
+
+.mascot-choice {
+    display: block;
+    position: relative;
+    margin: 0;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.mascot-choice input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.mascot-choice-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 6px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-soft);
+    text-align: center;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mascot-choice:hover .mascot-choice-content {
+    background: var(--color-pink-soft);
+}
+
+.mascot-choice input:checked+.mascot-choice-content {
+    border-color: var(--color-pink-deep);
+    background: var(--color-pink-soft);
+}
+
+.mascot-swatch {
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.mascot-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.mascot-actions button {
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+}
+
+.mascot-reset {
+    border: 1px solid var(--color-border-soft);
+    background: transparent;
+    color: var(--color-text-main);
+}
+
+.mascot-save {
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+}
+
+.mascot-actions button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.mascot-status,
+.mascot-error {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+}
+
+.mascot-status {
+    color: var(--color-positive);
+    background: var(--color-mint-soft);
+}
+
+.mascot-error {
+    color: var(--color-danger);
+    background: var(--color-pink-soft);
+}
+
+@media (max-width: 760px) {
+    .mascot-customizer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mascot-panel {
+        padding: 18px;
+    }
+
+    .mascot-customizer .mascot-customizer-preview {
+        width: min(100%, 270px);
+    }
+}
+
+.mascot-shop-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.mascot-shop-balance {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+}
+
+.mascot-item-preview {
+    display: block;
+    position: relative;
+    width: min(100%, 100px);
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.mascot-item-preview img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.mascot-item-preview--hair img {
+    transform: scale(1.12) translateY(9%);
+}
+
+.mascot-item-preview--outfit img {
+    transform: scale(1.65) translateY(-22%);
+}
+
+.mascot-item-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 18px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.mascot-item-price {
+    color: var(--color-warning);
+    font-family: var(--font-mono);
+}
+
+.mascot-buy {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mascot-buy-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+}
+
+.mascot-customizer [hidden] {
+    display: none !important;
+}
+
+.mascot-feedback {
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+}
+
+.mascot-feedback .mascot-error {
+    margin: 0;
+}
+
+@media (max-width: 760px) {
+    .mascot-feedback {
+        min-height: 64px;
+    }
+}
+
+.aurora-app .mascot-toast-stack {
+    position: fixed;
+    right: max(24px, env(safe-area-inset-right, 0px));
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: min(380px, calc(100vw - 48px));
+    pointer-events: none;
+}
+
+.aurora-app .mascot-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-medium);
+    font: 500 14px/1.45 var(--font-ui);
+    overflow-wrap: anywhere;
+    animation: mascot-toast-enter var(--transition-normal) both;
+}
+
+.aurora-app .mascot-toast .aurora-icon {
+    flex: none;
+}
+
+.aurora-app .mascot-toast--success {
+    background: var(--color-mint-soft);
+    color: var(--color-positive);
+}
+
+.aurora-app .mascot-toast--error {
+    background: var(--color-pink-soft);
+    color: var(--color-danger);
+}
+
+@keyframes mascot-toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 760px) {
+    .aurora-app .mascot-toast-stack {
+        right: max(12px, env(safe-area-inset-right, 0px));
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 24px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aurora-app .mascot-toast {
+        animation: none;
+    }
+}

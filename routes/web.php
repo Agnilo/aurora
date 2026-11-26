@@ -41,6 +41,8 @@ Route::get('/', function () {
 });
 
 require __DIR__ . '/admin.php';
+require __DIR__ . '/mascot.php';
+require __DIR__ . '/coin-rewards.php';
 
 Route::group([
     'prefix' => '{locale}',

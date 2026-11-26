@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ResolvesActivityAssignment;
 use App\Models\{Task, TaskStatus, Category, TaskPriority};
 use App\Models\Preferences\UserPreference;
-use App\Services\{GamificationService, PointsService, BadgeAwardingService, TaskXpService};
+use App\Services\{GamificationService, PointsService, BadgeAwardingService, TaskXpService, CoinRewardService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -112,6 +112,7 @@ class TaskController extends Controller
             $task = Task::whereKey($task->id)->lockForUpdate()->firstOrFail();
             abort_if($task->archived_at, 422, t('plans.archived'));
             $user = $task->user;
+            $balanceBefore = CoinRewardService::balanceForUpdate($user);
             $wasDone = (bool) $task->completed_at;
             $done = $request->has('completed') ? $request->boolean('completed') : !$wasDone;
             if ($done !== $wasDone) {
@@ -142,11 +143,16 @@ class TaskController extends Controller
             $task->refresh()->load('status', 'milestone', 'goal');
             $user->load('gameDetails', 'categoryLevels');
             $key = 'lookup.tasks.status.' . Str::slug($task->status?->name ?? '', '_');
+            $coinsEarned = max(0, (int) $user->gameDetails->coins - $balanceBefore);
             return [
                 'success' => true,
                 'completion_notice' => $done && !$wasDone
-                    ? t('gamification.task_done', ['xp' => (int) \App\Models\PointsLog::where('task_id', $task->id)->where('type', 'task_completed')->value('points')])
+                    ? t($coinsEarned > 0 ? 'gamification.task_done_reward' : 'gamification.task_done', [
+                        'xp' => (int) \App\Models\PointsLog::where('task_id', $task->id)->where('type', 'task_completed')->value('points'),
+                        'coins' => $coinsEarned,
+                    ])
                     : null,
+                'coins_earned' => $coinsEarned,
                 'task_id' => $task->id,
                 'completed_at' => $task->completed_at,
                 'status_id' => $task->status_id,

@@ -8,11 +8,13 @@
                 <p class="admin-subtitle mb-0">{{ t('admin.game_overview.subtitle') }}</p>
             </div>
             <div class="admin-game__actions">
+
                 <a class="btn btn-outline-secondary"
                     href="{{ route('admin.gamification.badges.create', ['locale' => app()->getLocale()]) }}">
                     <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" />
                     {{ t('admin.game_overview.add_badge') }}
                 </a>
+
                 <a class="btn btn-outline-secondary"
                     href="{{ route('admin.gamification.bonuses.create', ['locale' => app()->getLocale()]) }}">
                     <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" />

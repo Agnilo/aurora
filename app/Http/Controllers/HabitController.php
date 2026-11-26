@@ -124,8 +124,11 @@ class HabitController extends Controller
     {
         $this->authorizeHabit($request, $habit);
         $request->validate(['completed' => 'required|boolean']);
-        $xp = app(HabitService::class)->complete($habit, $request->boolean('completed'));
-        return back()->with('completion_notice', $xp === null ? null : t('gamification.habit_done', ['xp' => $xp]));
+        $reward = app(HabitService::class)->complete($habit, $request->boolean('completed'));
+        return back()->with('completion_notice', $reward === null ? null : t(
+            $reward['coins'] > 0 ? 'gamification.habit_done_reward' : 'gamification.habit_done',
+            $reward
+        ));
     }
 
     public function archive(Request $request, string $locale, Habit $habit)
