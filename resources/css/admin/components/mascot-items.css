@@ -120,3 +120,11 @@
         padding: var(--space-4);
     }
 }
+
+.admin-body .admin-mascot-thumb--shoes {
+    overflow: hidden;
+}
+
+.admin-body .admin-mascot-thumb--shoes img {
+    transform: scale(2.2) translateY(-41%);
+}

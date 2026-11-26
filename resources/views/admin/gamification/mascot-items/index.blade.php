@@ -17,7 +17,7 @@
             <div class="alert alert-success" role="status">{{ session('success') }}</div>
         @endif
         <div class="admin-mascot-filters mb-3">
-            @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit'] as $slot => $label)
+            @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit', 'top' => 'mascot.slot.top', 'bottom' => 'mascot.slot.bottom', 'shoes' => 'mascot.slot.shoes'] as $slot => $label)
                 <a class="btn {{ request('slot', '') === $slot ? 'btn-primary' : 'btn-outline-secondary' }}"
                     href="{{ route('admin.gamification.mascot-items.index', array_filter(['locale' => app()->getLocale(), 'slot' => $slot])) }}">{{ t($label) }}</a>
             @endforeach
@@ -39,7 +39,8 @@
                             <tr>
                                 <td>
                                     <div class="admin-mascot-item">
-                                        <span class="admin-mascot-thumb" aria-hidden="true">
+                                        <span class="admin-mascot-thumb admin-mascot-thumb--{{ $item->slot }}"
+                                            aria-hidden="true">
                                             @foreach($item->layers ?? [] as $path)
                                                 <img src="{{ asset($path) }}" alt="" loading="lazy">
                                             @endforeach

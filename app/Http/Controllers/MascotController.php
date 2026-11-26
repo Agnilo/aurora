@@ -17,9 +17,9 @@ class MascotController extends Controller
         $defaults = config('mascot.defaults', []);
         $balance = (int) ($user->gameDetails()->value('coins') ?? 0);
         $ready = $mascot->render($selection)['mode'] === 'layered';
-        foreach ($catalog as $slot => $options) {
-            $ready = $ready && isset($options[$defaults[$slot] ?? ''], $options[$selection[$slot] ?? ''])
-                && $options[$defaults[$slot]]['owned'];
+        foreach ($mascot->activeSlots($selection['clothing_mode']) as $slot) {
+            $options = $catalog[$slot];
+            $ready = $ready && isset($options[$selection[$slot] ?? '']) && $options[$selection[$slot]]['owned'];
         }
         return view('mascot.edit', compact('selection', 'catalog', 'defaults', 'ready', 'balance'));
     }
@@ -27,8 +27,11 @@ class MascotController extends Controller
     public function update(Request $request, MascotService $mascot)
     {
         $catalog = $mascot->catalog($request->user());
+        $request->validate(['clothing_mode' => ['required', Rule::in(['separate', 'full'])]]);
+        $mode = $request->input('clothing_mode');
         $rules = ['intent' => ['required', Rule::in(['save', 'buy'])], 'quoted_price' => ['nullable', 'integer', 'min:0']];
-        foreach ($catalog as $slot => $options) {
+        foreach ($mascot->activeSlots($mode) as $slot) {
+            $options = $catalog[$slot];
             $rules[$slot] = ['required', 'string', Rule::in(array_keys($options))];
         }
         $data = Validator::make($request->all(), $rules, [
@@ -38,7 +41,7 @@ class MascotController extends Controller
             'integer' => t('mascot.invalid'),
             'min' => t('mascot.invalid'),
         ])->validate();
-        $selection = array_intersect_key($data, $catalog);
+        $selection = array_intersect_key($data, $catalog) + ['clothing_mode' => $mode];
         $buy = $data['intent'] === 'buy';
         $mascot->saveSelection($request->user(), $selection, $buy, isset($data['quoted_price']) ? (int) $data['quoted_price'] : null);
         return redirect()->route('mascot.edit', ['locale' => app()->getLocale()])->with('mascot_saved', true);

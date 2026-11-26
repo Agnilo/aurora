@@ -6,7 +6,10 @@ return [
     'defaults' => [
         'body' => 'default',
         'hair' => 'pink',
-        'outfit' => 'default',
+        'outfit' => null,
+        'top' => 'default',
+        'bottom' => 'jeans',
+        'shoes' => 'default',
         'expression' => 'neutral',
         'accessory' => 'none',
     ],
@@ -22,13 +25,15 @@ return [
             'mint' => 'images/mascot/outfits/mint.png',
             'rose' => 'images/mascot/outfits/rose.png',
         ],
+        'shoes' => ['default' => 'images/mascot/shoes/default.png'],
         'expression' => ['neutral' => 'images/mascot/expressions/neutral.png'],
         'accessory' => ['none' => null],
     ],
-    'customizable' => ['hair', 'outfit'],
+    'customizable' => ['hair', 'top', 'bottom', 'outfit', 'shoes'],
     'swatches' => [
         'hair' => ['pink' => '#edaca5', 'brown' => '#a66f4d', 'blonde' => '#e9c27f'],
         'outfit' => ['default' => '#d1b7e2', 'mint' => '#a9cfb6', 'rose' => '#dda0b2'],
+        'shoes' => ['default' => '#f3ebe0'],
     ],
     'poses' => [],
 ];
