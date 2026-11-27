@@ -6,7 +6,6 @@
     const inputs = Object.fromEntries(names.map(name => [name, form.elements.namedItem(name)]));
     const touched = new Set();
     const serverErrors = new Map();
-    const general = document.getElementById('registration-error');
     const button = form.querySelector('[type="submit"]');
     let pending = false;
     let cooldown = 0;
@@ -83,8 +82,9 @@
         });
     }
     function announce(message) {
-        general.textContent = message;
-        general.hidden = !message;
+        if (message) {
+            document.dispatchEvent(new CustomEvent('aurora:toast', { detail: { type: 'error', message } }));
+        }
     }
     form.addEventListener('submit', async event => {
         event.preventDefault();

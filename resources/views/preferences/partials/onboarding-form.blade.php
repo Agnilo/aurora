@@ -3,7 +3,6 @@
         <div><h2 id="onb-question-title" hidden></h2></div>
         <ol class="onb-dots" id="onb-dots" aria-label="{{ t('preferences.onboarding.ui.progress') }}" hidden></ol>
     </header>
-    @if($errors->any())<div class="onb-errors" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     @if(!$motivationOnly && !$errors->any() && !old('answers'))
         <section class="onb-intro" id="onb-intro">
             <div><h2>{{ t('preferences.onboarding.ui.hello') }}</h2><p>{{ t('preferences.onboarding.ui.hello_text') }}</p><button type="button" class="onb-next" id="onb-start">{{ t('preferences.onboarding.ui.start') }} <span aria-hidden="true">→</span></button></div>

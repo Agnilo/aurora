@@ -107,35 +107,8 @@
         </form>
     </div>
 </div>
-@if(session('mascot_saved') || $errors->any())
-    <div class="mascot-toast-stack" data-mascot-toasts>
-        @if(session('mascot_saved'))
-            <div class="mascot-toast mascot-toast--success" role="status" data-dismiss-after="5000">
-                <x-lucide-check-circle class="aurora-icon" width="19" height="19" aria-hidden="true" />
-                <span>{{ t('mascot.saved') }}</span>
-            </div>
-        @endif
-        @if($errors->any())
-            <div class="mascot-toast mascot-toast--error" role="alert" data-dismiss-after="8000">
-                <x-lucide-alert-circle class="aurora-icon" width="19" height="19" aria-hidden="true" />
-                <span>{{ $errors->first() }}</span>
-            </div>
-        @endif
-    </div>
-@endif
 <script>
     (() => {
-        const toasts = document.querySelector('[data-mascot-toasts]');
-        if (toasts) {
-            document.body.append(toasts);
-            for (const toast of toasts.querySelectorAll('[data-dismiss-after]')) {
-                const dismiss = () => {
-                    toast.remove();
-                    if (!toasts.children.length) toasts.remove();
-                };
-                window.setTimeout(dismiss, Number(toast.dataset.dismissAfter));
-            }
-        }
         const root = document.querySelector('[data-mascot-customizer]');
         if (!root) return;
         const catalog = JSON.parse(root.dataset.catalog);

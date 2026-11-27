@@ -41,15 +41,6 @@
         @method('PUT')
     @endif
 
-    @if($errors->any())
-        <div class="gf-error-summary" role="alert">
-            <ul>
-                @foreach($errors->all() as $message)
-                    <li>{{ $message }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <section class="gf-panel" aria-labelledby="gf-main-heading">
         <div class="gf-section-heading">
@@ -233,8 +224,8 @@
                         <div class="gf-field">
                             <label for="gf-milestone-{{ $milestoneIndex }}-title">{{ t('goals.milestoneName') }}</label>
                             <input id="gf-milestone-{{ $milestoneIndex }}-title" type="text"
-                                name="milestones[{{ $milestoneIndex }}][title]" required maxlength="255" value="{{ $milestone['title'] ?? '' }}"
-                                placeholder="{{ t('goals.milestoneName') }}">
+                                name="milestones[{{ $milestoneIndex }}][title]" required maxlength="255"
+                                value="{{ $milestone['title'] ?? '' }}" placeholder="{{ t('goals.milestoneName') }}">
                         </div>
                         <div class="gf-field">
                             <label for="gf-milestone-{{ $milestoneIndex }}-deadline">{{ t('goals.deadline') }}</label>
@@ -254,15 +245,17 @@
                                     <label
                                         for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title">{{ t('goals.taskName') }}</label>
                                     <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-title" type="text"
-                                        name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][title]" required maxlength="255"
-                                        value="{{ $task['title'] ?? '' }}" placeholder="{{ t('goals.taskName') }}">
+                                        name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][title]" required
+                                        maxlength="255" value="{{ $task['title'] ?? '' }}"
+                                        placeholder="{{ t('goals.taskName') }}">
                                 </div>
                                 @if(!$systemXp)
                                     <div class="gf-field gf-task-points">
                                         <label
                                             for="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points">{{ t('goals.form.points') }}</label>
-                                        <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0" max="100000"
-                                            step="1" name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][points]"
+                                        <input id="gf-task-{{ $milestoneIndex }}-{{ $taskIndex }}-points" type="number" min="0"
+                                            max="100000" step="1"
+                                            name="milestones[{{ $milestoneIndex }}][tasks][{{ $taskIndex }}][points]"
                                             value="{{ $task['points'] ?? 0 }}" required>
                                     </div>
                                 @else
@@ -275,7 +268,8 @@
                                             <option value="">{{ t('goals.choose') }}</option>
                                             @foreach($taskPriorities as $item)
                                                 <option value="{{ $item->id }}" @selected(($task['priority_id'] ?? '') == $item->id)>
-                                                    {{ t('goals.form.difficulty.' . strtolower($item->name), $item->name) }}</option>
+                                                    {{ t('goals.form.difficulty.' . strtolower($item->name), $item->name) }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -332,7 +326,8 @@
             <div class="gf-field">
                 <label for="gf-milestone-__MILESTONE_INDEX__-title">{{ t('goals.milestoneName') }}</label>
                 <input id="gf-milestone-__MILESTONE_INDEX__-title" type="text"
-                    name="milestones[__MILESTONE_INDEX__][title]" required maxlength="255" value="" placeholder="{{ t('goals.milestoneName') }}">
+                    name="milestones[__MILESTONE_INDEX__][title]" required maxlength="255" value=""
+                    placeholder="{{ t('goals.milestoneName') }}">
             </div>
             <div class="gf-field">
                 <label for="gf-milestone-__MILESTONE_INDEX__-deadline">{{ t('goals.deadline') }}</label>
@@ -381,7 +376,8 @@
                 <option value="">{{ t('goals.choose') }}</option>
                 @foreach($taskStatuses as $item)
                     <option value="{{ $item->id }}">
-                        {{ t('lookup.tasks.status.' . \Illuminate\Support\Str::slug($item->name, '_')) }}</option>
+                        {{ t('lookup.tasks.status.' . \Illuminate\Support\Str::slug($item->name, '_')) }}
+                    </option>
                 @endforeach
             </select>
         </div>

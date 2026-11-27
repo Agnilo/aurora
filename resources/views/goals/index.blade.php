@@ -13,9 +13,6 @@
                     aria-hidden="true" focusable="false" /> {{ t('plans.create') }}</button>
         </header>
 
-        @if (session('success'))
-            <p class="gp-notice" role="status">{{ session('success') }}</p>
-        @endif
 
         @include('goals.partials.category.grid', [
             'categories' => $categories,

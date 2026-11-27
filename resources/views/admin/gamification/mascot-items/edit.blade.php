@@ -20,13 +20,6 @@
                 <p class="admin-subtitle mb-0">{{ t('mascot.admin.editor_description') }}</p>
             </div>
         </header>
-        @if($errors->any())
-            <div class="alert alert-danger" role="alert">
-                <ul class="mb-0">@foreach($errors->all() as $error)
-                <li>{{ $error }}</li>@endforeach
-                </ul>
-            </div>
-        @endif
         <div class="admin-mascot-editor">
             <section class="admin-game__panel admin-mascot-preview">
                 <h2>{{ t('mascot.admin.simulator') }}</h2>

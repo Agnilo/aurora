@@ -1,0 +1,178 @@
+.aurora-system-toasts {
+    position: fixed;
+    right: max(24px, env(safe-area-inset-right));
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: min(390px, calc(100vw - 48px));
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: none;
+    font-family: var(--font-ui);
+    color: var(--color-ink);
+    box-sizing: border-box;
+    padding: 2px;
+}
+
+.aurora-system-toasts:empty {
+    display: none;
+}
+
+.aurora-system-toasts>.aurora-system-toast {
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px 14px 14px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-md);
+    background: var(--color-blue-soft);
+    box-shadow: var(--shadow-medium);
+    pointer-events: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    animation: aurora-system-toast-in var(--transition-normal) both;
+}
+
+.aurora-system-toasts>.aurora-system-toast--success,
+.aurora-system-toasts>.aurora-system-toast--completion {
+    background: var(--color-mint-soft);
+}
+
+.aurora-system-toast.aurora-system-toast--success>.aurora-system-toast__icon,
+.aurora-system-toast.aurora-system-toast--completion>.aurora-system-toast__icon {
+    color: var(--color-positive);
+}
+
+.aurora-system-toasts>.aurora-system-toast--error {
+    background: var(--color-pink-soft);
+}
+
+.aurora-system-toast.aurora-system-toast--error>.aurora-system-toast__icon {
+    color: var(--color-danger);
+}
+
+.aurora-system-toasts>.aurora-system-toast--warning {
+    background: color-mix(in srgb, var(--color-yellow) 35%, var(--color-bg-card));
+}
+
+body:not([data-gamification="prominent"]) .aurora-system-toasts>.aurora-system-toast--completion {
+    display: none;
+}
+
+.aurora-system-toast>.aurora-system-toast__icon,
+.aurora-system-toast>.aurora-system-toast__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 24px;
+    color: var(--color-text-main);
+    flex: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    align-self: center;
+    line-height: 1;
+}
+
+.aurora-system-toast>.aurora-system-toast__icon>svg,
+.aurora-system-toast>.aurora-system-toast__close>svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    max-width: 100%;
+    max-height: 100%;
+    flex: none;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.aurora-system-toast>.aurora-system-toast__message {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    min-width: 0;
+    margin: 0;
+}
+
+.aurora-system-toast>.aurora-system-toast__message>span {
+    display: block;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    line-height: inherit;
+    white-space: normal;
+}
+
+.aurora-system-toast__message ul {
+    margin: 0;
+    padding-inline-start: 18px;
+}
+
+.aurora-system-toast__message li+li {
+    margin-top: 4px;
+}
+
+.aurora-system-toast>.aurora-system-toast__close {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+    border: 0;
+    background: transparent;
+    border-radius: var(--radius-xs);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.aurora-system-toast>.aurora-system-toast__close:hover {
+    background: var(--color-overlay-soft);
+    color: var(--color-ink);
+}
+
+.aurora-system-toast>.aurora-system-toast__close:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+@keyframes aurora-system-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .aurora-system-toasts {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+        width: min(390px, calc(100vw - 24px));
+        max-height: calc(100dvh - 24px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aurora-system-toasts>.aurora-system-toast {
+        animation: none;
+    }
+}

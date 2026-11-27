@@ -14,16 +14,6 @@
             </div>
         </header>
         <section class="admin-game__panel">
-            @if(session('success'))
-                <p class="admin-coin-rewards__message text-success" role="status">{{ session('success') }}</p>
-            @endif
-            @if($errors->any())
-                <div class="admin-coin-rewards__message text-danger" role="alert">
-                    @foreach($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
             <form method="POST"
                 action="{{ route('admin.gamification.coin-rewards.update', ['locale' => app()->getLocale()]) }}">
                 @csrf

@@ -6,7 +6,6 @@
         <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" /> {{ t('button.add_new') }}
     </a>
 </div>
-@if(session('success'))<div class="alert alert-success" role="status">{{ session('success') }}</div>@endif
 <div class="admin-panel"><div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
         <thead><tr>

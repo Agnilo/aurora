@@ -107,12 +107,9 @@ export function initDashboardCalendar(doc = document) {
             win.scrollTo(scroll);
         } catch {
             if (panel.isConnected) {
-                const message = doc.createElement('p');
-                message.className = 'dashboard-ui-error';
-                message.dataset.calendarLoadError = '';
-                message.setAttribute('role', 'alert');
-                message.textContent = doc.body.dataset.calendarLoadErrorMessage;
-                panel.append(message);
+                doc.dispatchEvent(new CustomEvent('aurora:toast', {
+                    detail: { type: 'error', message: doc.body.dataset.calendarLoadErrorMessage }
+                }));
             }
         } finally {
             win.clearTimeout(timeout);

@@ -6,13 +6,6 @@
             action="{{ route('admin.lookups.update', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $type, 'id' => $item->id]) }}"
             method="POST">
             @csrf @method('PUT')
-            @if($errors->any())
-                <div class="alert alert-danger" role="alert">
-                    <ul class="mb-0">@foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>@endforeach
-                    </ul>
-                </div>
-            @endif
             <div class="mb-3"><label class="form-label" for="lookup-key">{{ t('lookup.technical_key') }}</label>
                 <input id="lookup-key" type="text" class="form-control" value="{{ $fullKey }}" readonly>
                 <div class="form-text">{{ t('lookup.technical_key_help') }}</div>

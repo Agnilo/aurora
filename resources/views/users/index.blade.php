@@ -11,9 +11,6 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
 
         @if($users->isEmpty())
             <p class="text-muted">{{ t('admin.no_users_created') }}</p>

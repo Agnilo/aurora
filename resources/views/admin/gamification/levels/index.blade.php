@@ -6,11 +6,6 @@
 
         <h1 class="fw-bold mb-4">{{ t('gamification.levels') }}</h1>
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <a href="{{ route('admin.gamification.levels.create', app()->getLocale()) }}" class="btn btn-primary mb-3">
             + {{ t('button.add_new')}}
@@ -74,7 +69,8 @@
                                                                                     <form method="POST" action="{{ route('admin.gamification.levels.destroy', [
                                                                 'locale' => app()->getLocale(),
                                                                 'level' => $level->id
-                                                            ]) }}" class="m-0" data-confirm="{{ t('admin.confirm_delete_range') }}"
+                                                            ]) }}" class="m-0"
+                                                                                        data-confirm="{{ t('admin.confirm_delete_range') }}"
                                                                                         onsubmit="return confirm(this.dataset.confirm)">
                                                                                         @csrf
                                                                                         @method('DELETE')

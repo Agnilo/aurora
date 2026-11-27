@@ -12,15 +12,6 @@
         <h1>{{ t($habit->exists ? 'plans.edit_habit' : 'plans.new_habit') }}</h1>
         <p class="pl-form-intro">{{ t('plans.form.habit_intro') }}</p>
 
-        @if ($errors->any())
-            <div role="alert" class="pl-errors">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <form class="pl-panel pl-form pl-editor" data-plan-editor="habit" method="POST"
             action="{{ $habit->exists ? route('habits.update', ['locale' => app()->getLocale(), 'habit' => $habit]) : route('habits.store', ['locale' => app()->getLocale(), 'goal' => request()->query('goal')]) }}">

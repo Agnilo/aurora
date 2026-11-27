@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     @vite(['resources/css/frontend/app.css'])
+    @include('layouts.partials.system-toast-assets')
 </head>
 
 <body class="pref-onboarding-body">
@@ -26,6 +27,7 @@
         </nav>
     </header>
     <main class="onb-main">@yield('content')</main>
+    @include('layouts.partials.system-toasts')
 </body>
 
 </html>

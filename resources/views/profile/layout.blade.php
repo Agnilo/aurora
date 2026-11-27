@@ -71,11 +71,6 @@
         <a href="{{ route('preferences.motivation.create', ['locale' => app()->getLocale()]) }}" class="pr-tab">{{ t('preferences.onboarding.ui.profile_link') }}</a>
     </nav>
 
-    @if(session('success'))
-        <div class="pr-message" role="status">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <div class="pr-columns">
         <section class="pr-panel pr-main">

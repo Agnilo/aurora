@@ -6,9 +6,6 @@
         {{ t('dashboard.edit_user') }}: {{ $user->name }}
     </h1>
 
-    @if(session('success'))
-        <div class="alert alert-success" role="status">{{ session('success') }}</div>
-    @endif
 
     <form method="POST" action="{{ route('admin.users.update', ['locale' => app()->getLocale(), 'user' => $user->id]) }}"
         class="w-100">

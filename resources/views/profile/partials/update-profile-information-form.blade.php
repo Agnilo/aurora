@@ -40,11 +40,6 @@
                         </button>
                     </p>
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ t('profile.verification_link_sent') }}
-                        </p>
-                    @endif
                 </div>
             @endif
         </div>
@@ -52,10 +47,6 @@
         <div class="flex items-center gap-4">
             <x-primary-button>{{ t('button.save') }}</x-primary-button>
 
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600">{{ t('plans.saved') }}</p>
-            @endif
         </div>
     </form>
 </section>

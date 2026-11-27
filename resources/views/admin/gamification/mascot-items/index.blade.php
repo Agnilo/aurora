@@ -3,25 +3,6 @@
 @section('content')
     <div class="container py-4 admin-mascot admin-mascot-list">
         <h1 class="fw-bold mb-4">{{ t('mascot.admin.title') }}</h1>
-        @if(session('success') || $errors->any())
-            <div class="admin-mascot-toast-stack" data-mascot-admin-toasts>
-                @if(session('success'))
-                    <div class="admin-mascot-toast admin-mascot-toast--success" role="status" data-dismiss-after="5000">
-                        <x-lucide-check-circle class="aurora-icon" width="19" height="19" aria-hidden="true" />
-                        <span>{{ session('success') }}</span>
-                    </div>
-                @endif
-                @if($errors->any())
-                    <div class="admin-mascot-toast admin-mascot-toast--error" role="alert" data-dismiss-after="8000">
-                        <x-lucide-alert-circle class="aurora-icon" width="19" height="19" aria-hidden="true" />
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>@endforeach
-                        </ul>
-                    </div>
-                @endif
-            </div>
-        @endif
         <a class="btn btn-primary mb-3"
             href="{{ route('admin.gamification.mascot-items.create', ['locale' => app()->getLocale()]) }}">
             + {{ t('button.add_new') }}
@@ -187,16 +168,6 @@
     @include('admin.partials.confirm-dialog')
     <script>
         (() => {
-            const toasts = document.querySelector('[data-mascot-admin-toasts]');
-            if (toasts) {
-                document.body.append(toasts);
-                for (const toast of toasts.querySelectorAll('[data-dismiss-after]')) {
-                    window.setTimeout(() => {
-                        toast.remove();
-                        if (!toasts.children.length) toasts.remove();
-                    }, Number(toast.dataset.dismissAfter));
-                }
-            }
             document.querySelectorAll('[data-mascot-delete-info]').forEach(element => {
                 if (window.bootstrap?.Tooltip) {
                     bootstrap.Tooltip.getOrCreateInstance(element, { container: 'body', trigger: 'hover focus' });

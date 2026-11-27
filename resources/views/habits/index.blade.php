@@ -15,12 +15,6 @@
             </button>
         </header>
 
-        @if (session('success'))
-            <p class="gp-notice" role="status">{{ session('success') }}</p>
-        @endif
-        @if ($errors->any())
-            <p class="pl-errors" role="alert">{{ $errors->first() }}</p>
-        @endif
 
         <section class="pl-panel">
             <header class="pl-heading">

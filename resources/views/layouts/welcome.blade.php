@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     @vite('resources/css/frontend/pages/welcome.css')
+    @include('layouts.partials.system-toast-assets')
 </head>
 <body class="welcome-page">
     <a class="welcome-skip" href="#main">{{ t('welcome.skip') }}</a>
@@ -64,6 +65,6 @@
             </div>
         </footer>
     </div>
+    @include('layouts.partials.system-toasts')
 </body>
 </html>
-

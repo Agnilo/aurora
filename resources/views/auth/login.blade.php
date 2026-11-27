@@ -5,9 +5,6 @@
 @section('content')
     <h1 id="auth-title">{{ t('auth.login_title') }}</h1>
     <p class="auth-description">{{ t('auth.login_description') }}</p>
-    @if (session('status'))
-        <p class="auth-status" role="status">{{ session('status') }}</p>
-    @endif
     <form class="auth-form" method="POST" action="{{ route('login', ['locale' => app()->getLocale()]) }}">
         @csrf
         <div class="auth-field">

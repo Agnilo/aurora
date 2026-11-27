@@ -5,9 +5,6 @@
 @section('content')
     <h1 id="auth-title">{{ t('auth.register_title') }}</h1>
     <p class="auth-description">{{ t('preferences.ui.register_to_save') }}</p>
-    @if (session('status'))
-        <p class="auth-status" role="status">{{ session('status') }}</p>
-    @endif
     @php
         $registrationMessages = [
             'register_name_required' => t('security.register_name_required'),
@@ -33,7 +30,6 @@
     <form novalidate id="registration-form" data-messages="{{ json_encode($registrationMessages) }}" class="auth-form"
         method="POST" action="{{ route('register', ['locale' => app()->getLocale()]) }}">
         @csrf
-        <p id="registration-error" class="auth-error" role="alert" hidden></p>
         <div class="auth-field">
             <label for="name">{{ t('auth.name') }}</label>
             <input id="name" name="name" type="text" maxlength="255" autocomplete="name" value="{{ old('name') }}" required

@@ -12,15 +12,6 @@
         <h1>{{ t($task->exists ? 'plans.edit_task' : 'plans.new_task') }}</h1>
         <p class="pl-form-intro">{{ t('plans.form.task_intro') }}</p>
 
-        @if ($errors->any())
-            <div role="alert" class="pl-errors">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <form class="pl-panel pl-form pl-editor" data-plan-editor="task" method="POST"
             action="{{ $task->exists ? route('tasks.update', ['locale' => app()->getLocale(), 'task' => $task]) : route('tasks.store', ['locale' => app()->getLocale()]) }}">

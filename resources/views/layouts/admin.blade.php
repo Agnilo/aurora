@@ -22,6 +22,7 @@
         'resources/css/admin/dashboard.css',
         'resources/js/aurora-date-picker.js',
     ])
+    @include('layouts.partials.system-toast-assets')
 </head>
 
 <body class="admin-body">
@@ -60,6 +61,7 @@
         });
     </script>
     @yield('scripts')
+    @include('layouts.partials.system-toasts')
 </body>
 
 </html>

@@ -10,15 +10,6 @@
                 class="btn btn-outline-secondary">{{ t('preferences.admin.all_translations') }}</a>
         </div>
     </div>
-    @if(session('success'))
-    <div class="alert alert-success" role="status">{{ session('success') }}</div>@endif
-    @if($errors->any())
-        <div class="alert alert-danger" role="alert">
-            <ul class="mb-0">@foreach($errors->all() as $error)
-            <li>{{ $error }}</li>@endforeach
-            </ul>
-        </div>
-    @endif
     <form method="GET" action="{{ route('admin.preferences.questions.index', ['locale' => app()->getLocale()]) }}"
         class="admin-filter-card">
         <div class="row g-3 align-items-end">
@@ -33,7 +24,8 @@
                     <option value="">{{ t('preferences.admin.all_types') }}</option>
                     @foreach($types as $type)
                         <option value="{{ $type }}" @selected(($filters['type'] ?? '') === $type)>
-                    {{ t('preferences.admin.types.' . $type, [], $type) }}</option>@endforeach
+                            {{ t('preferences.admin.types.' . $type, [], $type) }}
+                    </option>@endforeach
                 </select>
             </div>
             <div class="col-md-4 col-lg-2">

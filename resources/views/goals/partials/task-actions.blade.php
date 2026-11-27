@@ -122,7 +122,7 @@
                 if (!taskId) {
                     checkbox.checked = previousState;
                     console.error('Task checkbox is missing data-task-id.', checkbox);
-                    alert(errorMessage);
+                    document.dispatchEvent(new CustomEvent('aurora:toast', { detail: { type: 'error', message: errorMessage } }));
                     return;
                 }
 
@@ -154,7 +154,7 @@
                     checkbox.checked = previousState;
                     matchingCheckboxes(taskId).forEach(input => { input.checked = previousState; });
                     console.error(error);
-                    alert(errorMessage);
+                    document.dispatchEvent(new CustomEvent('aurora:toast', { detail: { type: 'error', message: errorMessage } }));
                 } finally {
                     pendingTasks.delete(taskId);
                     checkbox.disabled = false;

@@ -225,8 +225,7 @@
                                 ({{ $total }})</a>
                         @endforeach
                     </nav>
-                    <p class="dashboard-ui-error" role="alert" data-task-error hidden>{{ t('dashboard.ui.save_error') }}
-                    </p>
+
                     <div class="dashboard-ui-task-list">
                         @forelse($tasks as $task)
                             @include('dashboard.focus-task-row')
@@ -427,10 +426,8 @@
                 event.preventDefault();
                 const button = form.querySelector('button');
                 if (button.disabled) return;
-                const error = form.closest('[data-dashboard-tasks]')?.querySelector('[data-task-error]');
                 button.disabled = true;
                 button.setAttribute('aria-busy', 'true');
-                if (error) error.hidden = true;
                 try {
                     const response = await fetch(form.action, {
                         method: 'POST', body: new FormData(form),
@@ -440,9 +437,12 @@
                     if (!response.ok) throw new Error('Task save failed');
                     const result = await response.json();
                     if (!result.success) throw new Error('Task save failed');
+                    if (result.completion_notice) {
+                        window.AuroraToast?.persistForReload(result.completion_notice, 'completion');
+                    }
                     window.location.reload();
                 } catch (e) {
-                    if (error) error.hidden = false;
+                    document.dispatchEvent(new CustomEvent('aurora:toast', { detail: { type: 'error', message: @json(t('dashboard.ui.save_error')) } }));
                     button.disabled = false;
                     button.removeAttribute('aria-busy');
                 }

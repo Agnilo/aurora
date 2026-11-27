@@ -33,15 +33,6 @@
         <h2 id="admin-preferences-title" class="h4">{{ t('admin_user_preferences.title') }}</h2>
         <p class="text-muted">{{ t('admin_user_preferences.hint') }}</p>
 
-        @if($errors->any())
-            <div class="alert alert-danger" role="alert">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $message)
-                        <li>{{ $message }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <form method="POST"
             action="{{ route('admin.users.preferences.update', ['locale' => app()->getLocale(), 'user' => $user->id]) }}">
@@ -117,8 +108,8 @@
                     aria-controls="admin-priority-areas">
                     @foreach(['survey', 'none', 'custom'] as $mode)
                         <option value="{{ $mode }}" @selected($priorityMode === $mode)
-                           @if($mode === 'survey') data-survey-field="priority"
-                        data-survey-base="{{ t('admin_user_preferences.priority.survey') }}" @endif>
+                            @if($mode === 'survey') data-survey-field="priority"
+                            data-survey-base="{{ t('admin_user_preferences.priority.survey') }}" @endif>
                             {{ t('admin_user_preferences.priority.' . $mode) }}{{ $mode === 'survey' && !empty($selectedSurvey['priority']) ? ' (' . $selectedSurvey['priority'] . ')' : '' }}
                         </option>
                     @endforeach
