@@ -28,15 +28,17 @@ class MascotAssetUploadService
                 throw ValidationException::withMessages([$field => t('mascot.admin.invalid_png')]);
             }
             $clear = false;
+            $nonOpaque = false;
             $visible = false;
-            for ($y = 0; $y < $size[1] && !($clear && $visible); $y++) {
-                for ($x = 0; $x < $size[0] && !($clear && $visible); $x++) {
+            for ($y = 0; $y < $size[1] && ($field === 'background' ? !$nonOpaque : !($clear && $visible)); $y++) {
+                for ($x = 0; $x < $size[0] && ($field === 'background' ? !$nonOpaque : !($clear && $visible)); $x++) {
                     $alpha = (imagecolorat($source, $x, $y) >> 24) & 127;
                     $clear = $clear || $alpha === 127;
+                    $nonOpaque = $nonOpaque || $alpha !== 0;
                     $visible = $visible || $alpha < 127;
                 }
             }
-            if (!$clear || !$visible) {
+            if ($field === 'background' ? $nonOpaque : (!$clear || !$visible)) {
                 throw ValidationException::withMessages([$field => t('mascot.admin.invalid_png')]);
             }
             imagealphablending($source, false);

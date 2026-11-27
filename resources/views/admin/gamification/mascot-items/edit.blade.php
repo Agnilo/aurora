@@ -24,7 +24,7 @@
             <section class="admin-game__panel admin-mascot-preview">
                 <h2>{{ t('mascot.admin.simulator') }}</h2>
                 <div class="admin-mascot-stage" role="img" aria-label="{{ t('mascot.preview') }}">
-                    @foreach(['hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'] as $layer)
+                    @foreach(['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'] as $layer)
                         <img data-preview-layer="{{ $layer }}" @if(isset($fixed[$layer])) src="{{ $fixed[$layer] }}" @else
                         hidden @endif alt="" draggable="false">
                     @endforeach
@@ -65,7 +65,7 @@
                     <div>
                         <label class="form-label" for="mascot-slot">{{ t('mascot.admin.type') }}</label>
                         <select class="form-select" id="mascot-slot" name="slot" @disabled($item->exists)>
-                            @foreach(['hair', 'outfit', 'top', 'bottom', 'shoes', 'body', 'accessory'] as $slot)
+                            @foreach(['hair', 'outfit', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background'] as $slot)
                                 <option value="{{ $slot }}" @selected(old('slot', $item->slot) === $slot)>
                                     {{ t('mascot.slot.' . $slot) }}</option>
                             @endforeach
@@ -109,7 +109,7 @@
                         <h2>{{ t('mascot.admin.layers') }}</h2>
                         <p class="admin-mascot-hint mb-0">{{ t('mascot.admin.png_note') }}</p>
                     </div>
-                    @foreach(['hair-back' => 'hair', 'hair-front' => 'hair', 'outfit' => 'outfit', 'top' => 'top', 'bottom' => 'bottom', 'shoes' => 'shoes', 'body' => 'body', 'accessory' => 'accessory'] as $layer => $slot)
+                    @foreach(['hair-back' => 'hair', 'hair-front' => 'hair', 'outfit' => 'outfit', 'top' => 'top', 'bottom' => 'bottom', 'shoes' => 'shoes', 'body' => 'body', 'accessory' => 'accessory', 'background' => 'background'] as $layer => $slot)
                         <div data-upload-slot="{{ $slot }}" @if(old('slot', $item->slot) !== $slot) hidden @endif>
                             <label class="form-label" for="upload-{{ $layer }}">{{ t('mascot.admin.layer.' . $layer) }}</label>
                             <input type="file" class="form-control" id="upload-{{ $layer }}" name="{{ $layer }}"

@@ -8,7 +8,7 @@
             + {{ t('button.add_new') }}
         </a>
         <div class="admin-mascot-filters mb-3">
-            @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit', 'top' => 'mascot.slot.top', 'bottom' => 'mascot.slot.bottom', 'shoes' => 'mascot.slot.shoes', 'body' => 'mascot.slot.body', 'accessory' => 'mascot.slot.accessory'] as $slot => $label)
+            @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit', 'top' => 'mascot.slot.top', 'bottom' => 'mascot.slot.bottom', 'shoes' => 'mascot.slot.shoes', 'body' => 'mascot.slot.body', 'accessory' => 'mascot.slot.accessory', 'background' => 'mascot.slot.background'] as $slot => $label)
                 <a class="btn {{ request('slot', '') === $slot ? 'btn-primary' : 'btn-outline-secondary' }}"
                     href="{{ route('admin.gamification.mascot-items.index', array_filter(['locale' => app()->getLocale(), 'slot' => $slot, 'status' => request('status'), 'per_page' => request('per_page')])) }}">{{ t($label) }}</a>
             @endforeach

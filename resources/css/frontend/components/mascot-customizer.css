@@ -2,11 +2,47 @@
     pointer-events: auto;
     cursor: pointer;
     border-radius: var(--radius-lg);
-    transition: filter var(--transition-fast);
+    filter: none;
 }
 
-.dashboard-ui-companion .aurora-mascot-link:hover {
-    filter: drop-shadow(0 5px 9px var(--color-pink-deep));
+.aurora-mascot-edit-indicator {
+    position: absolute;
+    z-index: 3;
+    right: 0;
+    bottom: 12px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-muted);
+    color: var(--color-text-main);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.aurora-mascot-edit-indicator svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+.aurora-mascot-link:hover .aurora-mascot-edit-indicator,
+.aurora-mascot-link:focus-visible .aurora-mascot-edit-indicator {
+    background: var(--color-ink);
+    color: var(--color-ink-inverse);
+}
+
+.dashboard-ui-companion .aurora-mascot-stack.aurora-mascot-link:hover,
+.dashboard-ui-companion .aurora-mascot-stack.aurora-mascot-link:focus-visible {
+    filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .aurora-mascot-edit-indicator,
+    .dashboard-ui-companion .aurora-mascot-stack.aurora-mascot-link {
+        transition: none;
+    }
 }
 
 .aurora-mascot-link:focus-visible,
@@ -237,7 +273,7 @@
     gap: 8px;
     padding: 8px 14px;
     border-radius: var(--radius-pill);
-    background: var(--color-yellow);
+    background: var(--color-bg-card);
     color: var(--color-ink);
     font-family: var(--font-mono);
 }
@@ -535,4 +571,405 @@
     inset: 0;
     margin: auto;
     color: var(--color-text-muted);
+}
+
+
+.mascot-customizer-grid {
+    align-items: stretch;
+}
+
+.mascot-customizer .mascot-preview-panel {
+    position: static;
+    align-self: stretch;
+    min-height: 0;
+    padding: 14px;
+    gap: 12px;
+}
+
+.mascot-room-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-soft);
+}
+
+.mascot-customizer .mascot-room-stage .mascot-customizer-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    z-index: 1;
+}
+
+.mascot-room-stage .mascot-shop-balance {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+}
+
+@media (max-width: 760px) {
+    .mascot-customizer .mascot-preview-panel {
+        max-width: 460px;
+        width: 100%;
+        margin-inline: auto;
+    }
+}
+
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background)::after {
+    content: none;
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-art:has(> .dashboard-ui-room-background) {
+    overflow: visible;
+}
+
+.dashboard-ui-companion .dashboard-ui-room-background {
+    position: absolute;
+    top: auto;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    max-width: none;
+    object-fit: contain;
+    object-position: center;
+    transform: translateY(9%);
+    image-rendering: pixelated;
+    opacity: .94;
+    filter: saturate(.9);
+    mask-image: linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0, 0, 0, .65) 29%, #000 43%, #000 93%, transparent calc(94% + 8px));
+    z-index: 0;
+    pointer-events: none;
+}
+
+.dashboard-ui-companion .aurora-mascot-stack.aurora-mascot-room-link {
+    width: 100%;
+    height: 225px;
+    aspect-ratio: auto;
+    margin-block: 4px 8px;
+    overflow: visible;
+    z-index: 1;
+}
+
+.mascot-room-stage .aurora-mascot-stack>.aurora-mascot-layer[data-mascot-layer="background"] {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 0;
+    image-rendering: pixelated;
+}
+
+.mascot-room-stage .aurora-mascot-stack:has(> [data-mascot-layer="background"])>.aurora-mascot-layer:not([data-mascot-layer="background"]) {
+    inset: auto;
+    top: 8%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    z-index: 1;
+}
+
+.dashboard-ui-companion .aurora-mascot-room-link>.aurora-mascot-layer {
+    inset: auto;
+    left: 50%;
+    bottom: 10px;
+    width: min(92%, 207px);
+    height: auto;
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.dashboard-ui-companion .aurora-mascot-room-link::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 13px;
+    width: 62px;
+    height: 8px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: rgba(57, 39, 38, .20);
+    filter: blur(3px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dashboard-ui-companion .aurora-mascot-room-link .aurora-mascot-edit-indicator {
+    right: 18px;
+    top: 10px;
+    bottom: auto;
+    width: 32px;
+    height: 32px;
+    color: var(--color-ink);
+    background: var(--color-bg-card);
+}
+
+.dashboard-ui-companion .aurora-mascot-room-link:is(:hover, :focus-visible) .aurora-mascot-edit-indicator {
+    background: var(--color-ink);
+    color: var(--color-ink-inverse);
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-top,
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stats {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat {
+    background: transparent;
+}
+
+.mascot-item-preview--background {
+    border-radius: var(--radius-sm);
+}
+
+.mascot-item-preview--background img {
+    transform: none;
+}
+
+
+.mascot-customizer .mascot-editor-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(88px, 100%), 1fr));
+    gap: 7px;
+    width: 100%;
+}
+
+.mascot-editor-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 64px;
+    padding: 8px 4px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-soft);
+    color: var(--color-text-main);
+    font: 500 12px/1.25 var(--font-ui);
+    text-align: center;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mascot-editor-group .aurora-icon {
+    flex: none;
+}
+
+.mascot-editor-group:hover {
+    background: var(--color-pink-soft);
+}
+
+.mascot-editor-group[aria-pressed="true"] {
+    background: var(--color-pink-soft);
+    border-color: var(--color-pink-deep);
+}
+
+.mascot-editor-group:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.mascot-accordion:is([data-editor-group="room"], [data-editor-group="accessories"]) .mascot-category-body {
+    height: auto;
+}
+
+.mascot-accordion:is([data-editor-group="room"], [data-editor-group="accessories"]) .mascot-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(110px, 100%), 1fr));
+    grid-auto-rows: 132px;
+    height: auto;
+    overflow: visible;
+}
+
+.mascot-accordion[data-editor-group="room"] .mascot-item-preview {
+    width: 64px;
+    max-width: 100%;
+}
+
+.dashboard-ui-companion .dashboard-ui-coins {
+    background: var(--color-bg-card);
+    color: var(--color-ink);
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-top {
+    gap: 8px;
+    padding: 16px 18px 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: linear-gradient(to bottom, var(--dashboard-ui-surface) 0%, var(--dashboard-ui-surface) 72%, transparent 100%);
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-top h2 {
+    margin: 0 auto 0 0;
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -.025em;
+}
+
+.dashboard-ui-companion-counters {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    gap: 2px;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-card);
+    box-shadow: inset 0 0 0 1px var(--color-border-soft);
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-counters :is(.dashboard-ui-badge-count, .dashboard-ui-coins) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-ink);
+    font: 500 13px/1 var(--font-mono);
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-counters .dashboard-ui-badge-count:hover {
+    background: var(--color-bg-soft);
+}
+
+.dashboard-ui-companion-counters .dashboard-ui-badge-count+.dashboard-ui-coins {
+    border-inline-start: 1px solid var(--color-border-soft);
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-counters strong {
+    font: 600 13px/1 var(--font-mono);
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stats {
+    gap: 0;
+    padding: 11px 9px;
+    background: var(--color-bg-card);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stats:has(> :only-child) {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat {
+    min-height: 48px;
+    padding: 0 8px;
+    gap: 8px;
+    align-items: center;
+    border-radius: 0;
+    background: transparent;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat+.dashboard-ui-companion-stat {
+    border-inline-start: 1px solid var(--color-border-soft);
+    padding-inline-start: 12px;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat .dashboard-ui-stat-icon {
+    width: 25px;
+    height: 25px;
+    margin-top: 4px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.dashboard-ui-companion .dashboard-ui-stat-icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.dashboard-ui-companion .dashboard-ui-stat-icon--level svg {
+    color: #b8790c;
+    fill: #ffdf79;
+}
+
+.dashboard-ui-companion .dashboard-ui-stat-icon--streak svg {
+    color: #ce4c20;
+    fill: #ffb55e;
+}
+
+.dashboard-ui-companion .dashboard-ui-companion-counters .dashboard-ui-badge-count svg {
+    color: #be4965;
+    fill: #f5b5c3;
+}
+
+.dashboard-ui-companion .dashboard-ui-coins svg,
+.mascot-shop-balance svg {
+    color: #b8790c;
+    fill: none;
+}
+
+.dashboard-ui-companion .dashboard-ui-coins svg> :first-child,
+.mascot-shop-balance svg> :first-child {
+    fill: #ffdf79;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+    align-content: start;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat-copy strong {
+    line-height: 16px;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat-copy small {
+    line-height: 14px;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat-copy .dashboard-ui-meter {
+    width: 100%;
+    height: 6px;
+    margin-top: 2px;
+    background: #eee8dd;
+}
+
+.dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat-copy .dashboard-ui-meter>span {
+    background: #d6a64c;
+}
+
+@media (max-width: 510px) {
+    .dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-top {
+        padding-inline: 14px;
+    }
+
+    .dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stats {
+        padding-inline: 5px;
+    }
+
+    .dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat {
+        gap: 6px;
+        padding-inline: 6px;
+    }
+
+    .dashboard-ui-companion:has(.dashboard-ui-room-background) .dashboard-ui-companion-stat+.dashboard-ui-companion-stat {
+        padding-inline-start: 8px;
+    }
 }

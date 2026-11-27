@@ -14,7 +14,7 @@
         <div class="hero-right">
 
             <div class="hero-coins">
-                {{ $user->gameDetails->coins }} <x-lucide-coins class="aurora-icon" width="20" height="20"
+                {{ $user->gameDetails->coins }} <x-lucide-badge-cent class="aurora-icon" width="20" height="20"
                     aria-hidden="true" focusable="false" />
             </div>
 

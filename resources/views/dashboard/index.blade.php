@@ -122,17 +122,21 @@
                     aria-label="{{ t('dashboard.ui.companion') }}">
                     <div class="dashboard-ui-companion-top">
                         <h2>{{ t('dashboard.ui.companion') }}</h2>
-                        @if(app(\App\Services\Preferences\MotivationProfileService::class)->gamificationLevel($user) === 'prominent')
-                            <a class="dashboard-ui-badge-count"
-                                href="{{ route('profile.badges', ['locale' => app()->getLocale()]) }}">
-                                <x-lucide-award class="aurora-icon" width="18" height="18" aria-hidden="true" />
-                                {{ t('dashboard.ui.badges') }} | {{ $user->badges()->count() }}
-                            </a>
-                        @endif
-                        <div class="dashboard-ui-coins" title="{{ t('dashboard.ui.coins') }}">
-                            <x-lucide-coins class="aurora-icon" width="18" height="18" aria-hidden="true" />
-                            <strong>{{ $details?->coins ?? 0 }}</strong>
-                            <span class="visually-hidden">{{ t('dashboard.ui.coins') }}</span>
+                        <div class="dashboard-ui-companion-counters">
+                            @if(app(\App\Services\Preferences\MotivationProfileService::class)->gamificationLevel($user) === 'prominent')
+                                <a class="dashboard-ui-badge-count"
+                                    href="{{ route('profile.badges', ['locale' => app()->getLocale()]) }}"
+                                    title="{{ t('dashboard.ui.badges') }}"
+                                    aria-label="{{ t('dashboard.ui.badges') }}: {{ $user->badges()->count() }}">
+                                    <x-lucide-award class="aurora-icon" width="17" height="17" aria-hidden="true" />
+                                    <strong>{{ $user->badges()->count() }}</strong>
+                                </a>
+                            @endif
+                            <div class="dashboard-ui-coins" title="{{ t('dashboard.ui.coins') }}">
+                                <x-lucide-badge-cent class="aurora-icon" width="18" height="18" aria-hidden="true" />
+                                <strong>{{ $details?->coins ?? 0 }}</strong>
+                                <span class="visually-hidden">{{ t('dashboard.ui.coins') }}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="dashboard-ui-companion-art">
@@ -140,8 +144,8 @@
                     </div>
                     <div class="dashboard-ui-companion-stats">
                         <div class="dashboard-ui-companion-stat">
-                            <span class="dashboard-ui-stat-icon"><x-lucide-star class="aurora-icon" width="20"
-                                    height="20" aria-hidden="true" /></span>
+                            <span class="dashboard-ui-stat-icon dashboard-ui-stat-icon--level"><x-lucide-star
+                                    class="aurora-icon" width="20" height="20" aria-hidden="true" /></span>
                             <div class="dashboard-ui-companion-stat-copy">
                                 <strong>{{ t('dashboard.ui.level') }} {{ $details?->level ?? '—' }}</strong>
                                 @if ($details)
@@ -155,11 +159,11 @@
                         </div>
                         @if ($showStreak)
                             <div class="dashboard-ui-companion-stat">
-                                <span class="dashboard-ui-stat-icon"><x-lucide-flame class="aurora-icon" width="20"
-                                        height="20" aria-hidden="true" /></span>
+                                <span class="dashboard-ui-stat-icon dashboard-ui-stat-icon--streak"><x-lucide-flame
+                                        class="aurora-icon" width="20" height="20" aria-hidden="true" /></span>
                                 <div class="dashboard-ui-companion-stat-copy">
                                     <strong>{{ $details?->streak_current ?? 0 }}</strong>
-                                    <small>{{ t('dashboard.ui.streak') }} | {{ t('dashboard.ui.days') }}</small>
+                                    <small>{{ t('dashboard.ui.streak') }}</small>
                                 </div>
                             </div>
                         @endif

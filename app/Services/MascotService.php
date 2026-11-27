@@ -28,7 +28,7 @@ class MascotService
 
     private function items()
     {
-        return MascotItem::query()->whereIn('slot', ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory'])->orderBy('sort_order')->orderBy('id')->get();
+        return MascotItem::query()->whereIn('slot', ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory', 'background'])->orderBy('sort_order')->orderBy('id')->get();
     }
 
     private function validItem(MascotItem $item): bool
@@ -41,6 +41,7 @@ class MascotService
             'shoes' => ['shoes'],
             'body' => ['body'],
             'accessory' => ['accessory'],
+            'background' => ['background'],
             default => [],
         };
         if (!$expected)
@@ -61,7 +62,7 @@ class MascotService
         $items = $this->items()->filter(fn($item) => $this->validItem($item))->groupBy('slot');
         foreach (config('mascot.defaults', []) as $slot => $default) {
             $key = $selection[$slot] ?? $default;
-            if (in_array($slot, ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory'], true)) {
+            if (in_array($slot, ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory', 'background'], true)) {
                 $valid = is_string($key) && $items->get($slot, collect())->contains('key', $key);
             } else {
                 $options = config('mascot.variants.' . $slot, []);
@@ -75,7 +76,7 @@ class MascotService
 
     public function catalog(?User $user = null): array
     {
-        $catalog = ['hair' => [], 'top' => [], 'bottom' => [], 'outfit' => [], 'shoes' => [], 'body' => [], 'accessory' => []];
+        $catalog = ['hair' => [], 'top' => [], 'bottom' => [], 'outfit' => [], 'shoes' => [], 'body' => [], 'accessory' => [], 'background' => []];
         $owned = $user ? UserMascotItem::where('user_id', $user->id)->pluck('mascot_item_id')->map(fn($id) => (int) $id)->all() : [];
         foreach ($this->items() as $item) {
             $isOwned = in_array((int) $item->id, $owned, true);
@@ -96,7 +97,7 @@ class MascotService
 
     public function activeSlots(string $mode): array
     {
-        return $mode === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory'];
+        return $mode === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory', 'background'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background'];
     }
 
     public function saveSelection(User $user, array $selection, bool $buy, ?int $quotedPrice): void
@@ -166,7 +167,12 @@ class MascotService
         $fallbackResult = ['mode' => 'fallback', 'image' => $this->dimensions($fallback) ? $fallback : null, 'layers' => []];
         if (!$hair || !$shoes || !$body || !$accessory || !$this->validItem($hair) || !$this->validItem($shoes) || !$this->validItem($body) || !$this->validItem($accessory))
             return $fallbackResult;
-        $layers = [
+        $background = $items->first(fn($item) => $item->slot === 'background' && $item->key === $chosen['background']);
+        $layers = [];
+        if ($background && $this->validItem($background)) {
+            $layers['background'] = $background->layers['background'];
+        }
+        $layers += [
             'hair-back' => $hair->layers['hair-back'],
             'body' => $body->layers['body'],
             'shoes' => $shoes->layers['shoes'],

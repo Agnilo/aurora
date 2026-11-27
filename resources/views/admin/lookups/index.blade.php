@@ -1,58 +1,86 @@
 @extends('admin.lookups.layout')
 @section('lookups-content')
-    <h2 class="admin-title mb-3">{{ $title }} — {{ t($fullKey, $item->name) }}</h2>
-    <div class="admin-form-card">
-        <form
-            action="{{ route('admin.lookups.update', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $type, 'id' => $item->id]) }}"
-            method="POST">
-            @csrf @method('PUT')
-            <div class="mb-3"><label class="form-label" for="lookup-key">{{ t('lookup.technical_key') }}</label>
-                <input id="lookup-key" type="text" class="form-control" value="{{ $fullKey }}" readonly>
-                <div class="form-text">{{ t('lookup.technical_key_help') }}</div>
+    @foreach($blocks as $block)
+        <div class="admin-panel admin-lookup-panel mb-4">
+            <div class="admin-section-heading">
+                <h2>{{ $block['title'] }}</h2>
+                <a href="{{ route('admin.lookups.create', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $block['type']]) }}"
+                    class="btn btn-sm btn-primary">
+                    <x-lucide-plus class="aurora-icon" width="16" height="16" aria-hidden="true" /> {{ t('button.add_new') }}
+                </a>
             </div>
-            @if(($blockDefinition['has_color'] ?? false) || ($blockDefinition['has_icon'] ?? false))
-                <div class="row g-3 mb-4">
-                    @if($blockDefinition['has_color'] ?? false)
-                        <div class="col-md-6">
-                            <label class="form-label" for="colorPicker">{{ t('lookup.color') }}</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="color" name="color" id="colorPicker" class="form-control form-control-color"
-                                    value="{{ old('color', $item->color ?? '#cccccc') }}">
-                                <input type="text" name="color_hex" id="colorHex" class="form-control"
-                                    value="{{ old('color_hex', $item->color ?? '') }}" placeholder="#FFAABB">
-                            </div>
-                        </div>
-                    @endif
-                    @if($blockDefinition['has_icon'] ?? false)
-                        <div class="col-md-6"><x-icon-picker name="icon" id="lookup-icon" :value="old('icon', $item->icon ?? '')"
-                                :button="t('lookup.icon')" /></div>
-                    @endif
-                </div>
-            @endif
-            @foreach($languages as $lang)
-                @php $tRow = $translations[$lang->code] ?? null; @endphp
-                <div class="mb-3"><label class="form-label" for="lookup-{{ $lang->code }}">{{ strtoupper($lang->code) }} —
-                        {{ $lang->name }}</label>
-                    <input id="lookup-{{ $lang->code }}" type="text" name="value[{{ $lang->code }}]" class="form-control"
-                        value="{{ old('value.' . $lang->code, $tRow?->value) }}">
-                </div>
-            @endforeach
-            <div class="form-actions">
-                <a href="{{ route('admin.lookups.index', ['locale' => app()->getLocale(), 'section' => $section]) }}"
-                    class="btn btn-outline-secondary btn-secondary-action">{{ t('button.cancel') }}</a>
-                <button type="submit" class="btn btn-primary">{{ t('button.save') }}</button>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:40px"></th>
+                            <th>{{ t('lookup.column.technical_key') }}</th>
+                            <th>{{ t('lookup.column.translation') }}</th>
+                            <th>{{ t('lookup.column.appearance') }}</th>
+                            <th class="text-end">{{ t('lookup.column.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sortable-{{ $block['type'] }}">
+                        @foreach($block['items'] as $item)
+                            <tr data-id="{{ $item['row']->id }}">
+                                <td class="drag-handle" aria-label="{{ t('admin.consistency.reorder') }}">⋮⋮</td>
+                                <td><code>{{ $item['full_key'] }}</code></td>
+                                <td>{{ $item['label'] }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if(($block['has_color'] ?? false) && !empty($item['row']->color))
+                                            <span class="color-dot" style="background: {{ $item['row']->color }}"
+                                                aria-label="{{ t('lookup.column.appearance') }}"></span>
+                                        @endif
+                                        @if(($block['has_icon'] ?? false) && !empty($item['row']->icon))
+                                            <x-stored-lucide :name="$item['row']->icon" class="aurora-icon" width="20" height="20"
+                                                aria-hidden="true" />
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="admin-table-actions">
+                                        <a href="{{ route('admin.lookups.edit', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $block['type'], 'id' => $item['row']->id]) }}"
+                                            class="btn btn-sm btn-outline-primary">{{ t('button.edit') }}</a>
+                                        <form method="POST"
+                                            action="{{ route('admin.lookups.destroy', ['locale' => app()->getLocale(), 'section' => $section, 'type' => $block['type'], 'id' => $item['row']->id]) }}"
+                                            onsubmit="return confirm(this.dataset.confirm)"
+                                            data-confirm="{{ t('lookup.confirm_delete') }}">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                class="btn btn-sm btn-outline-danger">{{ t('button.delete') }}</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </form>
-    </div>
+        </div>
+    @endforeach
 @endsection
+
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const picker = document.getElementById('colorPicker');
-            const input = document.getElementById('colorHex');
-            if (!picker || !input) return;
-            picker.addEventListener('input', e => { input.value = e.target.value.toLowerCase(); });
-            input.addEventListener('input', e => { const hex = e.target.value.trim(); if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) picker.value = hex; });
-        });
+            @foreach($blocks as $block)
+                const block_{{ $loop->index }} = document.getElementById('sortable-{{ $block['type'] }}');
+                if (block_{{ $loop->index }} && window.Sortable) {
+                    new Sortable(block_{{ $loop->index }}, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        onEnd: () => {
+                            const order = Array.from(block_{{ $loop->index }}.querySelectorAll('tr')).map((row, index) => ({ id: row.dataset.id, order: index + 1 }));
+                            fetch(`/{{ app()->getLocale() }}/admin/lookups/{{ $section }}/{{ $block['type'] }}/reorder`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ order }),
+                            });
+                        },
+                    });
+                }
+            @endforeach
+            });
     </script>
 @endsection

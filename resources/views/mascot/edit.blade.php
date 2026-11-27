@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', t('mascot.title') . ' | Aurora')
 @section('content')
-<div class="container mascot-customizer" data-mascot-customizer data-mascot-ui="appearance-v3"
+<div class="container mascot-customizer" data-mascot-customizer data-mascot-ui="room-groups-v1"
     data-balance="{{ $balance }}" data-catalog="{{ json_encode($catalog, JSON_THROW_ON_ERROR) }}"
     data-defaults="{{ json_encode($defaults, JSON_THROW_ON_ERROR) }}">
     <a class="mascot-back" href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
@@ -9,10 +9,6 @@
     </a>
     <div class="mascot-shop-heading">
         <h1>{{ t('mascot.title') }}</h1>
-        <div class="mascot-shop-balance" aria-label="{{ t('mascot.balance') }}: {{ $balance }}">
-            <x-lucide-coins class="aurora-icon" width="19" height="19" aria-hidden="true" />
-            <strong>{{ $balance }}</strong>
-        </div>
     </div>
     <p class="mascot-description">{{ t('mascot.description') }}</p>
     @unless($ready)
@@ -20,8 +16,36 @@
     @endunless
     <div class="mascot-customizer-grid">
         <section class="mascot-panel mascot-preview-panel" aria-label="{{ t('mascot.preview') }}">
-            <x-mascot :selection="$selection" :customizable="false" class="mascot-customizer-preview" />
-            <p>{{ t('mascot.preview') }}</p>
+            <div class="mascot-room-stage">
+
+                <x-mascot :selection="$selection" :customizable="false" class="mascot-customizer-preview" />
+                <div class="mascot-shop-balance" aria-label="{{ t('mascot.balance') }}: {{ $balance }}">
+                    <x-lucide-badge-cent class="aurora-icon" width="19" height="19" aria-hidden="true" />
+                    <strong>{{ $balance }}</strong>
+                </div>
+            </div>
+            <div class="mascot-editor-groups" role="group" aria-label="{{ t('mascot.editor.choose_group') }}">
+                <button type="button" class="mascot-editor-group" data-mascot-editor-group="appearance"
+                    aria-pressed="true" aria-controls="mascot-editor-options">
+                    <x-lucide-user-round class="aurora-icon" width="20" height="20" aria-hidden="true" />
+                    <span>{{ t('mascot.editor.appearance') }}</span>
+                </button>
+                <button type="button" class="mascot-editor-group" data-mascot-editor-group="clothing"
+                    aria-pressed="false" aria-controls="mascot-editor-options">
+                    <x-lucide-shirt class="aurora-icon" width="20" height="20" aria-hidden="true" />
+                    <span>{{ t('mascot.editor.clothing') }}</span>
+                </button>
+                <button type="button" class="mascot-editor-group" data-mascot-editor-group="accessories"
+                    aria-pressed="false" aria-controls="mascot-editor-options">
+                    <x-lucide-glasses class="aurora-icon" width="20" height="20" aria-hidden="true" />
+                    <span>{{ t('mascot.editor.accessories') }}</span>
+                </button>
+                <button type="button" class="mascot-editor-group" data-mascot-editor-group="room" aria-pressed="false"
+                    aria-controls="mascot-editor-options">
+                    <x-lucide-house class="aurora-icon" width="20" height="20" aria-hidden="true" />
+                    <span>{{ t('mascot.editor.room') }}</span>
+                </button>
+            </div>
         </section>
         <form class="mascot-panel mascot-options" method="POST"
             action="{{ route('mascot.update', ['locale' => app()->getLocale()]) }}">
@@ -29,11 +53,13 @@
             @method('PATCH')
             <input type="hidden" name="quoted_price" value="0">
             <input type="hidden" name="clothing_mode" value="{{ $selection['clothing_mode'] }}">
-            <div class="mascot-accordion" data-mascot-accordion>
-                @foreach(['hair', 'body', 'outfit', 'top', 'bottom', 'shoes', 'accessory'] as $slot)
+            <div class="mascot-accordion" id="mascot-editor-options" data-mascot-accordion
+                data-editor-group="appearance">
+                @foreach(['hair', 'body', 'outfit', 'top', 'bottom', 'shoes', 'accessory', 'background'] as $slot)
                 @php($options = $catalog[$slot] ?? [])
                 @php($inactive = ($slot === 'outfit' && $selection['clothing_mode'] !== 'full') || (in_array($slot, ['top', 'bottom'], true) && $selection['clothing_mode'] === 'full'))
                 <fieldset class="mascot-category" data-mascot-category="{{ $slot }}" data-mascot-slot="{{ $slot }}"
+                    @if(!in_array($slot, ['hair', 'body'], true)) hidden @endif
                     data-mascot-inactive="{{ $inactive ? 'true' : 'false' }}" @disabled(!$ready)>
                     <legend>
                         <button type="button" class="mascot-category-toggle" data-mascot-toggle
@@ -73,7 +99,8 @@
                                             <span class="mascot-item-state mascot-item-price">
                                                 <x-lucide-lock class="aurora-icon" width="13" height="13" aria-hidden="true" />
                                                 {{ $option['price'] }}
-                                                <x-lucide-coins class="aurora-icon" width="14" height="14" aria-hidden="true" />
+                                                <x-lucide-badge-cent class="aurora-icon" width="14" height="14"
+                                                    aria-hidden="true" />
                                             </span>
                                         @endif
                                     </span>
@@ -100,8 +127,8 @@
                     @disabled(!$ready)>{{ t('button.save') }}</button>
                 <button class="mascot-save mascot-buy" type="submit" name="intent" value="buy" hidden disabled>
                     {{ t('mascot.buy_equip') }}
-                    <span class="mascot-buy-price"><span data-mascot-price>0</span><x-lucide-coins class="aurora-icon"
-                            width="16" height="16" aria-hidden="true" /></span>
+                    <span class="mascot-buy-price"><span data-mascot-price>0</span><x-lucide-badge-cent
+                            class="aurora-icon" width="16" height="16" aria-hidden="true" /></span>
                 </button>
             </div>
         </form>
@@ -125,10 +152,28 @@
         let loading = false;
         const modeInput = form.querySelector('[name="clothing_mode"]');
         const mode = () => modeInput.value;
-        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory'];
+        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory', 'background'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background'];
         const categories = [...form.querySelectorAll('[data-mascot-category]')];
+        const editorGroups = {
+            appearance: ['hair', 'body'],
+            clothing: ['outfit', 'top', 'bottom', 'shoes'],
+            accessories: ['accessory'],
+            room: ['background'],
+        };
+        const groupButtons = [...root.querySelectorAll('[data-mascot-editor-group]')];
+        const accordion = root.querySelector('[data-mascot-accordion]');
+        let editorGroup = 'appearance';
         let openCategory = 'hair';
+        const rememberedCategories = { appearance: 'hair', clothing: 'top', accessories: 'accessory', room: 'background' };
         const syncAccordion = () => {
+            const slots = editorGroups[editorGroup];
+            accordion.dataset.editorGroup = editorGroup;
+            for (const button of groupButtons) {
+                button.setAttribute('aria-pressed', String(button.dataset.mascotEditorGroup === editorGroup));
+            }
+            for (const group of categories) {
+                group.hidden = !slots.includes(group.dataset.mascotCategory);
+            }
             const visible = categories.filter(group => !group.hidden);
             if (!visible.some(group => group.dataset.mascotCategory === openCategory)) {
                 openCategory = visible[0]?.dataset.mascotCategory;
@@ -144,6 +189,14 @@
         for (const group of categories) {
             group.querySelector('[data-mascot-toggle]').addEventListener('click', () => {
                 openCategory = group.dataset.mascotCategory;
+                rememberedCategories[editorGroup] = openCategory;
+                syncAccordion();
+            });
+        }
+        for (const button of groupButtons) {
+            button.addEventListener('click', () => {
+                editorGroup = button.dataset.mascotEditorGroup;
+                openCategory = rememberedCategories[editorGroup];
                 syncAccordion();
             });
         }
@@ -159,7 +212,7 @@
         const snapshot = () => ({ mode: mode(), checked: [...form.querySelectorAll('input[type="radio"]')].map(input => input.checked) });
         let lastGood = snapshot();
         const fixed = Object.fromEntries([...(preview?.querySelectorAll('[data-mascot-layer]') || [])].filter(img => img.dataset.mascotLayer === 'expression').map(img => [img.dataset.mascotLayer, img.src]));
-        const order = ['hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'];
+        const order = ['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'];
         const syncActions = () => {
             const values = new FormData(form);
             let cost = 0;

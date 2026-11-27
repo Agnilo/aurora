@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class MascotItemAdminController extends Controller
 {
-    private const SLOTS = ['hair' => ['hair-back', 'hair-front'], 'outfit' => ['outfit'], 'top' => ['top'], 'bottom' => ['bottom'], 'shoes' => ['shoes'], 'body' => ['body'], 'accessory' => ['accessory']];
+    private const SLOTS = ['hair' => ['hair-back', 'hair-front'], 'outfit' => ['outfit'], 'top' => ['top'], 'bottom' => ['bottom'], 'shoes' => ['shoes'], 'body' => ['body'], 'accessory' => ['accessory'], 'background' => ['background']];
 
     public function index(Request $request)
     {
@@ -246,6 +246,7 @@ class MascotItemAdminController extends Controller
             'shoes' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
             'body' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
             'accessory' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
+            'background' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
         ], ['required' => t('mascot.admin.required'), 'max' => t('mascot.admin.invalid_value'), 'file' => t('mascot.admin.invalid_png'), 'mimetypes' => t('mascot.admin.invalid_png'), 'dimensions' => t('mascot.admin.invalid_png'), 'integer' => t('mascot.admin.invalid_value'), 'between' => t('mascot.admin.invalid_value'), 'in' => t('mascot.admin.invalid_value'), 'boolean' => t('mascot.admin.invalid_value')]);
         $slot = $data['slot'];
         if ($slot === 'body' && (int) $data['price'] !== 0) {

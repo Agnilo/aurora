@@ -183,3 +183,27 @@
     max-width: none;
     padding: 16px;
 }
+
+
+.admin-body .admin-mascot-stage {
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.admin-body .admin-mascot-stage:has(> [data-preview-layer="background"]:not([hidden]))>img:not([data-preview-layer="background"]) {
+    inset: auto;
+    top: 8%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    z-index: 1;
+}
+
+.admin-body .admin-mascot-stage>img[data-preview-layer="background"] {
+    z-index: 0;
+}
+
+.admin-body .admin-mascot-thumb--background img {
+    transform: none;
+    border-radius: inherit;
+}

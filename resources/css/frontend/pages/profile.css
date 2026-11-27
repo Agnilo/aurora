@@ -614,6 +614,57 @@
     font-weight: 600;
 }
 
+.profile-page .pr-level-icon,
+.profile-page .pr-stat-icon {
+    background: transparent;
+    border-radius: 0;
+}
+
+.profile-page .pr-level-icon svg {
+    width: 36px;
+    height: 36px;
+    color: #b8790c;
+    fill: #ffdf79;
+}
+
+.profile-page .pr-stat-icon svg {
+    width: 23px;
+    height: 23px;
+    stroke-width: 1.75;
+}
+
+.profile-page .pr-stat-icon--coins svg {
+    color: #b8790c;
+    fill: none;
+}
+
+.profile-page .pr-stat-icon--coins svg> :first-child {
+    fill: #ffdf79;
+}
+
+.profile-page .pr-stat-icon--streak svg {
+    color: #ce4c20;
+    fill: #ffb55e;
+}
+
+.profile-page .pr-stat-icon--best svg {
+    color: #498c73;
+    fill: #e8f5ee;
+}
+
+.profile-page .pr-stat-icon--points svg {
+    color: #9873b5;
+    fill: #e5d5f3;
+}
+
+.profile-page .pr-xp-track {
+    background: #eee8dd;
+}
+
+.profile-page .pr-xp-track span {
+    background: #d6a64c;
+}
+
 @media (max-width: 1000px) {
     .profile-page .pr-columns {
         grid-template-columns: minmax(0, 1fr);

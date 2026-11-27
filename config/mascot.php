@@ -4,6 +4,7 @@ return [
     'fallback' => 'images/welcome/main2.png',
     'canvas' => [1254, 1254],
     'defaults' => [
+        'background' => 'default',
         'body' => 'default',
         'hair' => 'pink',
         'outfit' => null,
@@ -29,7 +30,7 @@ return [
         'expression' => ['neutral' => 'images/mascot/expressions/neutral-adaptive.png'],
         'accessory' => ['none' => null],
     ],
-    'customizable' => ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory'],
+    'customizable' => ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory', 'background'],
     'swatches' => [
         'hair' => ['pink' => '#edaca5', 'brown' => '#a66f4d', 'blonde' => '#e9c27f'],
         'outfit' => ['default' => '#d1b7e2', 'mint' => '#a9cfb6', 'rose' => '#dda0b2'],

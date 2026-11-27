@@ -45,7 +45,7 @@
             <div>
                 <dt>
                     <span class="pr-stat-icon pr-stat-icon--coins">
-                        <x-lucide-coins class="aurora-icon" width="16" height="16" aria-hidden="true"
+                        <x-lucide-badge-cent class="aurora-icon" width="16" height="16" aria-hidden="true"
                             focusable="false" />
                     </span>
                     {{ t('profile.coins') }}
