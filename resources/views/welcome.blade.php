@@ -45,7 +45,6 @@
     <section class="welcome-features" id="features" aria-labelledby="welcome-features-heading">
         <div class="welcome-features-header">
             <h2 id="welcome-features-heading">{{ t('welcome.features_heading') }}</h2>
-            <p>{{ t('welcome.features_subheading') }}</p>
         </div>
 
         <ol class="welcome-feature-grid" id="how-it-works">

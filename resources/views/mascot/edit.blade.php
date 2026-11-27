@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', t('mascot.title') . ' | Aurora')
 @section('content')
-<div class="container mascot-customizer" data-mascot-customizer data-mascot-ui="categories-only-v2"
+<div class="container mascot-customizer" data-mascot-customizer data-mascot-ui="appearance-v3"
     data-balance="{{ $balance }}" data-catalog="{{ json_encode($catalog, JSON_THROW_ON_ERROR) }}"
     data-defaults="{{ json_encode($defaults, JSON_THROW_ON_ERROR) }}">
     <a class="mascot-back" href="{{ route('dashboard', ['locale' => app()->getLocale()]) }}">
@@ -30,7 +30,7 @@
             <input type="hidden" name="quoted_price" value="0">
             <input type="hidden" name="clothing_mode" value="{{ $selection['clothing_mode'] }}">
             <div class="mascot-accordion" data-mascot-accordion>
-                @foreach(['hair', 'outfit', 'top', 'bottom', 'shoes'] as $slot)
+                @foreach(['hair', 'body', 'outfit', 'top', 'bottom', 'shoes', 'accessory'] as $slot)
                 @php($options = $catalog[$slot] ?? [])
                 @php($inactive = ($slot === 'outfit' && $selection['clothing_mode'] !== 'full') || (in_array($slot, ['top', 'bottom'], true) && $selection['clothing_mode'] === 'full'))
                 <fieldset class="mascot-category" data-mascot-category="{{ $slot }}" data-mascot-slot="{{ $slot }}"
@@ -56,9 +56,14 @@
                                     <span class="mascot-choice-content">
                                         <span class="mascot-item-preview mascot-item-preview--{{ $slot }}"
                                             aria-hidden="true">
-                                            @foreach($option['layers'] as $url)
-                                                <img src="{{ $url }}" alt="" loading="lazy" draggable="false">
-                                            @endforeach
+                                            @if($slot === 'accessory' && $key === 'none')
+                                                <x-lucide-ban class="aurora-icon mascot-none-icon" width="28" height="28"
+                                                    aria-hidden="true" />
+                                            @else
+                                                @foreach($option['layers'] as $url)
+                                                    <img src="{{ $url }}" alt="" loading="lazy" draggable="false">
+                                                @endforeach
+                                            @endif
                                         </span>
                                         <span>{{ $option['label'] }}</span>
                                         @if($option['owned'])
@@ -147,7 +152,7 @@
         let loading = false;
         const modeInput = form.querySelector('[name="clothing_mode"]');
         const mode = () => modeInput.value;
-        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes'] : ['hair', 'top', 'bottom', 'shoes'];
+        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory'];
         const categories = [...form.querySelectorAll('[data-mascot-category]')];
         let openCategory = 'hair';
         const syncAccordion = () => {
@@ -180,7 +185,7 @@
         };
         const snapshot = () => ({ mode: mode(), checked: [...form.querySelectorAll('input[type="radio"]')].map(input => input.checked) });
         let lastGood = snapshot();
-        const fixed = Object.fromEntries([...(preview?.querySelectorAll('[data-mascot-layer]') || [])].filter(img => ['body', 'expression', 'accessory'].includes(img.dataset.mascotLayer)).map(img => [img.dataset.mascotLayer, img.src]));
+        const fixed = Object.fromEntries([...(preview?.querySelectorAll('[data-mascot-layer]') || [])].filter(img => img.dataset.mascotLayer === 'expression').map(img => [img.dataset.mascotLayer, img.src]));
         const order = ['hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'];
         const syncActions = () => {
             const values = new FormData(form);

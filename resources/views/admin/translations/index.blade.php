@@ -98,7 +98,7 @@
                                             class="btn btn-sm btn-outline-primary">{{ t('button.edit') }}</a>
                                         <form method="POST"
                                             action="{{ route('admin.translations.destroy', ['locale' => app()->getLocale(), 'translationGroup' => $entry->group, 'translationKey' => $entry->key]) }}"
-                                            onsubmit="return confirm(this.dataset.confirm)"
+                                            data-aurora-confirm-delete
                                             data-confirm="{{ t('admin.consistency.delete_translation_confirm') }}">
                                             @csrf @method('DELETE')
                                             <button type="submit"
@@ -123,9 +123,7 @@
             <select id="translation-per-page" name="per_page" class="form-select form-select-sm w-auto flex-shrink-0"
                 style="width: auto;" onchange="this.form.requestSubmit()">
                 @foreach($pageSizes as $size)
-                    <option value="{{ $size }}" @selected($perPage === $size)>
-                        {{ $size }}
-                    </option>
+                    <option value="{{ $size }}" @selected($perPage === $size)>{{ $size }}</option>
                 @endforeach
             </select>
         </form>
@@ -133,6 +131,7 @@
             @include('admin.translations.pagination')
         </div>
     </div>
+    @include('admin.partials.confirm-dialog')
     <script>
         (() => {
             const form = document.getElementById('translation-bulk-form');
@@ -158,16 +157,20 @@
                 sync();
             });
             rows.forEach(row => row.addEventListener('change', sync));
-            form.addEventListener('submit', event => {
+            let submitting = false;
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
                 const count = sync();
-                if (!count || !window.confirm(form.dataset.confirm.replace(':count', String(count)))) {
-                    event.preventDefault();
-                } else {
-                    form.elements.selected_json.value = JSON.stringify(rows.filter(row => row.checked).map(row => row.value));
-                    button.disabled = true;
-                }
+                if (!count || submitting) return;
+                const selected = rows.filter(row => row.checked).map(row => row.value);
+                if (!await window.auroraAdminConfirm(form.dataset.confirm.replace(':count', String(count)), { danger: true })) return;
+                if (submitting) return;
+                submitting = true;
+                form.elements.selected_json.value = JSON.stringify(selected);
+                button.disabled = true;
+                HTMLFormElement.prototype.submit.call(form);
             });
-            window.addEventListener('pageshow', sync);
+            window.addEventListener('pageshow', () => { submitting = false; sync(); });
             sync();
         })();
     </script>

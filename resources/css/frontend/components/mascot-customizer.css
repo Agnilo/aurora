@@ -586,3 +586,18 @@
 .mascot-category[data-mascot-inactive="true"] .mascot-choice:hover .mascot-choice-content {
     background: var(--color-pink-soft);
 }
+
+.mascot-item-preview--body img {
+    transform: scale(2.35) translateY(18%);
+}
+
+.mascot-item-preview--accessory img {
+    transform: scale(2.8) translateY(13%);
+}
+
+.mascot-none-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    color: var(--color-text-muted);
+}

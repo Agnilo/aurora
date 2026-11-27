@@ -121,8 +121,11 @@ Route::group([
             ->except(['show', 'destroy']);
         Route::resource('badge-categories', BadgeCategoryAdminController::class)
             ->except(['show', 'destroy']);
+
+        Route::post('mascot-items/bulk', [MascotItemAdminController::class, 'bulk'])
+            ->name('mascot-items.bulk');
         Route::resource('mascot-items', MascotItemAdminController::class)
-            ->only(['index', 'create', 'store', 'edit', 'update']);
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
     });
 

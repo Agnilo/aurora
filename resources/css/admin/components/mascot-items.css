@@ -128,3 +128,130 @@
 .admin-body .admin-mascot-thumb--shoes img {
     transform: scale(2.2) translateY(-41%);
 }
+
+.admin-body .admin-mascot-list .admin-mascot-thumb {
+    width: 44px;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+}
+
+.admin-body .admin-mascot-list .admin-mascot-bulkbar {
+    font-size: 13px;
+}
+
+.admin-body .admin-mascot-list .admin-mascot-bulkbar [data-bulk-price] {
+    width: 120px;
+}
+
+.admin-body .admin-mascot-list .admin-mascot-pagination .tp-pagination {
+    margin-top: 0 !important;
+}
+
+.admin-body .admin-mascot-list .admin-mascot-thumb--accessory img {
+    transform: scale(2.4) translateY(10%);
+}
+
+.admin-body .admin-mascot-list .admin-mascot-thumb--top img {
+    transform: scale(2.0) translateY(-10%);
+}
+
+.admin-body .admin-mascot-list .admin-mascot-thumb--bottom img {
+    transform: scale(2.1) translateY(-30%);
+}
+
+
+.admin-body .admin-container .admin-mascot-list> :is(.admin-mascot-filters, .admin-mascot-status-filter, .admin-mascot-bulkbar, .admin-mascot-catalog, .admin-mascot-pagination) {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.admin-body .admin-mascot-list .admin-mascot-filters>.btn {
+    flex: 1 1 auto;
+    text-align: center;
+    white-space: normal;
+}
+
+.admin-body .admin-mascot-list .admin-mascot-status-field {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+.admin-body .admin-container>.admin-mascot-list>form.admin-mascot-bulkbar[method="POST"] {
+    width: 100%;
+    max-width: none;
+    padding: 16px;
+}
+
+.admin-body .admin-mascot-toast-stack {
+    position: fixed;
+    right: max(24px, env(safe-area-inset-right, 0px));
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: min(380px, calc(100vw - 48px));
+    pointer-events: none;
+}
+
+.admin-body .admin-mascot-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-medium);
+    font: 500 14px/1.45 var(--font-ui);
+    overflow-wrap: anywhere;
+    animation: admin-mascot-toast-enter var(--transition-normal) both;
+}
+
+.admin-body .admin-mascot-toast .aurora-icon {
+    flex: none;
+}
+
+.admin-body .admin-mascot-toast ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.admin-body .admin-mascot-toast--success {
+    background: var(--color-mint-soft);
+    color: var(--color-positive);
+}
+
+.admin-body .admin-mascot-toast--error {
+    background: var(--color-pink-soft);
+    color: var(--color-danger);
+}
+
+@keyframes admin-mascot-toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 760px) {
+    .admin-body .admin-mascot-toast-stack {
+        right: max(12px, env(safe-area-inset-right, 0px));
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 24px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-body .admin-mascot-toast {
+        animation: none;
+    }
+}
