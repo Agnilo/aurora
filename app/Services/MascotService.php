@@ -114,6 +114,17 @@ class MascotService
                 $catalog['hair'][$item->key]['colors'] = $colors;
             }
         }
+        if ($user !== null) {
+            foreach ($catalog as $slot => $options) {
+                uasort($options, static function (array $first, array $second): int {
+                    $firstPrice = $first['owned'] ? 0 : $first['price'];
+                    $secondPrice = $second['owned'] ? 0 : $second['price'];
+
+                    return $firstPrice <=> $secondPrice;
+                });
+                $catalog[$slot] = $options;
+            }
+        }
         return $catalog;
     }
 
