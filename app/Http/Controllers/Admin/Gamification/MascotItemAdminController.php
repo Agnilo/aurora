@@ -7,6 +7,7 @@ use App\Models\Localization\Translation;
 use App\Models\MascotItem;
 use App\Services\MascotAssetUploadService;
 use App\Services\MascotService;
+use App\Services\MascotHairColors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -16,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class MascotItemAdminController extends Controller
 {
-    private const SLOTS = ['hair' => ['hair-back', 'hair-front'], 'outfit' => ['outfit'], 'top' => ['top'], 'bottom' => ['bottom'], 'shoes' => ['shoes'], 'body' => ['body'], 'accessory' => ['accessory'], 'background' => ['background']];
+    private const SLOTS = ['hair' => ['hair-back', 'hair-front'], 'outfit' => ['outfit'], 'top' => ['top'], 'bottom' => ['bottom'], 'shoes' => ['shoes'], 'body' => ['body'], 'accessory' => ['accessory'], 'background' => ['background'], 'eye_color' => ['eyes'], 'expression' => ['expression'], 'blush' => ['blush']];
 
     public function index(Request $request)
     {
@@ -60,11 +61,6 @@ class MascotItemAdminController extends Controller
         $catalog = $mascot->catalog();
         $defaults = config('mascot.defaults');
         $fixed = [];
-        foreach (['expression'] as $slot) {
-            $path = config('mascot.variants.' . $slot . '.' . $defaults[$slot]);
-            if ($path)
-                $fixed[$slot] = asset($path);
-        }
         $current = array_map(fn($path) => asset($path), $item->layers ?? []);
         $isDefault = $item->exists && $item->key === ($defaults[$item->slot] ?? null);
         return view('admin.gamification.mascot-items.edit', compact('item', 'names', 'catalog', 'defaults', 'fixed', 'current', 'isDefault'));
@@ -231,6 +227,12 @@ class MascotItemAdminController extends Controller
 
     private function save(Request $request, MascotItem $item, MascotAssetUploadService $assets)
     {
+        $hairRules = ['hair_base_color' => ['exclude_unless:slot,hair', 'required', 'string', Rule::in(array_keys(MascotHairColors::PALETTE))]];
+        foreach (array_keys(MascotHairColors::PALETTE) as $color) {
+            foreach (['back', 'front'] as $side) {
+                $hairRules['hair-color-' . $color . '-' . $side] = ['exclude_unless:slot,hair', 'nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'];
+            }
+        }
         $data = $request->validate([
             'slot' => ['required', Rule::in($item->exists ? [$item->slot] : array_keys(self::SLOTS))],
             'name_lt' => ['required', 'string', 'max:120'],
@@ -247,13 +249,19 @@ class MascotItemAdminController extends Controller
             'body' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
             'accessory' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
             'background' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
-        ], ['required' => t('mascot.admin.required'), 'max' => t('mascot.admin.invalid_value'), 'file' => t('mascot.admin.invalid_png'), 'mimetypes' => t('mascot.admin.invalid_png'), 'dimensions' => t('mascot.admin.invalid_png'), 'integer' => t('mascot.admin.invalid_value'), 'between' => t('mascot.admin.invalid_value'), 'in' => t('mascot.admin.invalid_value'), 'boolean' => t('mascot.admin.invalid_value')]);
+            'eyes' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
+            'expression' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
+            'blush' => ['nullable', 'file', 'mimetypes:image/png', 'max:5120', 'dimensions:width=1254,height=1254'],
+        ] + $hairRules, ['required' => t('mascot.admin.required'), 'max' => t('mascot.admin.invalid_value'), 'file' => t('mascot.admin.invalid_png'), 'mimetypes' => t('mascot.admin.invalid_png'), 'dimensions' => t('mascot.admin.invalid_png'), 'integer' => t('mascot.admin.invalid_value'), 'between' => t('mascot.admin.invalid_value'), 'in' => t('mascot.admin.invalid_value'), 'boolean' => t('mascot.admin.invalid_value'), 'string' => t('mascot.admin.invalid_value')]);
         $slot = $data['slot'];
         if ($slot === 'body' && (int) $data['price'] !== 0) {
             throw ValidationException::withMessages(['price' => t('mascot.admin.skin_free')]);
         }
         if ($item->exists && $slot === 'accessory' && $item->key === 'none' && $request->hasFile('accessory')) {
             throw ValidationException::withMessages(['accessory' => t('mascot.admin.none_locked')]);
+        }
+        if ($item->exists && $slot === 'blush' && $item->key === 'none' && $request->hasFile('blush')) {
+            throw ValidationException::withMessages(['blush' => t('mascot.admin.none_blush_locked')]);
         }
         $existing = $item->layers ?? [];
         foreach (self::SLOTS[$slot] as $layer) {
@@ -262,12 +270,36 @@ class MascotItemAdminController extends Controller
             }
         }
         $newPaths = [];
+        $colorPaths = [];
+        if ($slot === 'hair') {
+            $baseColor = $data['hair_base_color'];
+            if (isset(($item->hair_colors ?? [])[$baseColor])) {
+                throw ValidationException::withMessages(['hair_base_color' => t('mascot.hair_color.base_conflict')]);
+            }
+            foreach (array_keys(MascotHairColors::PALETTE) as $color) {
+                $hasBack = $request->hasFile('hair-color-' . $color . '-back');
+                $hasFront = $request->hasFile('hair-color-' . $color . '-front');
+                if (($color === $baseColor && ($hasBack || $hasFront)) || ($hasBack !== $hasFront)) {
+                    throw ValidationException::withMessages(['hair_colors' => t('mascot.hair_color.pair_required')]);
+                }
+            }
+        }
         try {
             foreach (self::SLOTS[$slot] as $layer) {
                 if ($request->hasFile($layer))
                     $newPaths[$layer] = $assets->store($request->file($layer), $layer);
             }
-            DB::transaction(function () use ($item, $data, $slot, $newPaths) {
+            if ($slot === 'hair') {
+                foreach (array_keys(MascotHairColors::PALETTE) as $color) {
+                    foreach (['back', 'front'] as $side) {
+                        $field = 'hair-color-' . $color . '-' . $side;
+                        if ($request->hasFile($field)) {
+                            $colorPaths[$color]['hair-' . $side] = $assets->store($request->file($field), $field);
+                        }
+                    }
+                }
+            }
+            DB::transaction(function () use ($item, $data, $slot, $newPaths, $colorPaths) {
                 $record = $item->exists ? MascotItem::query()->lockForUpdate()->findOrFail($item->id) : $item;
                 $record->slot = $slot;
                 $this->validateChange($record, (bool) $data['active'], (int) $data['price']);
@@ -277,6 +309,13 @@ class MascotItemAdminController extends Controller
                 $key = $record->exists ? $record->key : 'item-' . Str::uuid();
                 $translationKey = $record->exists ? $record->translation_key : 'mascot.option.' . $slot . '.' . $key;
                 $layers = array_replace($record->layers ?? [], $newPaths);
+                if ($slot === 'hair') {
+                    if (isset(($record->hair_colors ?? [])[$data['hair_base_color']])) {
+                        throw ValidationException::withMessages(['hair_base_color' => t('mascot.hair_color.base_conflict')]);
+                    }
+                    $record->hair_base_color = $data['hair_base_color'];
+                    $record->hair_colors = array_replace($record->hair_colors ?? [], $colorPaths);
+                }
                 $record->fill([
                     'slot' => $slot,
                     'key' => $key,
@@ -294,6 +333,10 @@ class MascotItemAdminController extends Controller
         } catch (\Throwable $error) {
             foreach ($newPaths as $path)
                 File::delete(public_path($path));
+            foreach ($colorPaths as $layers) {
+                foreach ($layers as $path)
+                    File::delete(public_path($path));
+            }
             throw $error;
         }
         app('translation')->flushCache();

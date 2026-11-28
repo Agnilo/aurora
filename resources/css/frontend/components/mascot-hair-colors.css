@@ -1,0 +1,96 @@
+.mascot-accordion [data-mascot-category="hair"] .mascot-category-body {
+    height: auto;
+}
+
+.mascot-accordion [data-mascot-category="hair"] .mascot-category-body>.mascot-choices {
+    height: 135px;
+}
+
+.mascot-hair-colors {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 0 3px 6px;
+}
+
+.mascot-hair-colors label {
+    font-weight: 600;
+}
+
+.mascot-hair-colors select {
+    max-width: 220px;
+    padding: 6px 10px;
+    border-radius: var(--radius-lg);
+    color: inherit;
+}
+
+.mascot-hair-native--enhanced {
+    display: none;
+}
+
+.mascot-hair-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mascot-hair-swatch {
+    width: 30px;
+    height: 30px;
+    background: var(--swatch);
+    border: 2px solid var(--color-bg-card);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+.mascot-hair-swatch[aria-pressed="true"],
+.mascot-hair-swatch:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+.mascot-hair-swatch:disabled {
+    cursor: default;
+}
+
+@media (min-width: 761px) {
+    .mascot-customizer .mascot-customizer-grid {
+        align-items: stretch;
+    }
+
+    .mascot-customizer .mascot-options {
+        align-self: stretch;
+    }
+
+    .mascot-customizer .mascot-preview-panel {
+        position: sticky;
+        top: 24px;
+        align-self: start;
+        justify-content: flex-start;
+        height: auto;
+        min-height: 0;
+    }
+}
+
+.mascot-customizer .mascot-preview-panel>.mascot-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0;
+    gap: 8px;
+    flex: none;
+}
+
+.mascot-customizer .mascot-preview-panel>.mascot-feedback {
+    width: 100%;
+    min-height: 0;
+}
+
+.mascot-customizer .mascot-preview-panel>.mascot-feedback:not(:has(.mascot-error:not([hidden]))) {
+    display: none;
+}
+
+.mascot-customizer .mascot-options {
+    min-height: 0;
+}

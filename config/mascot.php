@@ -11,7 +11,9 @@ return [
         'top' => 'default',
         'bottom' => 'jeans',
         'shoes' => 'default',
+        'eye_color' => 'brown',
         'expression' => 'neutral',
+        'blush' => 'peach',
         'accessory' => 'none',
     ],
     'variants' => [
@@ -30,7 +32,7 @@ return [
         'expression' => ['neutral' => 'images/mascot/expressions/neutral-adaptive.png'],
         'accessory' => ['none' => null],
     ],
-    'customizable' => ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory', 'background'],
+    'customizable' => ['hair', 'top', 'bottom', 'outfit', 'shoes', 'body', 'accessory', 'background', 'eye_color', 'expression', 'blush'],
     'swatches' => [
         'hair' => ['pink' => '#edaca5', 'brown' => '#a66f4d', 'blonde' => '#e9c27f'],
         'outfit' => ['default' => '#d1b7e2', 'mint' => '#a9cfb6', 'rose' => '#dda0b2'],

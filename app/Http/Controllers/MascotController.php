@@ -34,6 +34,7 @@ class MascotController extends Controller
             $options = $catalog[$slot];
             $rules[$slot] = ['required', 'string', Rule::in(array_keys($options))];
         }
+        $rules['hair_color'] = ['required', 'string', 'max:16'];
         $data = Validator::make($request->all(), $rules, [
             'required' => t('mascot.invalid'),
             'string' => t('mascot.invalid'),
@@ -41,7 +42,7 @@ class MascotController extends Controller
             'integer' => t('mascot.invalid'),
             'min' => t('mascot.invalid'),
         ])->validate();
-        $selection = array_intersect_key($data, $catalog) + ['clothing_mode' => $mode];
+        $selection = array_intersect_key($data, $catalog) + ['clothing_mode' => $mode, 'hair_color' => $data['hair_color']];
         $buy = $data['intent'] === 'buy';
         $mascot->saveSelection($request->user(), $selection, $buy, isset($data['quoted_price']) ? (int) $data['quoted_price'] : null);
         return redirect()->route('mascot.edit', ['locale' => app()->getLocale()])->with('mascot_saved', true);

@@ -207,3 +207,12 @@
     transform: none;
     border-radius: inherit;
 }
+
+.admin-body .admin-mascot-catalog {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.admin-body .admin-mascot-catalog .table-responsive {
+    border-radius: inherit;
+}

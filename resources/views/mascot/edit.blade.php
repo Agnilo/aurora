@@ -46,20 +46,40 @@
                     <span>{{ t('mascot.editor.room') }}</span>
                 </button>
             </div>
+            <div class="mascot-actions">
+                <button class="mascot-reset" type="button" data-mascot-reset
+                    @disabled(!$ready)>{{ t('mascot.reset') }}</button>
+                <button class="mascot-save" type="submit" form="mascot-selection-form" name="intent" value="save"
+                    @disabled(!$ready)>{{ t('button.save') }}</button>
+                <button class="mascot-save mascot-buy" type="submit" form="mascot-selection-form" name="intent"
+                    value="buy" hidden disabled>
+                    {{ t('mascot.buy_equip') }}
+                    <span class="mascot-buy-price"><span data-mascot-price>0</span><x-lucide-badge-cent
+                            class="aurora-icon" width="16" height="16" aria-hidden="true" /></span>
+                </button>
+            </div>
+            <div class="mascot-feedback">
+                <p class="mascot-error" data-mascot-preview-error role="alert" hidden>{{ t('mascot.preview_error') }}
+                </p>
+                <p class="mascot-error" data-mascot-insufficient role="status" hidden>{{ t('mascot.insufficient') }}</p>
+            </div>
         </section>
-        <form class="mascot-panel mascot-options" method="POST"
+        <form id="mascot-selection-form" class="mascot-panel mascot-options" method="POST"
             action="{{ route('mascot.update', ['locale' => app()->getLocale()]) }}">
             @csrf
             @method('PATCH')
+            @if($errors->any())
+                <p class="mascot-error" role="alert">{{ $errors->first() }}</p>
+            @endif
             <input type="hidden" name="quoted_price" value="0">
             <input type="hidden" name="clothing_mode" value="{{ $selection['clothing_mode'] }}">
             <div class="mascot-accordion" id="mascot-editor-options" data-mascot-accordion
                 data-editor-group="appearance">
-                @foreach(['hair', 'body', 'outfit', 'top', 'bottom', 'shoes', 'accessory', 'background'] as $slot)
+                @foreach(['hair', 'body', 'eye_color', 'expression', 'blush', 'outfit', 'top', 'bottom', 'shoes', 'accessory', 'background'] as $slot)
                 @php($options = $catalog[$slot] ?? [])
                 @php($inactive = ($slot === 'outfit' && $selection['clothing_mode'] !== 'full') || (in_array($slot, ['top', 'bottom'], true) && $selection['clothing_mode'] === 'full'))
                 <fieldset class="mascot-category" data-mascot-category="{{ $slot }}" data-mascot-slot="{{ $slot }}"
-                    @if(!in_array($slot, ['hair', 'body'], true)) hidden @endif
+                    @if(!in_array($slot, ['hair', 'body', 'eye_color', 'expression', 'blush'], true)) hidden @endif
                     data-mascot-inactive="{{ $inactive ? 'true' : 'false' }}" @disabled(!$ready)>
                     <legend>
                         <button type="button" class="mascot-category-toggle" data-mascot-toggle
@@ -80,9 +100,10 @@
                                     <input type="radio" name="{{ $slot }}" value="{{ $key }}"
                                         data-choice-label="{{ $option['label'] }}" @checked(($selection[$slot] ?? array_key_first($options)) === $key) @if(!$inactive) required @endif>
                                     <span class="mascot-choice-content">
-                                        <span class="mascot-item-preview mascot-item-preview--{{ $slot }}"
+                                        <span
+                                            class="mascot-item-preview mascot-item-preview--{{ $slot }} {{ in_array($slot, ['eye_color', 'expression', 'blush'], true) ? 'mascot-item-preview--accessory' : '' }}"
                                             aria-hidden="true">
-                                            @if($slot === 'accessory' && $key === 'none')
+                                            @if(in_array($slot, ['accessory', 'blush'], true) && $key === 'none')
                                                 <x-lucide-ban class="aurora-icon mascot-none-icon" width="28" height="28"
                                                     aria-hidden="true" />
                                             @else
@@ -111,25 +132,22 @@
                                 @endif
                             @endforelse
                         </div>
+                        @if($slot === 'hair')
+                            <div class="mascot-hair-colors" data-hair-colors>
+                                <label for="mascot-hair-color">{{ t('mascot.hair_color.title') }}</label>
+                                <select id="mascot-hair-color" name="hair_color" required>
+                                    @foreach(($options[$selection['hair']]['colors'] ?? []) as $color => $variant)
+                                        <option value="{{ $color }}" @selected($selection['hair_color'] === $color)>
+                                            {{ $variant['label'] }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="mascot-hair-swatches" role="group"
+                                    aria-label="{{ t('mascot.hair_color.title') }}" data-hair-swatches></div>
+                            </div>
+                        @endif
                     </div>
                 </fieldset>
                 @endforeach
-            </div>
-            <div class="mascot-feedback">
-                <p class="mascot-error" data-mascot-preview-error role="alert" hidden>{{ t('mascot.preview_error') }}
-                </p>
-                <p class="mascot-error" data-mascot-insufficient role="status" hidden>{{ t('mascot.insufficient') }}</p>
-            </div>
-            <div class="mascot-actions">
-                <button class="mascot-reset" type="button" data-mascot-reset
-                    @disabled(!$ready)>{{ t('mascot.reset') }}</button>
-                <button class="mascot-save" type="submit" name="intent" value="save"
-                    @disabled(!$ready)>{{ t('button.save') }}</button>
-                <button class="mascot-save mascot-buy" type="submit" name="intent" value="buy" hidden disabled>
-                    {{ t('mascot.buy_equip') }}
-                    <span class="mascot-buy-price"><span data-mascot-price>0</span><x-lucide-badge-cent
-                            class="aurora-icon" width="16" height="16" aria-hidden="true" /></span>
-                </button>
             </div>
         </form>
     </div>
@@ -141,10 +159,10 @@
         const catalog = JSON.parse(root.dataset.catalog);
         const defaults = JSON.parse(root.dataset.defaults);
         const preview = root.querySelector('.mascot-customizer-preview');
-        const form = root.querySelector('form');
+        const form = root.querySelector('#mascot-selection-form');
         const loaded = new Map();
-        const save = form.querySelector('button[value="save"]');
-        const buy = form.querySelector('button[value="buy"]');
+        const save = root.querySelector('button[form="mascot-selection-form"][value="save"]');
+        const buy = root.querySelector('button[form="mascot-selection-form"][value="buy"]');
         const quote = form.querySelector('[name="quoted_price"]');
         const price = root.querySelector('[data-mascot-price]');
         const insufficient = root.querySelector('[data-mascot-insufficient]');
@@ -152,10 +170,39 @@
         let loading = false;
         const modeInput = form.querySelector('[name="clothing_mode"]');
         const mode = () => modeInput.value;
-        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory', 'background'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background'];
+        const hairColor = form.querySelector('[name="hair_color"]');
+        const swatches = form.querySelector('[data-hair-swatches]');
+        const syncHairColors = (preferred = hairColor.value) => {
+            const style = form.querySelector('input[name="hair"]:checked')?.value;
+            const colors = catalog.hair[style]?.colors || {};
+            const selected = Object.hasOwn(colors, preferred) ? preferred : Object.keys(colors)[0] || '';
+            hairColor.replaceChildren();
+            swatches.replaceChildren();
+            for (const [key, variant] of Object.entries(colors)) {
+                const option = new Option(variant.label, key, false, key === selected);
+                hairColor.add(option);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'mascot-hair-swatch';
+                button.style.setProperty('--swatch', variant.color);
+                button.setAttribute('aria-label', variant.label);
+                button.title = variant.label;
+                button.setAttribute('aria-pressed', String(key === selected));
+                button.disabled = initiallyDisabled;
+                button.addEventListener('click', () => {
+                    hairColor.value = key;
+                    hairColor.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+                swatches.append(button);
+            }
+            hairColor.value = selected;
+            hairColor.classList.add('mascot-hair-native--enhanced');
+            hairColor.disabled = initiallyDisabled;
+        };
+        const activeSlots = () => mode() === 'full' ? ['hair', 'outfit', 'shoes', 'body', 'accessory', 'background', 'eye_color', 'expression', 'blush'] : ['hair', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background', 'eye_color', 'expression', 'blush'];
         const categories = [...form.querySelectorAll('[data-mascot-category]')];
         const editorGroups = {
-            appearance: ['hair', 'body'],
+            appearance: ['hair', 'body', 'eye_color', 'expression', 'blush'],
             clothing: ['outfit', 'top', 'bottom', 'shoes'],
             accessories: ['accessory'],
             room: ['background'],
@@ -209,14 +256,13 @@
             }
             syncAccordion();
         };
-        const snapshot = () => ({ mode: mode(), checked: [...form.querySelectorAll('input[type="radio"]')].map(input => input.checked) });
+        const snapshot = () => ({ mode: mode(), hairColor: hairColor.value, checked: [...form.querySelectorAll('input[type="radio"]')].map(input => input.checked) });
         let lastGood = snapshot();
-        const fixed = Object.fromEntries([...(preview?.querySelectorAll('[data-mascot-layer]') || [])].filter(img => img.dataset.mascotLayer === 'expression').map(img => [img.dataset.mascotLayer, img.src]));
-        const order = ['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'];
+        const order = ['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'blush', 'eyes', 'expression', 'hair-front', 'accessory'];
         const syncActions = () => {
             const values = new FormData(form);
             let cost = 0;
-            let valid = true;
+            let valid = Boolean(catalog.hair[values.get('hair')]?.colors?.[values.get('hair_color')]);
             for (const slot of activeSlots()) {
                 const options = catalog[slot];
                 const option = options[values.get(slot)];
@@ -253,11 +299,11 @@
             syncMode();
             syncActions();
             errorNotice.hidden = true;
-            const desired = { ...fixed };
+            const desired = {};
             for (const slot of activeSlots()) {
                 const options = catalog[slot];
                 const key = new FormData(form).get(slot);
-                if (options[key]) Object.assign(desired, options[key].layers);
+                if (options[key]) Object.assign(desired, slot === 'hair' ? (options[key].colors[hairColor.value]?.layers || {}) : options[key].layers);
             }
             try {
                 await Promise.all(Object.values(desired).map(load));
@@ -282,6 +328,7 @@
                     errorNotice.hidden = false;
                     modeInput.value = lastGood.mode;
                     [...form.querySelectorAll('input[type="radio"]')].forEach((input, i) => { input.checked = lastGood.checked[i]; });
+                    syncHairColors(lastGood.hairColor);
                     syncMode();
                 }
             } finally {
@@ -291,15 +338,21 @@
                 }
             }
         };
+        syncHairColors();
+        lastGood = snapshot();
         syncMode();
         syncActions();
+        hairColor.addEventListener('change', () => { syncHairColors(); update(); });
         const choose = event => {
             const input = event.target;
             if (!input.matches('input[type="radio"]') || !input.checked || initiallyDisabled) return;
             const nextMode = input.name === 'outfit' ? 'full' : ['top', 'bottom'].includes(input.name) ? 'separate' : mode();
             const switched = mode() !== nextMode;
             modeInput.value = nextMode;
-            if (switched || event.type === 'change') update();
+            if (switched || event.type === 'change') {
+                if (input.name === 'hair') syncHairColors();
+                update();
+            }
         };
         form.addEventListener('click', choose);
         form.addEventListener('change', choose);
@@ -311,6 +364,7 @@
             for (const input of form.querySelectorAll('input[type="radio"]')) {
                 input.checked = input.value === (defaults[input.name] ?? Object.keys(catalog[input.name] || {})[0]);
             }
+            syncHairColors('pink');
             update();
         });
     })();

@@ -7,15 +7,16 @@
             href="{{ route('admin.gamification.mascot-items.create', ['locale' => app()->getLocale()]) }}">
             + {{ t('button.add_new') }}
         </a>
-        <div class="admin-mascot-filters mb-3">
-            @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit', 'top' => 'mascot.slot.top', 'bottom' => 'mascot.slot.bottom', 'shoes' => 'mascot.slot.shoes', 'body' => 'mascot.slot.body', 'accessory' => 'mascot.slot.accessory', 'background' => 'mascot.slot.background'] as $slot => $label)
-                <a class="btn {{ request('slot', '') === $slot ? 'btn-primary' : 'btn-outline-secondary' }}"
-                    href="{{ route('admin.gamification.mascot-items.index', array_filter(['locale' => app()->getLocale(), 'slot' => $slot, 'status' => request('status'), 'per_page' => request('per_page')])) }}">{{ t($label) }}</a>
-            @endforeach
-        </div>
         <form method="GET" action="{{ route('admin.gamification.mascot-items.index', ['locale' => app()->getLocale()]) }}"
             class="admin-no-surface admin-mascot-status-filter d-flex flex-wrap align-items-end gap-2 mb-3">
-            @if(request()->filled('slot'))<input type="hidden" name="slot" value="{{ request('slot') }}">@endif
+            <div class="admin-mascot-status-field">
+                <label for="mascot-slot-filter" class="form-label">{{ t('mascot.admin.type') }}</label>
+                <select id="mascot-slot-filter" name="slot" class="form-select">
+                    @foreach(['' => 'mascot.admin.all', 'hair' => 'mascot.slot.hair', 'outfit' => 'mascot.slot.outfit', 'top' => 'mascot.slot.top', 'bottom' => 'mascot.slot.bottom', 'shoes' => 'mascot.slot.shoes', 'body' => 'mascot.slot.body', 'accessory' => 'mascot.slot.accessory', 'background' => 'mascot.slot.background', 'eye_color' => 'mascot.slot.eye_color', 'expression' => 'mascot.slot.expression', 'blush' => 'mascot.slot.blush'] as $slot => $label)
+                        <option value="{{ $slot }}" @selected((string) request('slot', '') === $slot)>{{ t($label) }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="admin-mascot-status-field">
                 <label for="mascot-status-filter" class="form-label">{{ t('mascot.admin.status') }}</label>
                 <select id="mascot-status-filter" name="status" class="form-select">
@@ -89,7 +90,8 @@
                                             title="{{ t('mascot.admin.default_protected') }}" @endif></td>
                                     <td>
                                         <div class="admin-mascot-item">
-                                            <span class="admin-mascot-thumb admin-mascot-thumb--{{ $item->slot }}"
+                                            <span
+                                                class="admin-mascot-thumb admin-mascot-thumb--{{ $item->slot }} {{ in_array($item->slot, ['eye_color', 'expression', 'blush'], true) ? 'admin-mascot-thumb--accessory' : '' }}"
                                                 aria-hidden="true">
                                                 @foreach($item->layers ?? [] as $path)
                                                     <img src="{{ asset($path) }}" alt="" loading="lazy">

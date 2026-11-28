@@ -1,13 +1,64 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    .admin-body .admin-mascot-hair-variants,
+    .admin-body .admin-mascot-hair-variants .admin-mascot-fields-grid > div,
+    .admin-body .admin-mascot-hair-variant,
+    .admin-body .admin-mascot-hair-variant .form-control {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .admin-body .admin-mascot-hair-variant {
+        display: grid;
+        gap: var(--space-2);
+        margin: 0;
+        padding: var(--space-3) 0 0;
+        border: 0;
+        border-top: 1px solid var(--color-border-muted);
+        background: transparent;
+    }
+
+    .admin-body .admin-mascot-hair-variant-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin: 0;
+        font: 600 14px/1.4 var(--font-ui);
+    }
+
+    .admin-body .admin-mascot-hair-variant-fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+        gap: var(--space-2) var(--space-3);
+    }
+
+    .admin-body .admin-mascot-hair-variant-fields > div {
+        min-width: 0;
+    }
+
+    .admin-body .admin-mascot-hair-variant-fields .form-label {
+        margin-bottom: 4px;
+    }
+
+    .admin-body .admin-mascot-hair-swatch {
+        flex: 0 0 13px;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 1px var(--color-border-muted);
+    }
+</style>
     <section class="admin-game admin-mascot" data-mascot-admin
         data-catalog="{{ json_encode($catalog, JSON_THROW_ON_ERROR) }}"
         data-current="{{ json_encode($current, JSON_THROW_ON_ERROR) }}"
         data-fixed="{{ json_encode($fixed, JSON_THROW_ON_ERROR) }}"
         data-defaults="{{ json_encode($defaults, JSON_THROW_ON_ERROR) }}"
         data-original-slot="{{ $item->exists ? $item->slot : '' }}"
-        data-none-locked="{{ $item->exists && $item->slot === 'accessory' && $item->key === 'none' ? 'true' : 'false' }}"
+        data-current-hair-colors="{{ json_encode(array_map(fn($layers) => array_map(fn($path) => asset($path), $layers), $item->hair_colors ?? []), JSON_THROW_ON_ERROR) }}"
+        data-hair-color-labels="{{ json_encode(array_combine(array_keys(\App\Services\MascotHairColors::PALETTE), array_map(fn($key) => t('mascot.hair_color.' . $key), array_keys(\App\Services\MascotHairColors::PALETTE))), JSON_THROW_ON_ERROR) }}"
+        data-none-locked="{{ $item->exists && in_array($item->slot, ['accessory', 'blush'], true) && $item->key === 'none' ? 'true' : 'false' }}"
         data-error="{{ t('mascot.admin.invalid_png') }}">
         <a class="admin-mascot-back"
             href="{{ route('admin.gamification.mascot-items.index', ['locale' => app()->getLocale()]) }}">
@@ -24,7 +75,7 @@
             <section class="admin-game__panel admin-mascot-preview">
                 <h2>{{ t('mascot.admin.simulator') }}</h2>
                 <div class="admin-mascot-stage" role="img" aria-label="{{ t('mascot.preview') }}">
-                    @foreach(['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'expression', 'hair-front', 'accessory'] as $layer)
+                    @foreach(['background', 'hair-back', 'body', 'shoes', 'bottom', 'top', 'outfit', 'blush', 'eyes', 'expression', 'hair-front', 'accessory'] as $layer)
                         <img data-preview-layer="{{ $layer }}" @if(isset($fixed[$layer])) src="{{ $fixed[$layer] }}" @else
                         hidden @endif alt="" draggable="false">
                     @endforeach
@@ -62,10 +113,13 @@
                 @csrf
                 @if($item->exists) @method('PUT') @endif
                 <div class="admin-mascot-fields">
+                    @if($errors->any())
+                        <p class="text-danger" role="alert">{{ $errors->first() }}</p>
+                    @endif
                     <div>
                         <label class="form-label" for="mascot-slot">{{ t('mascot.admin.type') }}</label>
                         <select class="form-select" id="mascot-slot" name="slot" @disabled($item->exists)>
-                            @foreach(['hair', 'outfit', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background'] as $slot)
+                            @foreach(['hair', 'outfit', 'top', 'bottom', 'shoes', 'body', 'accessory', 'background', 'eye_color', 'expression', 'blush'] as $slot)
                                 <option value="{{ $slot }}" @selected(old('slot', $item->slot) === $slot)>
                                     {{ t('mascot.slot.' . $slot) }}</option>
                             @endforeach
@@ -109,15 +163,58 @@
                         <h2>{{ t('mascot.admin.layers') }}</h2>
                         <p class="admin-mascot-hint mb-0">{{ t('mascot.admin.png_note') }}</p>
                     </div>
-                    @foreach(['hair-back' => 'hair', 'hair-front' => 'hair', 'outfit' => 'outfit', 'top' => 'top', 'bottom' => 'bottom', 'shoes' => 'shoes', 'body' => 'body', 'accessory' => 'accessory', 'background' => 'background'] as $layer => $slot)
+                    @foreach(['hair-back' => 'hair', 'hair-front' => 'hair', 'outfit' => 'outfit', 'top' => 'top', 'bottom' => 'bottom', 'shoes' => 'shoes', 'body' => 'body', 'accessory' => 'accessory', 'background' => 'background', 'eyes' => 'eye_color', 'expression' => 'expression', 'blush' => 'blush'] as $layer => $slot)
                         <div data-upload-slot="{{ $slot }}" @if(old('slot', $item->slot) !== $slot) hidden @endif>
                             <label class="form-label" for="upload-{{ $layer }}">{{ t('mascot.admin.layer.' . $layer) }}</label>
                             <input type="file" class="form-control" id="upload-{{ $layer }}" name="{{ $layer }}"
-                                data-upload-layer="{{ $layer }}" accept="image/png" @disabled(old('slot', $item->slot) !== $slot || ($item->exists && $item->slot === 'accessory' && $item->key === 'none'))>
+                                data-upload-layer="{{ $layer }}" accept="image/png" @disabled(old('slot', $item->slot) !== $slot || ($item->exists && in_array($item->slot, ['accessory', 'blush'], true) && $item->key === 'none'))>
                             @if(isset($current[$layer]))
                             <p class="admin-mascot-hint mt-1 mb-0">{{ t('mascot.admin.keep_file') }}</p>@endif
                         </div>
                     @endforeach
+                    <div class="admin-mascot-hair-variants d-grid gap-2" data-hair-variants @if(old('slot', $item->slot) !== 'hair') hidden @endif>
+                        <div class="admin-mascot-upload-heading">
+                            <h2>{{ t('mascot.hair_color.title') }}</h2>
+                            <p class="admin-mascot-hint mb-0">{{ t('mascot.hair_color.admin_note') }}</p>
+                        </div>
+                        <div class="admin-mascot-fields-grid">
+                            <div class="min-w-0">
+                                <label class="form-label" for="hair-base-color">{{ t('mascot.hair_color.base') }}</label>
+                                <select class="form-select" id="hair-base-color" name="hair_base_color" @disabled(old('slot', $item->slot) !== 'hair')>
+                                    @foreach(\App\Services\MascotHairColors::PALETTE as $color => $hex)
+                                        <option value="{{ $color }}" @selected(old('hair_base_color', \App\Services\MascotHairColors::base($item)) === $color)>{{ t('mascot.hair_color.' . $color) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="min-w-0">
+                                <label class="form-label" for="hair-preview-color">{{ t('mascot.hair_color.preview') }}</label>
+                                <select class="form-select" id="hair-preview-color" data-hair-preview-color></select>
+                            </div>
+                        </div>
+                        @foreach(\App\Services\MascotHairColors::PALETTE as $color => $hex)
+                            <div class="admin-mascot-hair-variant" data-hair-variant="{{ $color }}" role="group" aria-labelledby="hair-variant-title-{{ $color }}">
+                                <div class="admin-mascot-hair-variant-title" id="hair-variant-title-{{ $color }}">
+                                    <span class="admin-mascot-hair-swatch" style="background-color: {{ $hex }}" aria-hidden="true"></span>
+                                    {{ t('mascot.hair_color.' . $color) }}
+                                </div>
+                                <div class="admin-mascot-hair-variant-fields">
+                                    @foreach(['back', 'front'] as $side)
+                                        @php($field = 'hair-color-' . $color . '-' . $side)
+                                        <div>
+                                            <label class="form-label" for="{{ $field }}">{{ t('mascot.admin.layer.hair-' . $side) }}</label>
+                                            <input type="file" class="form-control" id="{{ $field }}" name="{{ $field }}" data-upload-layer="{{ $field }}" accept="image/png">
+                                            @error($field)<p class="text-danger mt-1 mb-0">{{ $message }}</p>@enderror
+                                            @if(isset($item->hair_colors[$color]['hair-' . $side]))
+                                                <p class="admin-mascot-hint mt-1 mb-0">{{ t('mascot.admin.keep_file') }}</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                        @error('hair_colors')<p class="text-danger mb-0">{{ $message }}</p>@enderror
+                        @error('hair_base_color')<p class="text-danger mb-0">{{ $message }}</p>@enderror
+                    </div>
                 </div>
                 <div class="admin-game__panel-footer admin-mascot-footer">
                     <a class="btn btn-outline-secondary"
@@ -146,12 +243,30 @@
             const uploads = [...root.querySelectorAll('[data-upload-layer]')];
             const selects = [...root.querySelectorAll('[data-simulate]')];
             const mode = root.querySelector('[data-simulate-mode]');
+            const hairPreview = root.querySelector('[data-hair-preview-color]');
+            const currentHairColors = JSON.parse(root.dataset.currentHairColors);
+            const hairColorLabels = JSON.parse(root.dataset.hairColorLabels);
             const urls = new Map();
             const pending = new Map();
             const invalid = new Set();
             const revisions = new Map();
             const show = () => {
                 const layers = { ...fixed };
+                const base = root.querySelector('#hair-base-color').value;
+                const previewColors = {};
+                if (slot.value === 'hair') {
+                    for (const key of Object.keys(hairColorLabels)) {
+                        if (key === base) continue;
+                        const back = urls.get(`hair-color-${key}-back`);
+                        const front = urls.get(`hair-color-${key}-front`);
+                        if (back && front) previewColors[key] = { 'hair-back': back, 'hair-front': front };
+                        else if (currentHairColors[key]) previewColors[key] = currentHairColors[key];
+                    }
+                }
+                const preferred = hairPreview.value;
+                hairPreview.replaceChildren(new Option(hairColorLabels[base], base));
+                for (const key of Object.keys(previewColors)) hairPreview.add(new Option(hairColorLabels[key], key));
+                hairPreview.value = Object.hasOwn(previewColors, preferred) ? preferred : base;
                 const hasUpload = uploads.some(input => !input.disabled && urls.has(input.name));
                 const editing = useUpload.checked && (hasUpload || (slot.value === originalSlot && Object.keys(current).length));
                 const effectiveMode = editing && slot.value === 'outfit' ? 'full' : editing && ['top', 'bottom'].includes(slot.value) ? 'separate' : mode.value === 'full' && Object.keys(catalog.outfit || {}).length ? 'full' : 'separate';
@@ -163,7 +278,8 @@
                 for (const select of selects) Object.assign(layers, catalog[select.dataset.simulate]?.[select.value]?.layers || {});
                 if (useUpload.checked) {
                     if (slot.value === originalSlot) Object.assign(layers, current);
-                    for (const input of uploads) if (!input.disabled && urls.has(input.name)) layers[input.name] = urls.get(input.name);
+                    for (const input of uploads) if (!input.disabled && urls.has(input.name) && !input.name.startsWith('hair-color-')) layers[input.name] = urls.get(input.name);
+                    if (slot.value === 'hair' && previewColors[hairPreview.value]) Object.assign(layers, previewColors[hairPreview.value]);
                 }
                 if (effectiveMode === 'full') { delete layers.top; delete layers.bottom; } else { delete layers.outfit; }
                 for (const img of root.querySelectorAll('[data-preview-layer]')) {
@@ -177,7 +293,20 @@
                 error.textContent = activeInvalid ? root.dataset.error : '';
                 submit.disabled = activeInvalid || activePending;
             };
+            const baseColor = root.querySelector('#hair-base-color');
+            const variants = root.querySelector('[data-hair-variants]');
+            const syncHairFields = () => {
+                variants.hidden = slot.value !== 'hair';
+                baseColor.disabled = variants.hidden;
+                for (const group of variants.querySelectorAll('[data-hair-variant]')) {
+                    group.hidden = variants.hidden || group.dataset.hairVariant === baseColor.value;
+                    for (const input of group.querySelectorAll('input')) input.disabled = group.hidden;
+                }
+            };
+            baseColor.addEventListener('change', () => { syncHairFields(); show(); });
+            hairPreview.addEventListener('change', () => { useUpload.checked = true; show(); });
             const syncSlot = () => {
+                syncHairFields();
                 const price = root.querySelector('#mascot-price');
                 price.readOnly = price.dataset.priceDefault === 'true' || slot.value === 'body';
                 if (slot.value === 'body') price.value = '0';
